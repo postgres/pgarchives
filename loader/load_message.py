@@ -34,6 +34,11 @@ class ArchivesParser(object):
 		self.subject = self.decode_mime_header(self.get_mandatory('Subject'))
 		self.date = self.forgiving_date_decode(self.get_mandatory('Date'))
 		self.bodytxt = self.get_body()
+		self.attachments = []
+		self.get_attachments()
+		if len(self.attachments) > 0:
+			print "Found %s attachments" % len(self.attachments)
+			print [(a[0],a[1],len(a[2])) for a in self.attachments]
 
 		# Build an list of the message id's we are interested in
 		self.parents = []
@@ -178,6 +183,14 @@ class ArchivesParser(object):
 				'bodytxt': self.bodytxt,
 				})
 		id = curs.fetchall()[0][0]
+		if len(self.attachments):
+			# Insert attachments
+			curs.executemany("INSERT INTO attachments (message, filename, contenttype, attachment) VALUES (%(message)s, %(filename)s, %(contenttype)s, %(attachment)s)",[ {
+						'message': id,
+						'filename': a[0] or 'unknown_filename',
+						'contenttype': a[1],
+						'attachment': bytearray(a[2]),
+						} for a in self.attachments])
 
 		if len(self.children):
 			print "Setting %s other threads to children of %s" % (len(self.children), self.msgid)
@@ -250,6 +263,43 @@ class ArchivesParser(object):
 		# Yikes, nothing here! Hopefully we'll find something when
 		# we continue looping at a higher level.
 		return None
+
+	def get_attachments(self):
+		self.recursive_get_attachments(self.msg)
+
+	def recursive_get_attachments(self, container):
+		if container.get_content_type() == 'multipart/mixed':
+			# Multipart - worth scanning into
+			for p in container.get_payload():
+				if p.get_params() == None:
+					continue
+				self.recursive_get_attachments(p)
+		elif container.get_content_type() == 'multipart/alternative':
+			# Alternative is not an attachment (we decide)
+			# It's typilcally plantext + html
+			return
+		elif container.is_multipart():
+			# Other kinds of multipart, such as multipart/signed...
+			return
+		else:
+			# Not a multipart.
+			# Exclude specific contenttypes
+			if container.get_content_type() == 'application/pgp-signature':
+				return
+			# For now, accept anything not text/plain
+			if container.get_content_type() != 'text/plain':
+				self.attachments.append((container.get_filename(), container.get_content_type(), container.get_payload(decode=True)))
+				return
+			# It's a text/plain, it might be worthwhile.
+			# If it has a name, we consider it an attachments
+			if not container.get_params():
+				return
+			for k,v in container.get_params():
+				if k=='name' and v != '':
+					# Yes, it has a name
+					self.attachments.append((container.get_filename(), container.get_content_type(), container.get_payload(decode=True)))
+					return
+			# No name, and text/plain, so ignore it
 
 	re_msgid = re.compile('^\s*<(.*)>\s*')
 	def clean_messageid(self, messageid, ignorebroken=False):

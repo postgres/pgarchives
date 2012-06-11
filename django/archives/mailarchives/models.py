@@ -18,3 +18,12 @@ class List(models.Model):
 
 	class Meta:
 		db_table = 'lists'
+
+class Attachment(models.Model):
+	message = models.ForeignKey(Message, null=False, blank=False, db_column='message')
+	filename = models.CharField(max_length=1000, null=False, blank=False)
+	contenttype = models.CharField(max_length=1000, null=False, blank=False)
+	# attachment = bytea, not supported by django at this point
+
+	class Meta:
+		db_table = 'attachments'

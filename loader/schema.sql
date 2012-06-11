@@ -35,3 +35,12 @@ CREATE TABLE list_threads(
    listid int NOT NULL REFERENCES lists(listid),
    CONSTRAINT pg_list_threads PRIMARY KEY (threadid, listid)
 );
+
+CREATE TABLE attachments(
+   id serial not null primary key,
+   message int not null references messages(id),
+   filename text not null,
+   contenttype text not null,
+   attachment bytea not null
+);
+CREATE INDEX idx_attachments_msg ON attachments(message);

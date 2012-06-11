@@ -16,6 +16,12 @@ Message-ID: <a href="http://archives.postgresql.org/message-id/{{msg.messageid}}
 <div class="wrapper">
 <div style="width: 49%; border: 1px solid black;overflow: scroll; float:left; position:relative;">
 <pre>{{msg.bodytxt|urlize}}</pre>
+{%for a in msg.attachment_set.all%}
+<div>
+<b>Attachment: <a href="/attachment/{{a.id}}/">{{a.filename}}</a></b><br/>
+Desciption: {{a.contenttype}}
+</div>
+{%endfor%}
 </div>
 <div id="old" style="width: 49%; border: 1px solid black; overflow: scroll; float:right;position:relative;">
 </div>
