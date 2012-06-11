@@ -1,0 +1,24 @@
+<html>
+<head>
+<title>Put Title Here</title>
+</head>
+<body>
+<h1>Put Title Here</h1>
+{%for m in messages%}
+{%ifchanged m.date.date%}
+{%if not forloop.first%}
+</ul>
+{%endif%}
+<h3>{{m.date.date}}</h3>
+<ul>
+{%endifchanged%}
+  <li><a href="/test/{{m.id}}/">{{m.subject}}</a> ({{m.date.time|time:"H:i"}})</li>
+{%if forloop.last%}
+</ul>
+{%endif%}
+{%endfor%}
+{%with messages|last as lastmsg%}
+<a href="/{{list.listname}}/since/{{lastmsg.id}}/">Next</a>
+{%endwith%}
+</body>
+</html>
