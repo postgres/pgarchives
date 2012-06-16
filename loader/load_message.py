@@ -267,6 +267,18 @@ class ArchivesParser(object):
 	def get_attachments(self):
 		self.recursive_get_attachments(self.msg)
 
+	def _extract_filename(self, container):
+		# Try to get the filename for an attachment in the container.
+		# If the standard library can figure one out, use that one.
+		f = container.get_filename()
+		if f: return f
+
+		# Failing that, some mailers set Content-Description to the
+		# filename
+		if container.has_key('Content-Description'):
+			return container['Content-Description']
+		return None
+
 	def recursive_get_attachments(self, container):
 		if container.get_content_type() == 'multipart/mixed':
 			# Multipart - worth scanning into
@@ -288,7 +300,7 @@ class ArchivesParser(object):
 				return
 			# For now, accept anything not text/plain
 			if container.get_content_type() != 'text/plain':
-				self.attachments.append((container.get_filename(), container.get_content_type(), container.get_payload(decode=True)))
+				self.attachments.append((self._extract_filename(container), container.get_content_type(), container.get_payload(decode=True)))
 				return
 			# It's a text/plain, it might be worthwhile.
 			# If it has a name, we consider it an attachments
@@ -297,7 +309,7 @@ class ArchivesParser(object):
 			for k,v in container.get_params():
 				if k=='name' and v != '':
 					# Yes, it has a name
-					self.attachments.append((container.get_filename(), container.get_content_type(), container.get_payload(decode=True)))
+					self.attachments.append((self._extract_filename(container), container.get_content_type(), container.get_payload(decode=True)))
 					return
 			# No name, and text/plain, so ignore it
 
