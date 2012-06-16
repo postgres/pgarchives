@@ -12,6 +12,10 @@ class Message(models.Model):
 
 	class Meta:
 		db_table = 'messages'
+
+	@property
+	def printdate(self):
+		return self.date.strftime("%Y-%m-%d %H:%M:%S")
 		
 class List(models.Model):
 	listid = models.IntegerField(null=False, primary_key=True)
