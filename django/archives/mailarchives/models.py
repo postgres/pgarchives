@@ -1,6 +1,7 @@
 from django.db import models
 
 class Message(models.Model):
+	threadid = models.IntegerField(null=False, blank=False)
 	mailfrom = models.TextField(null=False, db_column='_from')
 	to = models.TextField(null=False, db_column='_to')
 	cc = models.TextField(null=False)
