@@ -18,6 +18,7 @@ urlpatterns = patterns('',
     (r'^test/(\d+)/$', 'archives.mailarchives.views.testview'),
     (r'^test/oldsite/([^/]+)/$', 'archives.mailarchives.views.oldsite'),
 
+    (r'^message-id/([^/]+)/', 'archives.mailarchives.views.message'),
     (r'^([\w-]+)/(\d+)-(\d+)/$', 'archives.mailarchives.views.datelist'),
     (r'^([\w-]+)/since/([^/]+)/$', 'archives.mailarchives.views.datelistsince'),
 

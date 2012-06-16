@@ -1,0 +1,70 @@
+{%load pgfilters%}
+<html>
+<head>
+<title>{{msg.subject}}</title>
+<script language="javascript">
+/* This should be moved into a common JS file */
+function onThreadSelect() {
+   document.location.href = '/message-id/' + document.getElementById('thread_select').value + '/';
+}
+</script>
+<style>
+div.threadlist {
+//   font-size: 0.9em;
+}
+div.threadlist ul {
+   margin-left: 0px;
+   padding-left: 14px;
+   list-style: none;
+}
+ul.threadlist li {
+   margin-left: 0px;
+}
+span.listname {
+   background-color: lightgray;
+   padding: 0.2em;
+   margin: 2ex 10px 2ex 0ex;
+   background: #F7F7F7;
+   border: 1px solid #CFCFCF;
+   -moz-border-radius: 8px;
+   -webkit-border-radius: 8px;
+   -khtml-border-radius: 8px;
+   border-radius: 8px;
+}
+</style>
+</head>
+<body>
+<h2>{{msg.subject}}</h2>
+<strong>From:</strong> {{msg.mailfrom|hidemail}}<br/>
+<strong>To:</strong> {{msg.to|hidemail}}<br/>
+{%if msg.cc%}<strong>Cc:</strong> {{msg.cc|hidemail}}<br/>{%endif%}
+<strong>Subject:</strong> {{msg.subject}}<br/>
+<strong>Date:</strong> {{msg.printdate}}<br/>
+<strong>Message-ID:</strong> <a href="http://archives.postgresql.org/message-id/{{msg.messageid}}">{{msg.messageid}}</a><br/>
+<strong>Thread:</strong> <select id="thread_select" onChange="onThreadSelect()">
+{%for m in threadstruct%}{%if m.id%}<option value="{{m.messageid}}"{%if m.id = msg.id%} SELECTED{%endif%}>{{m.indent|safe}}{{m.printdate}} from {{m.mailfrom}}</option>{%endif%}
+{%endfor%}
+</select><br/>
+<strong>Lists:</strong> {%for l in lists %}<span class="listname"><a href="/{{l.listname}}/since/{{msg.messageid}}/">{{l.listname}}</a></span>{%endfor%}<br/>
+<hr/>
+<div class="bodywrapper">
+<pre>{{msg.bodytxt|hidemail|urlize}}</pre>
+
+{%for a in msg.attachment_set.all%}
+<div>
+<b>Attachment: <a href="/attachment/{{a.id}}/">{{a.filename}}</a></b><br/>
+Desrciption: {{a.contenttype}}
+</div>
+{%endfor%}
+<hr/>
+Messages in thread:<br/>
+<div class="threadlist">
+<ul>
+{%for m in threadstruct%}{%if m.open%}<ul>
+{%else%}{%if m.close%}</ul>
+{%else%}<li>{%if m.id = msg.id%}<b>{{m.printdate}}</b> from <b>{{m.mailfrom}}</b>{%else%}<a href="/message-id/{{m.messageid}}/">{{m.printdate}}</a> from {{m.mailfrom}}{%endif%}</li>{%endif%}{%endif%}{%endfor%}
+</ul>
+</div>
+</div>
+</body>
+</html>
