@@ -36,11 +36,7 @@ def attachment(request, attid):
 	if len(r) != 1:
 		return HttpResponse("Attachment not found")
 
-	response = HttpResponse(r[0][2], mimetype=r[0][1])
-	# XXX: can probably make text/ not attachments? Or even better,
-	# make one download link and one inline link
-	response['Content-disposition'] = 'attachment; filename=%s' % r[0][0]
-	return response
+	return HttpResponse(r[0][2], mimetype=r[0][1])
 
 def _build_thread_structure(threadid):
 	# Yeah, this is *way* too complicated for the django ORM

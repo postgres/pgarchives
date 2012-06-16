@@ -52,8 +52,8 @@ span.listname {
 
 {%for a in msg.attachment_set.all%}
 <div>
-<b>Attachment: <a href="/attachment/{{a.id}}/">{{a.filename}}</a></b><br/>
-Desrciption: {{a.contenttype}}
+<b>Attachment: <a href="/attachment/{{a.id}}/{{a.filename}}">{{a.filename}}</a></b><br/>
+Description: {{a.contenttype}}
 </div>
 {%endfor%}
 <hr/>

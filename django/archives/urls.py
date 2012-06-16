@@ -22,5 +22,5 @@ urlpatterns = patterns('',
     (r'^([\w-]+)/(\d+)-(\d+)/$', 'archives.mailarchives.views.datelist'),
     (r'^([\w-]+)/since/([^/]+)/$', 'archives.mailarchives.views.datelistsince'),
 
-    (r'^attachment/(\d+)/$', 'archives.mailarchives.views.attachment'),
+    (r'^attachment/(\d+)/.*$', 'archives.mailarchives.views.attachment'),
 )
