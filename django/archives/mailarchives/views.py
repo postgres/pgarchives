@@ -8,21 +8,23 @@ from datetime import datetime
 
 from models import *
 
-def render_datelist_from(request, l, d):
+def render_datelist_from(request, l, d, title):
 	mlist = Message.objects.select_related().filter(date__gte=d).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('date')[:200]
 	return render_to_response('datelist.html', {
 			'list': l,
 			'messages': list(mlist),
+			'title': title,
 			})
 
-def datelistsince(request, listname, msgnum):
+def datelistsince(request, listname, msgid):
 	l = get_object_or_404(List, listname=listname)
-	msg = get_object_or_404(Message, pk=msgnum)
-	return render_datelist_from(request, l, msg.date)
+	msg = get_object_or_404(Message, messageid=msgid)
+	return render_datelist_from(request, l, msg.date, "%s since %s" % (l.listname, msg.date.strftime("%Y-%m-%d %H:%M:%S")))
 	
 def datelist(request, listname, year, month):
-	listid = get_object_or_404(List, listname=listname)
-	return render_datelist_from(request, listid, datetime(int(year), int(month), 1))
+	l = get_object_or_404(List, listname=listname)
+	d = datetime(int(year), int(month), 1)
+	return render_datelist_from(request, l, d, "%s - %s %s" % (l.listname, d.strftime("%B"), d.year))
 
 
 def attachment(request, attid):
