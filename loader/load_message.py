@@ -28,9 +28,9 @@ class ArchivesParser(object):
 
 	def analyze(self):
 		self.msgid = self.clean_messageid(self.get_mandatory('Message-ID'))
-		self._from = self.get_mandatory('From')
-		self.to = self.get_mandatory('To')
-		self.cc = self.get_optional('CC')
+		self._from = self.decode_mime_header(self.get_mandatory('From'))
+		self.to = self.decode_mime_header(self.get_mandatory('To'))
+		self.cc = self.decode_mime_header(self.get_optional('CC'))
 		self.subject = self.decode_mime_header(self.get_mandatory('Subject'))
 		self.date = self.forgiving_date_decode(self.get_mandatory('Date'))
 		self.bodytxt = self.get_body()
@@ -329,6 +329,10 @@ class ArchivesParser(object):
 			raise e
 
 	def decode_mime_header(self, hdr):
+		if hdr == None:
+			return None
+
+		return " ".join([unicode(s, charset or 'us-ascii', errors='ignore') for s,charset in decode_header(hdr)])
 		(s, charset) = decode_header(hdr)[0]
 		if charset:
 			return unicode(s, charset, errors='ignore')
