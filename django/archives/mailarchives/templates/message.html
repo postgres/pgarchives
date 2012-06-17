@@ -45,7 +45,7 @@ span.listname {
 {%for m in threadstruct%}{%if m.id%}<option value="{{m.messageid}}"{%if m.id = msg.id%} SELECTED{%endif%}>{{m.indent|safe}}{{m.printdate}} from {{m.mailfrom}}</option>{%endif%}
 {%endfor%}
 </select><br/>
-<strong>Lists:</strong> {%for l in lists %}<span class="listname"><a href="/{{l.listname}}/since/{{msg.messageid}}/">{{l.listname}}</a></span>{%endfor%}<br/>
+<strong>Lists:</strong> {%for l in lists %}<span class="listname"><a href="/{{l.listname}}/since/{{msg.shortdate}}/">{{l.listname}}</a></span>{%endfor%}<br/>
 <hr/>
 <div class="bodywrapper">
 <pre>{{msg.bodytxt|hidemail|urlize}}</pre>

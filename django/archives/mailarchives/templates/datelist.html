@@ -19,7 +19,7 @@
 {%endif%}
 {%endfor%}
 {%with messages|last as lastmsg%}
-<a href="/{{list.listname}}/since/{{lastmsg.messageid}}/">Next</a>
+<a href="/{{list.listname}}/since/{{lastmsg.shortdate}}/">Next</a>
 {%endwith%}
 </body>
 </html>

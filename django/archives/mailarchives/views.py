@@ -20,6 +20,11 @@ def datelistsince(request, listname, msgid):
 	l = get_object_or_404(List, listname=listname)
 	msg = get_object_or_404(Message, messageid=msgid)
 	return render_datelist_from(request, l, msg.date, "%s since %s" % (l.listname, msg.date.strftime("%Y-%m-%d %H:%M:%S")))
+
+def datelistsincetime(request, listname, year, month, day, hour, minute):
+	l = get_object_or_404(List, listname=listname)
+	d = datetime(int(year), int(month), int(day), int(hour), int(minute))
+	return render_datelist_from(request, l, d, "%s since %s" % (l.listname, d.strftime("%Y-%m-%d %H:%M")))
 	
 def datelist(request, listname, year, month):
 	l = get_object_or_404(List, listname=listname)

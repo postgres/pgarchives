@@ -17,7 +17,11 @@ class Message(models.Model):
 	@property
 	def printdate(self):
 		return self.date.strftime("%Y-%m-%d %H:%M:%S")
-		
+
+	@property
+	def shortdate(self):
+		return self.date.strftime("%Y%m%d%H%M")
+
 class List(models.Model):
 	listid = models.IntegerField(null=False, primary_key=True)
 	listname = models.CharField(max_length=200, null=False, blank=False, unique=True)
