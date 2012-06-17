@@ -41,15 +41,15 @@ def attachment(request, attid):
 def _build_thread_structure(threadid):
 	# Yeah, this is *way* too complicated for the django ORM
 	curs = connection.cursor()
-	curs.execute("""WITH RECURSIVE t(id, _from, subject, date, messageid, parentid, parentpath) AS(
-  SELECT id,_from,subject,date,messageid,parentid,array[]::int[] FROM messages m WHERE m.threadid=%(threadid)s AND parentid IS NULL
+	curs.execute("""WITH RECURSIVE t(id, _from, subject, date, messageid, has_attachment, parentid, parentpath) AS(
+  SELECT id,_from,subject,date,messageid,has_attachment,parentid,array[]::int[] FROM messages m WHERE m.threadid=%(threadid)s AND parentid IS NULL
  UNION ALL
-  SELECT m.id,m._from,m.subject,m.date,m.messageid,m.parentid,t.parentpath||t.id FROM messages m INNER JOIN t ON t.id=m.parentid WHERE m.threadid=%(threadid)s
+  SELECT m.id,m._from,m.subject,m.date,m.messageid,m.has_attachment,m.parentid,t.parentpath||t.id FROM messages m INNER JOIN t ON t.id=m.parentid WHERE m.threadid=%(threadid)s
 )
-SELECT id,_from,subject,date,messageid,parentid,parentpath FROM t ORDER BY parentpath, date
+SELECT id,_from,subject,date,messageid,has_attachment,parentid,parentpath FROM t ORDER BY parentpath, date
 """, {'threadid': threadid})
 	lastpath = []
-	for id,_from,subject,date,messageid,parentid,parentpath in curs.fetchall():
+	for id,_from,subject,date,messageid,has_attachment,parentid,parentpath in curs.fetchall():
 		if lastpath != parentpath:
 			# We have a previous path, so we need to emit one or more
 			# close nodes. We start by finding the longest common path
@@ -71,7 +71,7 @@ SELECT id,_from,subject,date,messageid,parentid,parentpath FROM t ORDER BY paren
 				raise Exception("Invalid paths. Last path %s, new path %s" % (lastpath, common_path))
 			yield {'open':1}
 			lastpath = parentpath
-		yield {'id':id, 'mailfrom':_from, 'subject': subject, 'printdate': date.strftime("%Y-%m-%d %H:%M:%S"), 'messageid': messageid, 'parentid': parentid, 'indent': "&nbsp;" * len(parentpath)}
+		yield {'id':id, 'mailfrom':_from, 'subject': subject, 'printdate': date.strftime("%Y-%m-%d %H:%M:%S"), 'messageid': messageid, 'hasattachment': has_attachment, 'parentid': parentid, 'indent': "&nbsp;" * len(parentpath)}
 	# At the end we have a number of close tags to export
 	for x in range(0,len(lastpath)):
 		yield {'close':1}

@@ -7,6 +7,7 @@ CREATE TABLE messages (
    cc text NOT NULL,
    subject text NOT NULL,
    date timestamptz NOT NULL,
+   has_attachment boolean NOT NULL,
    messageid text NOT NULL,
    bodytxt text NOT NULL
 );

@@ -23,4 +23,9 @@ urlpatterns = patterns('',
     (r'^([\w-]+)/since/([^/]+)/$', 'archives.mailarchives.views.datelistsince'),
 
     (r'^attachment/(\d+)/.*$', 'archives.mailarchives.views.attachment'),
+
+    # Normally served by the webserver, but needed for development installs
+    (r'^media/(.*)$', 'django.views.static.serve', {
+			'document_root': '../media',
+    })
 )

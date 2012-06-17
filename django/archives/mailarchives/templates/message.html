@@ -50,19 +50,21 @@ span.listname {
 <div class="bodywrapper">
 <pre>{{msg.bodytxt|hidemail|urlize}}</pre>
 
+{%if msg.has_attachment%}
 {%for a in msg.attachment_set.all%}
 <div>
 <b>Attachment: <a href="/attachment/{{a.id}}/{{a.filename}}">{{a.filename}}</a></b><br/>
 Description: {{a.contenttype}}
 </div>
 {%endfor%}
+{%endif%}
 <hr/>
 Messages in thread:<br/>
 <div class="threadlist">
 <ul>
 {%for m in threadstruct%}{%if m.open%}<ul>
 {%else%}{%if m.close%}</ul>
-{%else%}<li>{%if m.id = msg.id%}<b>{{m.printdate}}</b> from <b>{{m.mailfrom}}</b>{%else%}<a href="/message-id/{{m.messageid}}/">{{m.printdate}}</a> from {{m.mailfrom}}{%endif%}</li>{%endif%}{%endif%}{%endfor%}
+{%else%}<li>{%if m.id = msg.id%}<b>{{m.printdate}}</b> from <b>{{m.mailfrom}}</b>{%else%}<a href="/message-id/{{m.messageid}}/">{{m.printdate}}</a> from {{m.mailfrom}} {%if m.hasattachment%}<img src="/media/img/misc/attach.png" alt="Has attachment" title="Has attachment"/>{%endif%}{%endif%}</li>{%endif%}{%endif%}{%endfor%}
 </ul>
 </div>
 </div>

@@ -171,7 +171,7 @@ class ArchivesParser(object):
 		if len(curs.fetchall()):
 			print "Tagged thread %s with listid %s" % (self.threadid, listid)
 
-		curs.execute("INSERT INTO messages (parentid, threadid, _from, _to, cc, subject, date, messageid, bodytxt) VALUES (%(parentid)s, %(threadid)s, %(from)s, %(to)s, %(cc)s, %(subject)s, %(date)s, %(messageid)s, %(bodytxt)s) RETURNING id", {
+		curs.execute("INSERT INTO messages (parentid, threadid, _from, _to, cc, subject, date, has_attachment, messageid, bodytxt) VALUES (%(parentid)s, %(threadid)s, %(from)s, %(to)s, %(cc)s, %(subject)s, %(date)s, %(has_attachment)s, %(messageid)s, %(bodytxt)s) RETURNING id", {
 				'parentid': self.parentid,
 				'threadid': self.threadid,
 				'from': self._from,
@@ -179,6 +179,7 @@ class ArchivesParser(object):
 				'cc': self.cc or '',
 				'subject': self.subject,
 				'date': self.date,
+				'has_attachment': len(self.attachments) > 0,
 				'messageid': self.msgid,
 				'bodytxt': self.bodytxt,
 				})
