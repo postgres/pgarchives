@@ -7,7 +7,7 @@ register = template.Library()
 @register.filter(name='hidemail')
 @stringfilter
 def hidemail(value):
-	return value.replace('@', ' at ')
+	return value.replace('@', '(at)').replace('.','(dot)')
 
 @register.filter(name='nameonly')
 @stringfilter
