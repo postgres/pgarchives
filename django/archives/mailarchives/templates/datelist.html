@@ -1,9 +1,7 @@
+{%extends "base.html"%}
+{%block title%}PostgreSQL Mailing Lists: {{title}}{%endblock%}
 {%load pgfilters%}
-<html>
-<head>
-<title>{{title}}</title>
-</head>
-<body>
+{%block layoutblock%}
 <h1>{{title}}</h1>
 {%for m in messages%}
 {%ifchanged m.date.date%}
@@ -25,5 +23,5 @@
 {%with messages|last as lastmsg%}
 <a href="/{{list.listname}}/since/{{lastmsg.shortdate}}/">Next</a>
 {%endwith%}
-</body>
-</html>
+
+{%endblock%}

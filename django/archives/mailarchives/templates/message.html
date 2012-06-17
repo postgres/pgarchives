@@ -1,7 +1,7 @@
+{%extends "base.html"%}
+{%block title%}{{msg.subject}}{%endblock%}
 {%load pgfilters%}
-<html>
-<head>
-<title>{{msg.subject}}</title>
+{%block extrahead%}
 <script language="javascript">
 /* This should be moved into a common JS file */
 function onThreadSelect() {
@@ -32,8 +32,8 @@ span.listname {
    border-radius: 8px;
 }
 </style>
-</head>
-<body>
+{%endblock%}
+{%block layoutblock%}
 <h2>{{msg.subject}}</h2>
 <strong>From:</strong> {{msg.mailfrom|hidemail}}<br/>
 <strong>To:</strong> {{msg.to|hidemail}}<br/>
@@ -68,5 +68,4 @@ Messages in thread:<br/>
 </ul>
 </div>
 </div>
-</body>
-</html>
+{%endblock%}
