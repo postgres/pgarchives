@@ -61,6 +61,16 @@ class ArchivesParser(object):
 
 	def store(self, conn, listid):
 		curs = conn.cursor()
+
+		# Potentially add the information that there exists a mail for
+		# this month. We do that this early since we're always going to
+		# make the check anyway, and this keeps the code in one place..
+		curs.execute("INSERT INTO list_months (listid, year, month) SELECT %(listid)s, %(year)s, %(month)s WHERE NOT EXISTS (SELECT listid FROM list_months WHERE listid=%(listid)s AND year=%(year)s AND month=%(month)s)", {
+						'listid': listid,
+						'year': self.date.year,
+						'month': self.date.month,
+						})
+
 		curs.execute("SELECT threadid, EXISTS(SELECT threadid FROM list_threads lt WHERE lt.listid=%(listid)s AND lt.threadid=m.threadid) FROM messages m WHERE m.messageid=%(messageid)s", {
 				'messageid': self.msgid,
 				'listid': listid,

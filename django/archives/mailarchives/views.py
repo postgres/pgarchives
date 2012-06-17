@@ -8,6 +8,17 @@ from datetime import datetime
 
 from models import *
 
+def monthlist(request, listname):
+	l = get_object_or_404(List, listname=listname)
+	curs = connection.cursor()
+	curs.execute("SELECT year, month FROM list_months WHERE listid=%(listid)s ORDER BY year DESC, month DESC", {'listid': l.listid})
+	months=[{'year':r[0],'month':r[1], 'date':datetime(r[0],r[1],1) }for r in curs.fetchall()]
+
+	return render_to_response('monthlist.html', {
+			'list': l,
+			'months': months,
+			})
+
 def render_datelist_from(request, l, d, title):
 	mlist = Message.objects.select_related().filter(date__gte=d).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('date')[:200]
 	return render_to_response('datelist.html', {

@@ -1,0 +1,18 @@
+{%extends "base.html"%}
+{%block title%}PostgreSQL Mailing Lists: {{list.listname}}{%endblock%}
+{%load pgfilters%}
+{%block layoutblock%}
+<h1>{{list.listname}}</h1>
+{%regroup months by year as yearmonth %}
+<ul>
+{%for year in yearmonth%}
+ <li>{{year.grouper}}
+  <ul>
+   {%for month in year.list%}
+    <li><a href="/{{list.listname}}/{{month.year}}-{{month.month|stringformat:"02d"}}/">{{month.date|date:"F"}}</a></li>
+   {%endfor%}
+  </ul>
+ </li>
+{%endfor%}
+</ul>
+{%endblock%}

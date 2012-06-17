@@ -28,7 +28,14 @@ CREATE UNIQUE INDEX idx_unresolved_msgid_message ON unresolved_messages(msgid, m
 
 CREATE TABLE lists(
    listid int NOT NULL PRIMARY KEY,
-   listname text NOT NULL
+   listname text NOT NULL,
+);
+
+CREATE TABLE list_months(
+   listid int NOT NULL,
+   year int NOT NULL,
+   month int NOT NULL,
+   CONSTRAINT list_months_pk PRIMARY KEY (listid, year, month)
 );
 
 CREATE TABLE list_threads(
