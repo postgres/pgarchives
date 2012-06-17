@@ -32,7 +32,7 @@ CREATE TABLE lists(
 );
 
 CREATE TABLE list_months(
-   listid int NOT NULL,
+   listid int NOT NULL REFERENCES lists(listid),
    year int NOT NULL,
    month int NOT NULL,
    CONSTRAINT list_months_pk PRIMARY KEY (listid, year, month)
