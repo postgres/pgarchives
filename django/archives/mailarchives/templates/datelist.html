@@ -18,6 +18,10 @@
 </ul>
 {%endif%}
 {%endfor%}
+{%with messages|first as firstmsg%}
+<a href="/{{list.listname}}/before/{{firstmsg.shortdate}}/">Prev</a>
+{%endwith%}
+|
 {%with messages|last as lastmsg%}
 <a href="/{{list.listname}}/since/{{lastmsg.shortdate}}/">Next</a>
 {%endwith%}

@@ -16,6 +16,18 @@ def render_datelist_from(request, l, d, title):
 			'title': title,
 			})
 
+def render_datelist_to(request, l, d, title):
+	# Need to sort this backwards in the database to get the LIMIT applied
+	# properly, and then manually resort it in the correct order. We can do
+	# the second sort safely in python since it's not a lot of items..
+	mlist = sorted(Message.objects.select_related().filter(date__lte=d).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('-date')[:200], key=lambda m: m.date)
+
+	return render_to_response('datelist.html', {
+			'list': l,
+			'messages': list(mlist),
+			'title': title,
+			})
+
 def datelistsince(request, listname, msgid):
 	l = get_object_or_404(List, listname=listname)
 	msg = get_object_or_404(Message, messageid=msgid)
@@ -25,7 +37,18 @@ def datelistsincetime(request, listname, year, month, day, hour, minute):
 	l = get_object_or_404(List, listname=listname)
 	d = datetime(int(year), int(month), int(day), int(hour), int(minute))
 	return render_datelist_from(request, l, d, "%s since %s" % (l.listname, d.strftime("%Y-%m-%d %H:%M")))
-	
+
+def datelistbefore(request, listname, msgid):
+	l = get_object_or_404(List, listname=listname)
+	msg = get_object_or_404(Message, messageid=msgid)
+	return render_datelist_to(request, l, msg.date, "%s before %s" % (l.listname, msg.date.strftime("%Y-%m-%d %H:%M:%S")))
+
+def datelistbeforetime(request, listname, year, month, day, hour, minute):
+	l = get_object_or_404(List, listname=listname)
+	d = datetime(int(year), int(month), int(day), int(hour), int(minute))
+	return render_datelist_to(request, l, d, "%s before %s" % (l.listname, d.strftime("%Y-%m-%d %H:%M")))
+
+
 def datelist(request, listname, year, month):
 	l = get_object_or_404(List, listname=listname)
 	d = datetime(int(year), int(month), 1)
