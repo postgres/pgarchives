@@ -1,5 +1,7 @@
 from django.template.defaultfilters import stringfilter
 from django import template
+from email.utils import parseaddr
+
 register = template.Library()
 
 @register.filter(name='hidemail')
@@ -7,7 +9,7 @@ register = template.Library()
 def hidemail(value):
 	return value.replace('@', ' at ')
 
-@register.filter(name='class_name')
-def class_name(ob):
-	return ob.__class__.__name__
-
+@register.filter(name='nameonly')
+@stringfilter
+def nameonly(value):
+	return parseaddr(value)[0]

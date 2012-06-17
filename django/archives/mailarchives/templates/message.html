@@ -64,7 +64,7 @@ Messages in thread:<br/>
 <ul>
 {%for m in threadstruct%}{%if m.open%}<ul>
 {%else%}{%if m.close%}</ul>
-{%else%}<li>{%if m.id = msg.id%}<b>{{m.printdate}}</b> from <b>{{m.mailfrom}}</b>{%else%}<a href="/message-id/{{m.messageid}}/">{{m.printdate}}</a> from {{m.mailfrom}} {%if m.hasattachment%}<img src="/media/img/misc/attach.png" alt="Has attachment" title="Has attachment"/>{%endif%}{%endif%}</li>{%endif%}{%endif%}{%endfor%}
+{%else%}<li>{%if m.id = msg.id%}<b>{{m.printdate}}</b> from <b>{{m.mailfrom|nameonly}}</b>{%else%}<a href="/message-id/{{m.messageid}}/">{{m.printdate}}</a> from {{m.mailfrom|nameonly}} {%if m.hasattachment%}<img src="/media/img/misc/attach.png" alt="Has attachment" title="Has attachment"/>{%endif%}{%endif%}</li>{%endif%}{%endif%}{%endfor%}
 </ul>
 </div>
 </div>
