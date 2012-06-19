@@ -1,10 +1,11 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.db import connection
+from django.db.models import Q
 
 import urllib
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from models import *
 
@@ -19,8 +20,13 @@ def monthlist(request, listname):
 			'months': months,
 			})
 
-def render_datelist_from(request, l, d, title):
-	mlist = Message.objects.select_related().filter(date__gte=d).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('date')[:200]
+def render_datelist_from(request, l, d, title, to=None):
+	datefilter = Q(date__gte=d)
+	if to:
+		datefilter.add(Q(date__lt=to), Q.AND)
+
+	mlist = Message.objects.select_related().filter(datefilter).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('date')[:200]
+
 	return render_to_response('datelist.html', {
 			'list': l,
 			'messages': list(mlist),
@@ -63,7 +69,9 @@ def datelistbeforetime(request, listname, year, month, day, hour, minute):
 def datelist(request, listname, year, month):
 	l = get_object_or_404(List, listname=listname)
 	d = datetime(int(year), int(month), 1)
-	return render_datelist_from(request, l, d, "%s - %s %s" % (l.listname, d.strftime("%B"), d.year))
+	enddate = d+timedelta(days=31)
+	enddate = datetime(enddate.year, enddate.month, 1)
+	return render_datelist_from(request, l, d, "%s - %s %s" % (l.listname, d.strftime("%B"), d.year), enddate)
 
 
 def attachment(request, attid):
