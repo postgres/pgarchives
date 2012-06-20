@@ -69,7 +69,7 @@ class ArchivesParser(object):
 				return unicode(b, charset, errors='ignore')
 			else:
 				# XXX: reasonable default?
-				return unicode(b)
+				return unicode(b, errors='ignore')
 
 	def get_body(self):
 		# This is where the magic happens - try to figure out what the body
