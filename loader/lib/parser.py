@@ -6,6 +6,7 @@ from email.parser import Parser
 from email.header import decode_header
 
 from lib.exception import IgnorableException
+from lib.log import log
 
 class ArchivesParser(object):
 	def __init__(self):
@@ -25,8 +26,8 @@ class ArchivesParser(object):
 		self.attachments = []
 		self.get_attachments()
 		if len(self.attachments) > 0:
-			print "Found %s attachments" % len(self.attachments)
-			print [(a[0],a[1],len(a[2])) for a in self.attachments]
+			log.status("Found %s attachments" % len(self.attachments))
+			log.status([(a[0],a[1],len(a[2])) for a in self.attachments])
 
 		# Build an list of the message id's we are interested in
 		self.parents = []
@@ -97,7 +98,7 @@ class ArchivesParser(object):
 		for p in container.get_payload():
 			if p.get_params() == None:
 				# MIME multipart/mixed, but no MIME type on the part
-				print "Found multipart/mixed in message '%s', but no MIME type on part. Trying text/plain." % self.msgid
+				log.log("Found multipart/mixed in message '%s', but no MIME type on part. Trying text/plain." % self.msgid)
 				return self.get_payload_as_unicode(p)
 			if p.get_params()[0][0].lower() == 'text/plain':
 				# Don't include it if it looks like an attachment
@@ -166,7 +167,7 @@ class ArchivesParser(object):
 		m = self.re_msgid.match(messageid)
 		if not m:
 			if ignorebroken:
-				print "Could not parse messageid '%s', ignoring it" % messageid
+				log.log("Could not parse messageid '%s', ignoring it" % messageid)
 				return None
 			raise Exception("Could not parse message id '%s'" % messageid)
 		return m.groups(1)[0]
@@ -194,7 +195,7 @@ class ArchivesParser(object):
 				dp = datetime.datetime(*dp.utctimetuple()[:6])
 			return dp
 		except Exception, e:
-			print "Failed to parse date '%s'" % d
+			log.log("Failed to parse date '%s'" % d)
 			raise e
 
 	def decode_mime_header(self, hdr):

@@ -14,6 +14,7 @@ import psycopg2
 from lib.storage import ArchivesParserStorage
 from lib.mbox import MailboxBreakupParser
 from lib.exception import IgnorableException
+from lib.log import log, opstatus
 
 
 if __name__ == "__main__":
@@ -22,6 +23,7 @@ if __name__ == "__main__":
 	optparser.add_option('-d', '--directory', dest='directory', help='Load all messages in directory')
 	optparser.add_option('-m', '--mbox', dest='mbox', help='Load all messages in mbox')
 	optparser.add_option('-i', '--interactive', dest='interactive', action='store_true', help='Prompt after each message')
+	optparser.add_option('-v', '--verbose', dest='verbose', action='store_true', help='Verbose output')
 
 	(opt, args) = optparser.parse_args()
 
@@ -40,6 +42,8 @@ if __name__ == "__main__":
 		optparser.print_usage()
 		sys.exit(1)
 
+	log.set(opt.verbose)
+
 	# Yay for hardcoding
 	conn = psycopg2.connect("host=/tmp dbname=archives")
 
@@ -50,7 +54,7 @@ if __name__ == "__main__":
 			})
 	r = curs.fetchall()
 	if len(r) != 1:
-		print "List %s not found" % opt.list
+		log.error("List %s not found" % opt.list)
 		conn.close()
 		sys.exit(1)
 	listid = r[0][0]
@@ -58,14 +62,15 @@ if __name__ == "__main__":
 	if opt.directory:
 		# Parse all files in directory
 		for x in os.listdir(opt.directory):
-			print "Parsing file %s" % x
+			log.status("Parsing file %s" % x)
 			with open(os.path.join(opt.directory, x)) as f:
 				ap = ArchivesParserStorage()
 				ap.parse(f)
 				try:
 					ap.analyze()
 				except IgnorableException, e:
-					print "%s :: ignoring" % e
+					log.log("%s :: ignoring" % e)
+					opstatus.failed += 1
 					continue
 				ap.store(conn, listid)
 			if opt.interactive:
@@ -87,12 +92,13 @@ if __name__ == "__main__":
 			try:
 				ap.analyze()
 			except IgnorableException, e:
-				print "%s :: ignoring" % e
+				log.log("%s :: ignoring" % e)
+				opstatus.failed += 1
 				continue
 			ap.store(conn, listid)
 		if mboxparser.returncode():
-			print "Failed to parse mbox:"
-			print mboxparser.stderr_output()
+			log.error("Failed to parse mbox:")
+			log.error(mboxparser.stderr_output())
 			sys.exit(1)
 	else:
 		# Parse single message on stdin
@@ -101,12 +107,13 @@ if __name__ == "__main__":
 		try:
 			ap.analyze()
 		except IgnorableException, e:
-			print "%s :: ignoring" % e
+			log.log("%s :: ignoring" % e)
 			conn.close()
 			sys.exit(1)
 		ap.store(conn, listid)
 
-	print "Committing..."
+	log.status("Committing...")
 	conn.commit()
-	print "Done."
+	log.status("Done.")
 	conn.close()
+	opstatus.print_status()

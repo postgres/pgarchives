@@ -1,5 +1,7 @@
 from parser import ArchivesParser
 
+from lib.log import log, opstatus
+
 class ArchivesParserStorage(ArchivesParser):
 	def __init__(self):
 		super(ArchivesParserStorage, self).__init__()
@@ -24,14 +26,15 @@ class ArchivesParserStorage(ArchivesParser):
 		if len(r) > 0:
 			# Has to be 1 row, since we have a unique index on id
 			if not r[0][1]:
-				print "Tagging message %s with list %s" % (self.msgid, listid)
+				log.status("Tagging message %s with list %s" % (self.msgid, listid))
 				curs.execute("INSERT INTO list_threads (threadid, listid) VALUES (%(threadid)s, %(listid)s)", {
 						'threadid': r[0][0],
 						'listid': listid,
 						})
 
 			#FIXME: option to overwrite existing message!
-			print "Message %s already stored" % self.msgid
+			log.status("Message %s already stored" % self.msgid)
+			opstatus.dupes += 1
 			return
 
 		# Resolve own thread
@@ -59,7 +62,7 @@ class ArchivesParserStorage(ArchivesParser):
 			# Slice away all matches that are worse than the one we wanted
 			self.parents = self.parents[:best_parent]
 
-			print "Message %s resolved to existing thread %s, waiting for %s better messages" % (self.msgid, self.threadid, len(self.parents))
+			log.status("Message %s resolved to existing thread %s, waiting for %s better messages" % (self.msgid, self.threadid, len(self.parents)))
 		else:
 			# No parent exist. But don't create the threadid just yet, since
 			# it's possible that we're somebody elses parent!
@@ -84,7 +87,7 @@ class ArchivesParserStorage(ArchivesParser):
 			mergethreads = set([r[2] for r in childrows]).difference(set((self.threadid,)))
 			if len(mergethreads):
 				# We have one or more merge threads
-				print "Merging threads %s into thread %s" % (",".join(str(s) for s in mergethreads), self.threadid)
+				log.status("Merging threads %s into thread %s" % (",".join(str(s) for s in mergethreads), self.threadid))
 				curs.execute("UPDATE messages SET threadid=%(threadid)s WHERE threadid=ANY(%(oldthreadids)s)", {
 						'threadid': self.threadid,
 						'oldthreadids': list(mergethreads),
@@ -116,7 +119,7 @@ class ArchivesParserStorage(ArchivesParser):
 			# No parent and no child exists - create a new threadid, just for us!
 			curs.execute("SELECT nextval('threadid_seq')")
 			self.threadid = curs.fetchall()[0][0]
-			print "Message %s resolved to no parent (out of %s) and no child, new thread %s" % (self.msgid, len(self.parents), self.threadid)
+			log.status("Message %s resolved to no parent (out of %s) and no child, new thread %s" % (self.msgid, len(self.parents), self.threadid))
 
 		# Insert a thread tag if we're on a new list
 		curs.execute("INSERT INTO list_threads (threadid, listid) SELECT %(threadid)s, %(listid)s WHERE NOT EXISTS (SELECT * FROM list_threads t2 WHERE t2.threadid=%(threadid)s AND t2.listid=%(listid)s) RETURNING threadid", {
@@ -124,7 +127,7 @@ class ArchivesParserStorage(ArchivesParser):
 			'listid': listid,
 			})
 		if len(curs.fetchall()):
-			print "Tagged thread %s with listid %s" % (self.threadid, listid)
+			log.status("Tagged thread %s with listid %s" % (self.threadid, listid))
 
 		curs.execute("INSERT INTO messages (parentid, threadid, _from, _to, cc, subject, date, has_attachment, messageid, bodytxt) VALUES (%(parentid)s, %(threadid)s, %(from)s, %(to)s, %(cc)s, %(subject)s, %(date)s, %(has_attachment)s, %(messageid)s, %(bodytxt)s) RETURNING id", {
 				'parentid': self.parentid,
@@ -149,7 +152,7 @@ class ArchivesParserStorage(ArchivesParser):
 						} for a in self.attachments])
 
 		if len(self.children):
-			print "Setting %s other threads to children of %s" % (len(self.children), self.msgid)
+			log.status("Setting %s other threads to children of %s" % (len(self.children), self.msgid))
 			curs.executemany("UPDATE messages SET parentid=%(parent)s WHERE id=%(id)s",
 							 [{'parent': id, 'id': c} for c in self.children])
 		if len(self.parents):
@@ -157,3 +160,5 @@ class ArchivesParserStorage(ArchivesParser):
 			# properly threaded - so store them in the db.
 			curs.executemany("INSERT INTO unresolved_messages (message, priority, msgid) VALUES (%(id)s, %(priority)s, %(msgid)s)",
 							 [{'id': id, 'priority': i, 'msgid': self.parents[i]} for i in range(0, len(self.parents))])
+
+		opstatus.stored += 1
