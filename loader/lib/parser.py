@@ -5,6 +5,8 @@ import dateutil.parser
 from email.parser import Parser
 from email.header import decode_header
 
+from lib.exception import IgnorableException
+
 class ArchivesParser(object):
 	def __init__(self):
 		self.parser = Parser()

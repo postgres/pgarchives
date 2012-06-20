@@ -12,9 +12,8 @@ from optparse import OptionParser
 import psycopg2
 
 from lib.storage import ArchivesParserStorage
-
-class IgnorableException(Exception):
-	pass
+from lib.mbox import MailboxBreakupParser
+from lib.exception import IgnorableException
 
 
 if __name__ == "__main__":
