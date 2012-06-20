@@ -20,6 +20,7 @@ if __name__ == "__main__":
 	optparser = OptionParser()
 	optparser.add_option('-l', '--list', dest='list', help='Name of list to loiad message for')
 	optparser.add_option('-d', '--directory', dest='directory', help='Load all messages in directory')
+	optparser.add_option('-m', '--mbox', dest='mbox', help='Load all messages in mbox')
 	optparser.add_option('-i', '--interactive', dest='interactive', action='store_true', help='Prompt after each message')
 
 	(opt, args) = optparser.parse_args()
@@ -31,6 +32,11 @@ if __name__ == "__main__":
 
 	if not opt.list:
 		print "List must be specified"
+		optparser.print_usage()
+		sys.exit(1)
+
+	if opt.directory and opt.mbox:
+		print "Can't specify both directory and mbox!"
 		optparser.print_usage()
 		sys.exit(1)
 
@@ -71,6 +77,23 @@ if __name__ == "__main__":
 					print "Ok, aborting!"
 					break
 				print "---------------------------------"
+	elif opt.mbox:
+		mboxparser = MailboxBreakupParser(opt.mbox)
+		while not mboxparser.EOF:
+			ap = ArchivesParserStorage()
+			msg = mboxparser.next()
+			if not msg: break
+			ap.parse(msg)
+			try:
+				ap.analyze()
+			except IgnorableException, e:
+				print "%s :: ignoring" % e
+				continue
+			ap.store(conn, listid)
+		if mboxparser.returncode():
+			print "Failed to parse mbox:"
+			print mboxparser.stderr_output()
+			sys.exit(1)
 	else:
 		# Parse single message on stdin
 		ap = ArchivesParserStorage()
