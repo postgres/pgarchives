@@ -180,7 +180,16 @@ class ArchivesParser(object):
 			d = self._date_multi_re.sub('', d)
 
 		try:
-			return dateutil.parser.parse(d)
+			dp = dateutil.parser.parse(d)
+
+			# Some offsets are >16 hours, which postgresql will not
+			# (for good reasons) accept
+			if dp.utcoffset().seconds > 60 * 60 * 16 - 1 and dp.utcoffset().days >= 0:
+				# Convert it to a UTC timestamp using Python. It will give
+				# us the right time, but the wrong timezone. Should be
+				# enough...
+				dp = datetime.datetime(*dp.utctimetuple()[:6])
+			return dp
 		except Exception, e:
 			print "Failed to parse date '%s'" % d
 			raise e
