@@ -100,6 +100,9 @@ class ArchivesParser(object):
 				print "Found multipart/mixed in message '%s', but no MIME type on part. Trying text/plain." % self.msgid
 				return self.get_payload_as_unicode(p)
 			if p.get_params()[0][0].lower() == 'text/plain':
+				# Don't include it if it looks like an attachment
+				if p.has_key('Content-Disposition') and p['Content-Disposition'].startswith('attachment'):
+					continue
 				return self.get_payload_as_unicode(p)
 			if p.is_multipart():
 				b = self.recursive_first_plaintext(p)
