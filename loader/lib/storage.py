@@ -135,7 +135,7 @@ class ArchivesParserStorage(ArchivesParser):
 				'from': self._from,
 				'to': self.to or '',
 				'cc': self.cc or '',
-				'subject': self.subject,
+				'subject': self.subject or '',
 				'date': self.date,
 				'has_attachment': len(self.attachments) > 0,
 				'messageid': self.msgid,
