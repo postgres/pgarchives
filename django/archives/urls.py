@@ -18,13 +18,13 @@ urlpatterns = patterns('',
     (r'^test/(\d+)/$', 'archives.mailarchives.views.testview'),
     (r'^test/oldsite/([^/]+)/$', 'archives.mailarchives.views.oldsite'),
 
-    (r'^message-id/([^/]+)/', 'archives.mailarchives.views.message'),
+    (r'^message-id/([^/]+)$', 'archives.mailarchives.views.message'),
     (r'^([\w-]+)/$', 'archives.mailarchives.views.monthlist'),
     (r'^([\w-]+)/(\d+)-(\d+)/$', 'archives.mailarchives.views.datelist'),
     (r'^([\w-]+)/since/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})', 'archives.mailarchives.views.datelistsincetime'),
     (r'^([\w-]+)/since/([^/]+)/$', 'archives.mailarchives.views.datelistsince'),
     (r'^([\w-]+)/before/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})', 'archives.mailarchives.views.datelistbeforetime'),
-    (r'^([\w-]+)/before/([^/]+)/$', 'archives.mailarchives.views.datelistbefore'),
+    (r'^([\w-]+)/before/([^/]+)$', 'archives.mailarchives.views.datelistbefore'),
 
     (r'^attachment/(\d+)/.*$', 'archives.mailarchives.views.attachment'),
 

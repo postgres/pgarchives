@@ -5,7 +5,7 @@
 <script language="javascript">
 /* This should be moved into a common JS file */
 function onThreadSelect() {
-   document.location.href = '/message-id/' + document.getElementById('thread_select').value + '/';
+   document.location.href = '/message-id/' + document.getElementById('thread_select').value;
 }
 </script>
 <style>
@@ -45,7 +45,7 @@ span.listname {
 {%for m in threadstruct%}{%if m.id%}<option value="{{m.messageid}}"{%if m.id = msg.id%} SELECTED{%endif%}>{{m.indent|safe}}{{m.printdate}} from {{m.mailfrom}}</option>{%endif%}
 {%endfor%}
 </select><br/>
-<strong>Lists:</strong> {%for l in lists %}<span class="listname"><a href="/{{l.listname}}/since/{{msg.shortdate}}/">{{l.listname}}</a></span>{%endfor%}<br/>
+<strong>Lists:</strong> {%for l in lists %}<span class="listname"><a href="/{{l.listname}}/since/{{msg.shortdate}}">{{l.listname}}</a></span>{%endfor%}<br/>
 <hr/>
 <div class="bodywrapper">
 <pre>{{msg.bodytxt|hidemail|urlize}}</pre>
@@ -64,7 +64,7 @@ Messages in thread:<br/>
 <ul>
 {%for m in threadstruct%}{%if m.open%}<ul>
 {%else%}{%if m.close%}</ul>
-{%else%}<li>{%if m.id = msg.id%}<b>{{m.printdate}}</b> from <b>{{m.mailfrom|nameonly}}</b>{%else%}<a href="/message-id/{{m.messageid}}/">{{m.printdate}}</a> from {{m.mailfrom|nameonly}} {%if m.hasattachment%}<img src="/media/img/misc/attach.png" alt="Has attachment" title="Has attachment"/>{%endif%}{%endif%}</li>{%endif%}{%endif%}{%endfor%}
+{%else%}<li>{%if m.id = msg.id%}<b>{{m.printdate}}</b> from <b>{{m.mailfrom|nameonly}}</b>{%else%}<a href="/message-id/{{m.messageid}}">{{m.printdate}}</a> from {{m.mailfrom|nameonly}} {%if m.hasattachment%}<img src="/media/img/misc/attach.png" alt="Has attachment" title="Has attachment"/>{%endif%}{%endif%}</li>{%endif%}{%endif%}{%endfor%}
 </ul>
 </div>
 </div>
