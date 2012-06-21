@@ -5,7 +5,7 @@ import dateutil.parser
 from email.parser import Parser
 from email.header import decode_header
 from HTMLParser import HTMLParser
-import cStringIO as StringIO
+import StringIO
 
 from lib.exception import IgnorableException
 from lib.log import log
