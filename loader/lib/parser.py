@@ -200,6 +200,7 @@ class ArchivesParser(object):
 #	_date_multi_re = re.compile(' \((\w+\s\w+(\s+\w+)*|)\)$')
 	# Now using [^\s] instead of \w, to work with japanese chars
 	_date_multi_re = re.compile(' \(([^\s]+\s[^\s]+(\s+[^\s]+)*|)\)$')
+	_date_multi_re2 = re.compile(' (\+\d{4}) \([^)]+\)$')
 	def forgiving_date_decode(self, d):
 		# We have a number of dates in the format
 		# "<full datespace> +0200 (MET DST)"
@@ -208,6 +209,13 @@ class ArchivesParser(object):
 		# completely empty
 		if self._date_multi_re.search(d):
 			d = self._date_multi_re.sub('', d)
+
+		# If the spec is instead
+		# "<full datespace> +0200 (...)"
+		# of any kind, we can just remove what's in the (), because the
+		# parser is just going to rely on the fixed offset anyway.
+		if self._date_multi_re2.search(d):
+			d = self._date_multi_re2.sub(' \\1', d)
 
 		try:
 			dp = dateutil.parser.parse(d)
