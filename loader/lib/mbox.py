@@ -13,7 +13,11 @@ class MailboxBreakupParser(object):
 	def __init__(self, fn):
 		self.EOF = False
 
-		cmd = "formail -s /bin/sh -c 'cat && echo %s' < %s" % (SEPARATOR, fn)
+		if fn.endswith(".gz"):
+			cat = "zcat"
+		else:
+			cat = "cat"
+		cmd = "%s %s | formail -s /bin/sh -c 'cat && echo %s'" % (cat, fn, SEPARATOR)
 		self.pipe = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
 
 	def returncode(self):
