@@ -24,7 +24,7 @@ class ArchivesParser(object):
 		self.to = self.decode_mime_header(self.get_optional('To'))
 		self.cc = self.decode_mime_header(self.get_optional('CC'))
 		self.subject = self.decode_mime_header(self.get_mandatory('Subject'))
-		self.date = self.forgiving_date_decode(self.get_mandatory('Date'))
+		self.date = self.forgiving_date_decode(self.decode_mime_header(self.get_mandatory('Date')))
 		self.bodytxt = self.get_body()
 		self.attachments = []
 		self.get_attachments()
