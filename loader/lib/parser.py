@@ -112,7 +112,7 @@ class ArchivesParser(object):
 			b = self.html_clean(b)
 			return b
 
-		raise Exception("Don't know how to read the body from %s" % self.msgid)
+		raise IgnorableException("Don't know how to read the body from %s" % self.msgid)
 
 	def recursive_first_plaintext(self, container, html_instead=False):
 		for p in container.get_payload():
