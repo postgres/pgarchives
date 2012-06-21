@@ -50,6 +50,16 @@ class ArchivesParser(object):
 					self.parents.append(m)
 
 
+	def clean_charset(self, charset):
+		if charset.lower() == 'unknown-8bit':
+			# Special case where we don't know... We'll assume
+			# us-ascii and use replacements
+			charset = 'us-ascii'
+		if charset.lower() == 'x-gbk':
+			# Some MUAs set it to x-gbk, but there is a valid
+			# declaratoin as gbk...
+			charset = 'gbk'
+		return charset
 
 	def get_payload_as_unicode(self, msg):
 		b = msg.get_payload(decode=True)
@@ -65,11 +75,7 @@ class ArchivesParser(object):
 					charset = v
 					break
 			if charset:
-				if charset.lower() == 'unknown-8bit':
-					# Special case where we don't know... We'll assume
-					# us-ascii and use replacements
-					charset = 'us-ascii'
-				return unicode(b, charset, errors='ignore')
+				return unicode(b, self.clean_charset(charset), errors='ignore')
 			else:
 				# XXX: reasonable default?
 				return unicode(b, errors='ignore')
@@ -216,10 +222,10 @@ class ArchivesParser(object):
 		if hdr == None:
 			return None
 
-		return " ".join([unicode(s, charset or 'us-ascii', errors='ignore') for s,charset in decode_header(hdr)])
+		return " ".join([unicode(s, charset and self.clean_charset(charset) or 'us-ascii', errors='ignore') for s,charset in decode_header(hdr)])
 		(s, charset) = decode_header(hdr)[0]
 		if charset:
-			return unicode(s, charset, errors='ignore')
+			return unicode(s, self.clean_charset(charset), errors='ignore')
 		return unicode(s, 'us-ascii', errors='ignore')
 
 	def get_mandatory(self, fieldname):
