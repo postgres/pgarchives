@@ -60,6 +60,10 @@ class ArchivesParser(object):
 			# Some MUAs set it to x-gbk, but there is a valid
 			# declaratoin as gbk...
 			charset = 'gbk'
+		if charset.lower() == 'iso-8859-8-i':
+			# -I is a special logical version, but should be the
+			# same charset
+			chaset = 'iso-8859-8'
 		return charset
 
 	def get_payload_as_unicode(self, msg):
