@@ -83,6 +83,9 @@ if __name__ == "__main__":
 					break
 				print "---------------------------------"
 	elif opt.mbox:
+		if not os.path.isfile(opt.mbox):
+			print "File %s does not exist" % opt.mbox
+			sys.exit(1)
 		mboxparser = MailboxBreakupParser(opt.mbox)
 		while not mboxparser.EOF:
 			ap = ArchivesParserStorage()
