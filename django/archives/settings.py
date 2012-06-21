@@ -144,3 +144,8 @@ LOGGING = {
         },
     }
 }
+
+
+
+# Required for lighttpd
+FORCE_SCRIPT_NAME=""
