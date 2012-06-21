@@ -55,15 +55,15 @@ class ArchivesParser(object):
 		if charset.lower() == 'unknown-8bit':
 			# Special case where we don't know... We'll assume
 			# us-ascii and use replacements
-			charset = 'us-ascii'
+			return 'us-ascii'
 		if charset.lower() == 'x-gbk':
 			# Some MUAs set it to x-gbk, but there is a valid
 			# declaratoin as gbk...
-			charset = 'gbk'
+			return 'gbk'
 		if charset.lower() == 'iso-8859-8-i':
 			# -I is a special logical version, but should be the
 			# same charset
-			chaset = 'iso-8859-8'
+			return 'iso-8859-8'
 		return charset
 
 	def get_payload_as_unicode(self, msg):
