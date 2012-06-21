@@ -12,4 +12,7 @@ def hidemail(value):
 @register.filter(name='nameonly')
 @stringfilter
 def nameonly(value):
-	return parseaddr(value)[0]
+	(name, email) = parseaddr(value)
+	if name:
+		return name
+	return email.split('@')[0]
