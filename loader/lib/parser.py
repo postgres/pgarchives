@@ -4,6 +4,8 @@ import dateutil.parser
 
 from email.parser import Parser
 from email.header import decode_header
+from HTMLParser import HTMLParser
+import cStringIO as StringIO
 
 from lib.exception import IgnorableException
 from lib.log import log
@@ -92,9 +94,16 @@ class ArchivesParser(object):
 		b = self.recursive_first_plaintext(self.msg)
 		if b: return b
 
+		# Couldn't find a plaintext. Look for the first HTML in that case.
+		# Fallback, but what can we do at this point...
+		b = self.recursive_first_plaintext(self.msg, True)
+		if b:
+			b = self.html_clean(b)
+			return b
+
 		raise Exception("Don't know how to read the body from %s" % self.msgid)
 
-	def recursive_first_plaintext(self, container):
+	def recursive_first_plaintext(self, container, html_instead=False):
 		for p in container.get_payload():
 			if p.get_params() == None:
 				# MIME multipart/mixed, but no MIME type on the part
@@ -105,8 +114,13 @@ class ArchivesParser(object):
 				if p.has_key('Content-Disposition') and p['Content-Disposition'].startswith('attachment'):
 					continue
 				return self.get_payload_as_unicode(p)
+			if html_instead and p.get_params()[0][0].lower() == 'text/html':
+				# Don't include it if it looks like an attachment
+				if p.has_key('Content-Disposition') and p['Content-Disposition'].startswith('attachment'):
+					continue
+				return self.get_payload_as_unicode(p)
 			if p.is_multipart():
-				b = self.recursive_first_plaintext(p)
+				b = self.recursive_first_plaintext(p, html_instead)
 				if b: return b
 
 		# Yikes, nothing here! Hopefully we'll find something when
@@ -221,3 +235,24 @@ class ArchivesParser(object):
 			return self.msg[fieldname]
 		except:
 			return None
+
+	def html_clean(self, html):
+		cleaner = HTMLCleaner()
+		cleaner.feed(html)
+		return cleaner.get_text()
+
+
+class HTMLCleaner(HTMLParser):
+	def __init__(self):
+		HTMLParser.__init__(self)
+		self.io = StringIO.StringIO()
+
+	def get_text(self):
+		return self.io.getvalue()
+
+	def handle_data(self, data):
+		self.io.write(data)
+
+	def handle_starttag(self, tag, attrs):
+		if tag == "p" or tag == "br":
+			self.io.write("\n")
