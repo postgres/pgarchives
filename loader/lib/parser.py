@@ -193,8 +193,9 @@ class ArchivesParser(object):
 			raise Exception("Could not parse message id '%s'" % messageid)
 		return m.groups(1)[0]
 
-	_date_multi_OL = re.compile(' \((\w+\s\w+|)\)$')
-	_date_multi_re = re.compile(' \((\w+\s\w+(\s+\w+)*|)\)$')
+#	_date_multi_re = re.compile(' \((\w+\s\w+(\s+\w+)*|)\)$')
+	# Now using [^\s] instead of \w, to work with japanese chars
+	_date_multi_re = re.compile(' \(([^\s]+\s[^\s]+(\s+[^\s]+)*|)\)$')
 	def forgiving_date_decode(self, d):
 		# We have a number of dates in the format
 		# "<full datespace> +0200 (MET DST)"
