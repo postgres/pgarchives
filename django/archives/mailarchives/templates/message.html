@@ -48,7 +48,7 @@ span.listname {
 <strong>Lists:</strong> {%for l in lists %}<span class="listname"><a href="/{{l.listname}}/since/{{msg.shortdate}}">{{l.listname}}</a></span>{%endfor%}<br/>
 <hr/>
 <div class="bodywrapper">
-<pre>{{msg.bodytxt|hidemail|urlize}}</pre>
+<pre>{{msg.bodytxt|urlize}}</pre>
 
 {%if msg.has_attachment%}
 {%for a in msg.attachment_set.all%}
