@@ -45,7 +45,7 @@ if __name__ == "__main__":
 	log.set(opt.verbose)
 
 	# Yay for hardcoding
-	conn = psycopg2.connect("host=/tmp dbname=archives")
+	conn = psycopg2.connect("dbname=archives")
 
 	# Get the listid we're working on
 	curs = conn.cursor()
