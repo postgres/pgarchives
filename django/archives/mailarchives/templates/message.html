@@ -59,6 +59,7 @@ Description: {{a.contenttype}}
 {%endfor%}
 {%endif%}
 <hr/>
+{%if threadstruct|length > 1%}
 Messages in thread:<br/>
 <div class="threadlist">
 <ul>
@@ -67,5 +68,7 @@ Messages in thread:<br/>
 {%else%}<li>{%if m.id = msg.id%}<b>{{m.printdate}}</b> from <b>{{m.mailfrom|nameonly}}</b>{%else%}<a href="/message-id/{{m.messageid}}">{{m.printdate}}</a> from {{m.mailfrom|nameonly}} {%if m.hasattachment%}<img src="/media/img/misc/attach.png" alt="Has attachment" title="Has attachment"/>{%endif%}{%endif%}</li>{%endif%}{%endif%}{%endfor%}
 </ul>
 </div>
+{%endif%}
+
 </div>
 {%endblock%}
