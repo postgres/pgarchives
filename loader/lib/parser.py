@@ -5,6 +5,7 @@ import dateutil.parser
 from email.parser import Parser
 from email.header import decode_header
 from HTMLParser import HTMLParser
+import tidy
 import StringIO
 
 from lib.exception import IgnorableException
@@ -243,6 +244,9 @@ class ArchivesParser(object):
 			return None
 
 	def html_clean(self, html):
+		# First we pass it through tidy
+		html = unicode(str(tidy.parseString(html.encode('utf8'), drop_proprietary_attributes=1, alt_text='',hide_comments=1,output_xhtml=1,show_body_only=1,clean=1,char_encoding='utf8')), 'utf8')
+
 		cleaner = HTMLCleaner()
 		cleaner.feed(html)
 		return cleaner.get_text()
