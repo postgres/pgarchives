@@ -9,6 +9,12 @@ from datetime import datetime, timedelta
 
 from models import *
 
+def index(request):
+	lists = List.objects.all().extra(where=["EXISTS (SELECT listid FROM list_months lm WHERE lm.listid = lists.listid)"]).order_by('listname')
+	return render_to_response('index.html', {
+			'lists': lists,
+			})
+
 def monthlist(request, listname):
 	l = get_object_or_404(List, listname=listname)
 	curs = connection.cursor()
