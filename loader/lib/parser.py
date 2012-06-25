@@ -30,7 +30,6 @@ class ArchivesParser(object):
 		self.get_attachments()
 		if len(self.attachments) > 0:
 			log.status("Found %s attachments" % len(self.attachments))
-			log.status([(a[0],a[1],len(a[2])) for a in self.attachments])
 
 		# Build an list of the message id's we are interested in
 		self.parents = []
