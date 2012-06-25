@@ -54,3 +54,12 @@ CREATE TABLE attachments(
    attachment bytea not null
 );
 CREATE INDEX idx_attachments_msg ON attachments(message);
+
+CREATE TABLE loaderrors(
+   id SERIAL NOT NULL PRIMARY KEY,
+   dat timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   msgid text NOT NULL,
+   srctype text NOT NULL,
+   src text NOT NULL,
+   err text NOT NULL
+);

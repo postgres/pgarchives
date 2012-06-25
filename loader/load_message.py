@@ -16,6 +16,22 @@ from lib.mbox import MailboxBreakupParser
 from lib.exception import IgnorableException
 from lib.log import log, opstatus
 
+def log_failed_message(srctype, src, msg, err):
+	try:
+		msgid = msg.msgid
+	except:
+		msgid = "<unknown>"
+	print "Failed to load message (msgid %s) from %s, spec %s: %s" % (msgid, srctype, src, err)
+
+	# We also put the data in the db. This happens in the main transaction
+	# so if the whole script dies, it goes away...
+	conn.cursor().execute("INSERT INTO loaderrors (msgid, srctype, src, err) VALUES (%(msgid)s, %(srctype)s, %(src)s, %(err)s)", {
+			'msgid': msgid,
+			'srctype': srctype,
+			'src': src,
+			'err': unicode(err),
+			})
+
 
 if __name__ == "__main__":
 	optparser = OptionParser()
@@ -69,7 +85,7 @@ if __name__ == "__main__":
 				try:
 					ap.analyze()
 				except IgnorableException, e:
-					log.log("%s :: ignoring" % e)
+					log_failed_message("directory", os.path.join(opt.directory, x), ap, e)
 					opstatus.failed += 1
 					continue
 				ap.store(conn, listid)
@@ -95,7 +111,7 @@ if __name__ == "__main__":
 			try:
 				ap.analyze()
 			except IgnorableException, e:
-				log.log("%s :: ignoring" % e)
+				log_failed_message("mbox", opt.mbox, ap, e)
 				opstatus.failed += 1
 				continue
 			ap.store(conn, listid)
@@ -110,7 +126,7 @@ if __name__ == "__main__":
 		try:
 			ap.analyze()
 		except IgnorableException, e:
-			log.log("%s :: ignoring" % e)
+			log_failed_message("stdin","", ap, e)
 			conn.close()
 			sys.exit(1)
 		ap.store(conn, listid)
