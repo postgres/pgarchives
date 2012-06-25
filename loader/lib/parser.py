@@ -118,7 +118,7 @@ class ArchivesParser(object):
 		for p in container.get_payload():
 			if p.get_params() == None:
 				# MIME multipart/mixed, but no MIME type on the part
-				log.log("Found multipart/mixed in message '%s', but no MIME type on part. Trying text/plain." % self.msgid)
+				log.status("Found multipart/mixed in message '%s', but no MIME type on part. Trying text/plain." % self.msgid)
 				return self.get_payload_as_unicode(p)
 			if p.get_params()[0][0].lower() == 'text/plain':
 				# Don't include it if it looks like an attachment
@@ -192,7 +192,7 @@ class ArchivesParser(object):
 		m = self.re_msgid.match(messageid)
 		if not m:
 			if ignorebroken:
-				log.log("Could not parse messageid '%s', ignoring it" % messageid)
+				log.status("Could not parse messageid '%s', ignoring it" % messageid)
 				return None
 			raise Exception("Could not parse message id '%s'" % messageid)
 		return m.groups(1)[0]
