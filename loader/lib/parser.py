@@ -80,7 +80,10 @@ class ArchivesParser(object):
 					charset = v
 					break
 			if charset:
-				return unicode(b, self.clean_charset(charset), errors='ignore')
+				try:
+					return unicode(b, self.clean_charset(charset), errors='ignore')
+				except LookupError, e:
+					raise IgnorableException("Failed to get unicode payload: %s" % e)
 			else:
 				# XXX: reasonable default?
 				return unicode(b, errors='ignore')
