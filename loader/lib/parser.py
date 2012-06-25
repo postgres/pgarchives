@@ -232,8 +232,7 @@ class ArchivesParser(object):
 				dp = datetime.datetime(*dp.utctimetuple()[:6])
 			return dp
 		except Exception, e:
-			log.log("Failed to parse date '%s'" % d)
-			raise e
+			raise IgnorableException("Failed to parse date '%s': %s" % (d, e))
 
 	def _decode_mime_header(self, hdr):
 		if hdr == None:
