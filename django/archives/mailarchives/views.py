@@ -115,6 +115,8 @@ def message(request, msgid):
 			if t['id'] == m.parentid:
 				parent = t
 				break
+	else:
+		parent = None
 	return render_to_response('message.html', {
 			'msg': m,
 			'threadstruct': threadstruct,
