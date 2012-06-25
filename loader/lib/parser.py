@@ -232,7 +232,7 @@ class ArchivesParser(object):
 			log.log("Failed to parse date '%s'" % d)
 			raise e
 
-	def decode_mime_header(self, hdr):
+	def _decode_mime_header(self, hdr):
 		if hdr == None:
 			return None
 
@@ -241,6 +241,12 @@ class ArchivesParser(object):
 		if charset:
 			return unicode(s, self.clean_charset(charset), errors='ignore')
 		return unicode(s, 'us-ascii', errors='ignore')
+
+	def decode_mime_header(self, hdr):
+		try:
+			return self._decode_mime_header(hdr)
+		except LookupError, e:
+			raise IgnorableException("Failed to decode header value '%s': %s" % (hdr, e))
 
 	def get_mandatory(self, fieldname):
 		try:
