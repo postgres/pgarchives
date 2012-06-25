@@ -9,6 +9,7 @@ class Message(models.Model):
 	date = models.DateTimeField(null=False)
 	messageid = models.TextField(null=False)
 	bodytxt = models.TextField(null=False)
+	parentid = models.IntegerField(null=False, blank=False)
 	has_attachment = models.BooleanField(null=False, default=False)
 
 	class Meta:

@@ -59,15 +59,19 @@ Description: {{a.contenttype}}
 {%endfor%}
 {%endif%}
 <hr/>
-{%if threadstruct|length > 1%}
-Messages in thread:<br/>
-<div class="threadlist">
+{%if parent%}
+<h3>In response to</h3>
 <ul>
-{%for m in threadstruct%}{%if m.open%}<ul>
-{%else%}{%if m.close%}</ul>
-{%else%}<li>{%if m.id = msg.id%}<b>{{m.printdate}}</b> from <b>{{m.mailfrom|nameonly}}</b>{%else%}<a href="/message-id/{{m.messageid}}">{{m.printdate}}</a> from {{m.mailfrom|nameonly}} {%if m.hasattachment%}<img src="/media/img/misc/attach.png" alt="Has attachment" title="Has attachment"/>{%endif%}{%endif%}</li>{%endif%}{%endif%}{%endfor%}
+<li><a href="/message-id/{{parent.messageid}}">{{parent.printdate}}</a> from {{parent.mailfrom|nameonly}}</a></li>
 </ul>
-</div>
+{%endif%}
+{%if responses %}
+<h3>Responses</h3>
+<ul>
+{%for m in responses%}
+<li><a href="/message-id/{{m.messageid}}">{{m.printdate}}</a> from {{m.mailfrom|nameonly}}</a></li>
+{%endfor%}
+</ul>
 {%endif%}
 
 </div>

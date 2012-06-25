@@ -103,38 +103,23 @@ SELECT id,_from,subject,date,messageid,has_attachment,parentid,parentpath FROM t
 """, {'threadid': threadid})
 	lastpath = []
 	for id,_from,subject,date,messageid,has_attachment,parentid,parentpath in curs.fetchall():
-		if lastpath != parentpath:
-			# We have a previous path, so we need to emit one or more
-			# close nodes. We start by finding the longest common path
-			# between the two.
-			common_path = []
-			for i in range(0, min(len(lastpath), len(parentpath))):
-				if lastpath[i] == parentpath[i]:
-					common_path.append(lastpath[i])
-				else:
-					break
-
-			# Need to close as many nodes as the difference in length between
-			# the previous path and the common path.
-			for x in range(0, len(lastpath)-len(common_path)):
-				yield {'close':1}
-
-			# We never need to open more than one node
-			if len(parentpath) - len(common_path) != 1:
-				raise Exception("Invalid paths. Last path %s, new path %s" % (lastpath, common_path))
-			yield {'open':1}
-			lastpath = parentpath
 		yield {'id':id, 'mailfrom':_from, 'subject': subject, 'printdate': date.strftime("%Y-%m-%d %H:%M:%S"), 'messageid': messageid, 'hasattachment': has_attachment, 'parentid': parentid, 'indent': "&nbsp;" * len(parentpath)}
-	# At the end we have a number of close tags to export
-	for x in range(0,len(lastpath)):
-		yield {'close':1}
 
 def message(request, msgid):
 	m = get_object_or_404(Message, messageid=msgid)
 	lists = List.objects.extra(where=["listid IN (SELECT listid FROM list_threads WHERE threadid=%s)" % m.threadid]).order_by('listname')
+	threadstruct = list(_build_thread_structure(m.threadid))
+	responses = [t for t in threadstruct if t['parentid']==m.id]
+	if m.parentid:
+		for t in threadstruct:
+			if t['id'] == m.parentid:
+				parent = t
+				break
 	return render_to_response('message.html', {
 			'msg': m,
-			'threadstruct': list(_build_thread_structure(m.threadid)),
+			'threadstruct': threadstruct,
+			'responses': responses,
+			'parent': parent,
 			'lists': lists,
 			})
 
