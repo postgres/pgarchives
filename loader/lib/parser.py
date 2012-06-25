@@ -143,16 +143,21 @@ class ArchivesParser(object):
 	def get_attachments(self):
 		self.recursive_get_attachments(self.msg)
 
+	def _clean_filename_encoding(self, filename):
+		# Anything that's not UTF8, we just get rid of. We can live with
+		# filenames slightly mangled in this case.
+		return unicode(filename, 'utf-8', errors='ignore')
+
 	def _extract_filename(self, container):
 		# Try to get the filename for an attachment in the container.
 		# If the standard library can figure one out, use that one.
 		f = container.get_filename()
-		if f: return f
+		if f: return self._clean_filename_encoding(f)
 
 		# Failing that, some mailers set Content-Description to the
 		# filename
 		if container.has_key('Content-Description'):
-			return container['Content-Description']
+			return self._clean_filename_encoding(container['Content-Description'])
 		return None
 
 	def recursive_get_attachments(self, container):
