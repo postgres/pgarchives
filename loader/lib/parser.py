@@ -197,7 +197,7 @@ class ArchivesParser(object):
 			if ignorebroken:
 				log.status("Could not parse messageid '%s', ignoring it" % messageid)
 				return None
-			raise Exception("Could not parse message id '%s'" % messageid)
+			raise IgnorableException("Could not parse message id '%s'" % messageid)
 		return m.groups(1)[0]
 
 #	_date_multi_re = re.compile(' \((\w+\s\w+(\s+\w+)*|)\)$')
