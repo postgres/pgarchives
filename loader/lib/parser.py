@@ -4,6 +4,7 @@ import dateutil.parser
 
 from email.parser import Parser
 from email.header import decode_header
+from email.errors import HeaderParseError
 from HTMLParser import HTMLParser
 import tidy
 import StringIO
@@ -251,11 +252,17 @@ class ArchivesParser(object):
 		if hdr == None:
 			return None
 
-		return " ".join([unicode(s, charset and self.clean_charset(charset) or 'us-ascii', errors='ignore') for s,charset in decode_header(hdr)])
-		(s, charset) = decode_header(hdr)[0]
-		if charset:
-			return unicode(s, self.clean_charset(charset), errors='ignore')
-		return unicode(s, 'us-ascii', errors='ignore')
+		try:
+			return " ".join([unicode(s, charset and self.clean_charset(charset) or 'us-ascii', errors='ignore') for s,charset in decode_header(hdr)])
+			(s, charset) = decode_header(hdr)[0]
+			if charset:
+				return unicode(s, self.clean_charset(charset), errors='ignore')
+			return unicode(s, 'us-ascii', errors='ignore')
+		except HeaderParseError, e:
+			# Parser error is typically someone specifying an encoding,
+			# but then not actually using that encoding. We'll do the best
+			# we can, which is cut it down to ascii and ignore errors
+			return unicode(hdr, 'us-ascii', errors='ignore')
 
 	def decode_mime_header(self, hdr):
 		try:
