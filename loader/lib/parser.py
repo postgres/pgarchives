@@ -5,7 +5,7 @@ import dateutil.parser
 from email.parser import Parser
 from email.header import decode_header
 from email.errors import HeaderParseError
-from HTMLParser import HTMLParser
+from HTMLParser import HTMLParser, HTMLParseError
 import tidy
 import StringIO
 
@@ -116,7 +116,7 @@ class ArchivesParser(object):
 		b = self.recursive_first_plaintext(self.msg, True)
 		if b:
 			b = self.html_clean(b)
-			return b
+			if b: return b
 
 		raise IgnorableException("Don't know how to read the body from %s" % self.msgid)
 
@@ -288,9 +288,14 @@ class ArchivesParser(object):
 		# First we pass it through tidy
 		html = unicode(str(tidy.parseString(html.encode('utf8'), drop_proprietary_attributes=1, alt_text='',hide_comments=1,output_xhtml=1,show_body_only=1,clean=1,char_encoding='utf8')), 'utf8')
 
-		cleaner = HTMLCleaner()
-		cleaner.feed(html)
-		return cleaner.get_text()
+		try:
+			cleaner = HTMLCleaner()
+			cleaner.feed(html)
+			return cleaner.get_text()
+		except HTMLParseError, e:
+			# Failed to parse the html, thus failed to clean it. so we must
+			# give up...
+			return None
 
 
 class HTMLCleaner(HTMLParser):
