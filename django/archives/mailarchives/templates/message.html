@@ -62,14 +62,14 @@ Description: {{a.contenttype}}
 {%if parent%}
 <h3>In response to</h3>
 <ul>
-<li><a href="/message-id/{{parent.messageid}}">{{parent.printdate}}</a> from {{parent.mailfrom|nameonly}}</a></li>
+<li><a href="/message-id/{{parent.messageid}}">{{parent.subject}}</a> at {{parent.printdate}} from {{parent.mailfrom|nameonly}}</a></li>
 </ul>
 {%endif%}
 {%if responses %}
 <h3>Responses</h3>
 <ul>
 {%for m in responses%}
-<li><a href="/message-id/{{m.messageid}}">{{m.printdate}}</a> from {{m.mailfrom|nameonly}}</a></li>
+<li><a href="/message-id/{{m.messageid}}">{{m.subject}}</a> at {{m.printdate}} from {{m.mailfrom|nameonly}}</a></li>
 {%endfor%}
 </ul>
 {%endif%}
