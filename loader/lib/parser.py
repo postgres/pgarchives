@@ -63,6 +63,9 @@ class ArchivesParser(object):
 			# -I is a special logical version, but should be the
 			# same charset
 			return 'iso-8859-8'
+		if charset.lower() == 'iso-850':
+			# Strange spelling of cp850 (windows charset)
+			return 'cp850'
 		return charset
 
 	def get_payload_as_unicode(self, msg):
