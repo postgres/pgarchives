@@ -166,6 +166,12 @@ class ArchivesParser(object):
 	def recursive_get_attachments(self, container):
 		if container.get_content_type() == 'multipart/mixed':
 			# Multipart - worth scanning into
+			if not container.is_multipart():
+				# Wow, this is broken. It's multipart/mixed, but doesn't
+				# contain multiple parts.
+				# Since we're just looking for attachments, let's just
+				# ignore it...
+				return
 			for p in container.get_payload():
 				if p.get_params() == None:
 					continue
