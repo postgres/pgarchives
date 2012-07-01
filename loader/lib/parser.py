@@ -57,7 +57,7 @@ class ArchivesParser(object):
 			# Special case where we don't know... We'll assume
 			# us-ascii and use replacements
 			return 'us-ascii'
-		if lcharset == '0' or lcharset == 'x-user-defined':
+		if lcharset == '0' or lcharset == 'x-user-defined' or lcharset == '_autodetect_all':
 			# Seriously broken charset definitions, map to us-ascii
 			# and throw away the rest with replacements
 			return 'us-ascii'
@@ -77,6 +77,8 @@ class ArchivesParser(object):
 			return 'iso-8859-1'
 		if lcharset == 'iso885915':
 			return 'iso-8859-15'
+		if lcharset == 'iso-latin-2':
+			return 'iso-8859-2'
 		if lcharset == 'iso-850':
 			# Strange spelling of cp850 (windows charset)
 			return 'cp850'
@@ -89,6 +91,13 @@ class ArchivesParser(object):
 			return 'iso-8859-1'
 		if lcharset == 'x-windows-949':
 			return 'ms949'
+		if lcharset == 'pt_pt':
+			# This is a locale, and not a charset, but most likely it's this one
+			return 'iso-8859-1'
+		if lcharset == 'tscii':
+			# No support for this charset :S Map it down to ascii
+			# and throw away all the rest. sucks, but we have to
+			return 'us-ascii'
 		return charset
 
 	def get_payload_as_unicode(self, msg):
