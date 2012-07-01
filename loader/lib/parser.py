@@ -159,6 +159,12 @@ class ArchivesParser(object):
 		self.recursive_get_attachments(self.msg)
 
 	def _clean_filename_encoding(self, filename):
+		# Clean a filenames encoding and return it as a unicode string
+
+		# If it's already unicode, just return it
+		if isinstance(filename, unicode):
+			return filename
+
 		# Anything that's not UTF8, we just get rid of. We can live with
 		# filenames slightly mangled in this case.
 		return unicode(filename, 'utf-8', errors='ignore')
