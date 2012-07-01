@@ -15,6 +15,7 @@ CREATE TABLE messages (
 );
 CREATE INDEX idx_messages_threadid ON messages(threadid);
 CREATE UNIQUE INDEX idx_messages_msgid ON messages(messageid);
+CREATE INDEX idx_messages_date ON messages(date);
 
 CREATE SEQUENCE threadid_seq;
 
