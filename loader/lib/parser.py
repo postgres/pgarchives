@@ -218,7 +218,7 @@ class ArchivesParser(object):
 #	_date_multi_re = re.compile(' \((\w+\s\w+(\s+\w+)*|)\)$')
 	# Now using [^\s] instead of \w, to work with japanese chars
 	_date_multi_re = re.compile(' \(([^\s]+\s[^\s]+(\s+[^\s]+)*|)\)$')
-	_date_multi_re2 = re.compile(' (\+\d{4}) \([^)]+\)$')
+	_date_multi_re2 = re.compile(' ([\+-]\d{4}) \([^)]+\)$')
 	def forgiving_date_decode(self, d):
 		# We have a number of dates in the format
 		# "<full datespace> +0200 (MET DST)"
