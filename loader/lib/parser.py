@@ -252,7 +252,7 @@ class ArchivesParser(object):
 		if d.endswith('-7700 (EST)'):
 			d = d.replace('-7700 (EST)', 'EST')
 		if d.endswith('+-4-30'):
-			d = d.replace('+04-30', '+0430')
+			d = d.replace('+-4-30', '+0430')
 		if d.endswith('+1.00'):
 			d = d.replace('+1.00', '+0100')
 		if d.endswith('+-100'):
