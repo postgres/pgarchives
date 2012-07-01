@@ -52,7 +52,7 @@ class ArchivesParser(object):
 
 
 	def clean_charset(self, charset):
-		if charset.lower() == 'unknown-8bit':
+		if charset.lower() == 'unknown-8bit' or charset.lower() == 'x-unknown':
 			# Special case where we don't know... We'll assume
 			# us-ascii and use replacements
 			return 'us-ascii'
