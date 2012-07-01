@@ -239,7 +239,7 @@ class ArchivesParser(object):
 			d = self._date_multi_re2.sub(' \\1', d)
 
 		try:
-			dp = dateutil.parser.parse(d)
+			dp = dateutil.parser.parse(d, fuzzy=True)
 
 			# Some offsets are >16 hours, which postgresql will not
 			# (for good reasons) accept
