@@ -279,6 +279,8 @@ class ArchivesParser(object):
 			return self._decode_mime_header(hdr)
 		except LookupError, e:
 			raise IgnorableException("Failed to decode header value '%s': %s" % (hdr, e))
+		except ValueError, ve:
+			raise IgnorableException("Failed to decode header value '%s': %s" % (hdr, ve))
 
 	def get_mandatory(self, fieldname):
 		try:
