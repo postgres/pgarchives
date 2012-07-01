@@ -82,12 +82,12 @@ class ArchivesParser(object):
 			return 'cp850'
 		if lcharset == 'koi8r':
 			return 'koi8-r'
-		if lcharset = 'cp 1252':
+		if lcharset == 'cp 1252':
 			return 'cp1252'
-		if lcharset = 'iso-8859-1,iso-8859-2':
+		if lcharset == 'iso-8859-1,iso-8859-2':
 			# Why did this show up more than once?!
 			return 'iso-8859-1'
-		if lcharset = 'x-windows-949':
+		if lcharset == 'x-windows-949':
 			return 'ms949'
 		return charset
 
