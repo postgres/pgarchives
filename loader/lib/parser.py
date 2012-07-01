@@ -94,6 +94,10 @@ class ArchivesParser(object):
 		if lcharset == 'pt_pt':
 			# This is a locale, and not a charset, but most likely it's this one
 			return 'iso-8859-1'
+		if lcharset == 'macintosh':
+			return 'mac_roman'
+		if lcharset == 'cn-big5':
+			return 'big5'
 		if lcharset == 'tscii':
 			# No support for this charset :S Map it down to ascii
 			# and throw away all the rest. sucks, but we have to
