@@ -53,7 +53,7 @@ class ArchivesParser(object):
 
 	def clean_charset(self, charset):
 		lcharset = charset.lower()
-		if lcharset == 'unknown-8bit' or lcharset == 'x-unknown':
+		if lcharset == 'unknown-8bit' or lcharset == 'x-unknown' or lcharset == 'x-user-defined':
 			# Special case where we don't know... We'll assume
 			# us-ascii and use replacements
 			return 'us-ascii'
