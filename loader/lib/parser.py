@@ -75,9 +75,20 @@ class ArchivesParser(object):
 		if lcharset == 'iso-88-59-1' or lcharset == 'iso-8858-1':
 			# Strange way of saying 8859....
 			return 'iso-8859-1'
+		if lcharset == 'iso885915':
+			return 'iso-8859-15'
 		if lcharset == 'iso-850':
 			# Strange spelling of cp850 (windows charset)
 			return 'cp850'
+		if lcharset == 'koi8r':
+			return 'koi8-r'
+		if lcharset = 'cp 1252':
+			return 'cp1252'
+		if lcharset = 'iso-8859-1,iso-8859-2':
+			# Why did this show up more than once?!
+			return 'iso-8859-1'
+		if lcharset = 'x-windows-949':
+			return 'ms949'
 		return charset
 
 	def get_payload_as_unicode(self, msg):
