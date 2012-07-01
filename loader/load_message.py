@@ -21,7 +21,7 @@ def log_failed_message(listid, srctype, src, msg, err):
 		msgid = msg.msgid
 	except:
 		msgid = "<unknown>"
-	print "Failed to load message (msgid %s) from %s, spec %s: %s" % (msgid.encode('us-ascii', 'replace'), srctype, src, unicode(err).encode('us-ascii', 'replace'))
+	print "Failed to load message (msgid %s) from %s, spec %s: %s" % (msgid.encode('us-ascii', 'replace'), srctype, src, unicode(str(err), 'us-ascii', 'replace'))
 
 	# We also put the data in the db. This happens in the main transaction
 	# so if the whole script dies, it goes away...
@@ -30,7 +30,7 @@ def log_failed_message(listid, srctype, src, msg, err):
 			'msgid': msgid,
 			'srctype': srctype,
 			'src': src,
-			'err': unicode(err),
+			'err': unicode(str(err), 'us-ascii', 'replace'),
 			})
 
 
