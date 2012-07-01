@@ -251,12 +251,20 @@ class ArchivesParser(object):
 		# Strange timezones requiring manual adjustments
 		if d.endswith('-7700 (EST)'):
 			d = d.replace('-7700 (EST)', 'EST')
+		if d.endswith('+6700 (EST)'):
+			d = d.replace('+6700 (EST)', 'EST')
 		if d.endswith('+-4-30'):
 			d = d.replace('+-4-30', '+0430')
 		if d.endswith('+1.00'):
 			d = d.replace('+1.00', '+0100')
 		if d.endswith('+-100'):
 			d = d.replace('+-100', '+0100')
+		if d.endswith('+500'):
+			d = d.replace('+500', '0500')
+		if d.endswith('Mexico/General'):
+			d = d.replace('Mexico/General','CDT')
+		if d.endswith('Pacific Daylight Time'):
+			d = d.replace('Pacific Daylight Time', 'PDT')
 
 		if self._date_multiminus_re.search(d):
 			d = self._date_multiminus_re.sub(' \\1', d)
