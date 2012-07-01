@@ -20,7 +20,7 @@ class ArchivesParser(object):
 		self.msg = self.parser.parse(stream)
 
 	def analyze(self):
-		self.msgid = self.clean_messageid(self.get_mandatory('Message-ID'))
+		self.msgid = self.clean_messageid(self.decode_mime_header(self.get_mandatory('Message-ID')))
 		self._from = self.decode_mime_header(self.get_mandatory('From'))
 		self.to = self.decode_mime_header(self.get_optional('To'))
 		self.cc = self.decode_mime_header(self.get_optional('CC'))
@@ -253,6 +253,12 @@ class ArchivesParser(object):
 		if hdr == None:
 			return None
 
+		# Per http://bugs.python.org/issue504152 (and lots of testing), it seems
+		# we must get rid of the sequence \n\t at least in the header. If we
+		# do this *before* doing any MIME decoding, we should be safe against
+		# anybody *actually* putting that sequence in the header (since we
+		# won't match the encoded contents)
+		hdr = hdr.replace("\n\t","")
 		try:
 			return " ".join([unicode(s, charset and self.clean_charset(charset) or 'us-ascii', errors='ignore') for s,charset in decode_header(hdr)])
 			(s, charset) = decode_header(hdr)[0]
