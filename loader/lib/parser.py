@@ -246,7 +246,22 @@ class ArchivesParser(object):
 	# Now using [^\s] instead of \w, to work with japanese chars
 	_date_multi_re = re.compile(' \(([^\s]+\s[^\s]+(\s+[^\s]+)*|)\)$')
 	_date_multi_re2 = re.compile(' ([\+-]\d{4}) \([^)]+\)$')
+	_date_multiminus_re = re.compile(' -(-\d+)$')
 	def forgiving_date_decode(self, d):
+		# Strange timezones requiring manual adjustments
+		if d.endswith('-7700 (EST)'):
+			d = d.replace('-7700 (EST)', 'EST')
+		if d.endswith('+-4-30'):
+			d = d.replace('+04-30', '+0430')
+		if d.endswith('+1.00'):
+			d = d.replace('+1.00', '+0100')
+		if d.endswith('+-100'):
+			d = d.replace('+-100', '+0100')
+
+		if self._date_multiminus_re.search(d):
+			d = self._date_multiminus_re.sub(' \\1', d)
+
+
 		# We have a number of dates in the format
 		# "<full datespace> +0200 (MET DST)"
 		# or similar. The problem coming from the space within the
