@@ -65,6 +65,9 @@ class ArchivesParser(object):
 			# -I is a special logical version, but should be the
 			# same charset
 			return 'iso-8859-8'
+		if lcharset == 'windows-874':
+			# This is an alias for iso-8859-11
+			return 'iso-8859-11'
 		if lcharset == 'iso-88-59-1' or lcharset == 'iso-8858-1':
 			# Strange way of saying 8859....
 			return 'iso-8859-1'
