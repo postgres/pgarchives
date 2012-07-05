@@ -1,0 +1,49 @@
+{%extends "base.html"%}
+{%block title%}{{msg.subject}}{%endblock%}
+{%load pgfilters%}
+{%block extrahead%}
+<script language="javascript">
+/* This should be moved into a common JS file */
+
+function load() {
+   if (document.location.href.indexOf('#') < 0) {
+      document.location.href = document.location.href + '#' + '{{msg.messageid}}';
+   }
+}
+window.onload = load;
+</script>
+<style>
+div.msgwrap {
+   border: 2px solid blue;
+   margin-bottom: 10px;
+}
+</style>
+{%endblock%}
+{%block layoutblock%}
+<h2>{{msg.subject}}</h2>
+{%for m in allmsg %}
+<div class="msgwrap">
+<a name="{{msg.messageid}}"></a>
+<strong>From:</strong> {{m.mailfrom|hidemail}}<br/>
+<strong>To:</strong> {{m.to|hidemail}}<br/>
+{%if msg.cc%}<strong>Cc:</strong> {{m.cc|hidemail}}<br/>{%endif%}
+<strong>Subject:</strong> {{m.subject}}<br/>
+<strong>Date:</strong> {{m.printdate}}<br/>
+<strong>Message-ID:</strong> <a href="http://archives.postgresql.org/message-id/{{m.messageid}}">{{m.messageid}}</a><br/>
+<hr/>
+<div class="bodywrapper">
+<pre>{{m.bodytxt|urlize}}</pre>
+
+{%if m.has_attachment%}
+{%for a in m.attachment_set.all%}
+<div>
+<b>Attachment: <a href="/attachment/{{a.id}}/{{a.filename}}">{{a.filename}}</a></b><br/>
+Description: {{a.contenttype}}
+</div>
+{%endfor%}
+{%endif%}
+</div>
+
+</div>
+{%endfor%}
+{%endblock%}

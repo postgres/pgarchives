@@ -125,6 +125,16 @@ def message(request, msgid):
 			'lists': lists,
 			})
 
+def message_flat(request, msgid):
+	msg = get_object_or_404(Message, messageid=msgid)
+	allmsg = Message.objects.filter(threadid=msg.threadid).order_by('date')
+	# XXX: need to get the complete list of lists!
+
+	return render_to_response('message_flat.html', {
+			'msg': msg,
+			'allmsg': allmsg,
+			})
+
 def testview(request, seqid):
 	m = Message.objects.get(pk=seqid)
 	try:
