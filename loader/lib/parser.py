@@ -165,7 +165,11 @@ class ArchivesParser(object):
 		raise IgnorableException("Don't know how to read the body from %s" % self.msgid)
 
 	def recursive_first_plaintext(self, container, html_instead=False):
-		for p in container.get_payload():
+		pl = container.get_payload()
+		if isinstance(pl, str):
+			# This was not a multipart, but it leaked... Give up!
+			return None
+		for p in pl:
 			if p.get_params() == None:
 				# MIME multipart/mixed, but no MIME type on the part
 				log.status("Found multipart/mixed in message '%s', but no MIME type on part. Trying text/plain." % self.msgid)
