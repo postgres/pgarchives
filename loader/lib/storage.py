@@ -31,10 +31,12 @@ class ArchivesParserStorage(ArchivesParser):
 						'threadid': r[0][0],
 						'listid': listid,
 						})
+				opstatus.tagged += 1
+			else:
+				opstatus.dupes += 1
 
 			#FIXME: option to overwrite existing message!
 			log.status("Message %s already stored" % self.msgid)
-			opstatus.dupes += 1
 			return
 
 		# Resolve own thread

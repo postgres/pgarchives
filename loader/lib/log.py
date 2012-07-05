@@ -22,10 +22,11 @@ class OpStatus(object):
 	def __init__(self):
 		self.stored = 0
 		self.dupes = 0
+		self.tagged = 0
 		self.failed = 0
 
 	def print_status(self):
-		print "%s stored, %s dupes, %s failed" % (self.stored, self.dupes, self.failed)
+		print "%s stored, %s new-list tagged, %s dupes, %s failed" % (self.stored, self.tagged, self.dupes, self.failed)
 
 
 log = Log()
