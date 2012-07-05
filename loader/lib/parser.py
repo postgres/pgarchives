@@ -303,7 +303,7 @@ class ArchivesParser(object):
 
 			# Some offsets are >16 hours, which postgresql will not
 			# (for good reasons) accept
-			if dp.utcoffset() and dp.utcoffset().seconds > 60 * 60 * 16 - 1 and dp.utcoffset().days >= 0:
+			if dp.utcoffset() and abs(dp.utcoffset().days * (24*60*60) + dp.utcoffset().seconds) > 60*60*16-1:
 				# Convert it to a UTC timestamp using Python. It will give
 				# us the right time, but the wrong timezone. Should be
 				# enough...
