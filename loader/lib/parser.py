@@ -127,6 +127,15 @@ class ArchivesParser(object):
 				return unicode(b, errors='ignore')
 
 	def get_body(self):
+		b = self._get_body()
+		if b:
+			# Python bug 9133, allows unicode surrogate pairs - which PostgreSQL will
+			# later reject..
+			if b.find(u'\udbff\n\udef8'):
+				b = b.replace(u'\udbff\n\udef8', '')
+		return b
+
+	def _get_body(self):
 		# This is where the magic happens - try to figure out what the body
 		# of this message should render as.
 
