@@ -95,7 +95,7 @@ class ArchivesParserStorage(ArchivesParser):
 						'oldthreadids': list(mergethreads),
 						})
 				# Insert any lists that were tagged on the merged threads
-				curs.execute("INSERT INTO list_threads (threadid, listid) SELECT %(threadid)s,listid FROM list_threads lt2 WHERE lt2.threadid=ANY(%(oldthreadids)s) AND listid NOT IN (SELECT listid FROM list_threads lt3 WHERE lt3.threadid=%(threadid)s)", {
+				curs.execute("INSERT INTO list_threads (threadid, listid) SELECT DISTINCT %(threadid)s,listid FROM list_threads lt2 WHERE lt2.threadid=ANY(%(oldthreadids)s) AND listid NOT IN (SELECT listid FROM list_threads lt3 WHERE lt3.threadid=%(threadid)s)", {
 						'threadid': self.threadid,
 						'oldthreadids': list(mergethreads),
 						})
