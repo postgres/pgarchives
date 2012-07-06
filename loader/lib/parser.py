@@ -101,7 +101,7 @@ class ArchivesParser(object):
 			return 'mac_roman'
 		if lcharset == 'cn-big5':
 			return 'big5'
-		if lcharset == 'x-unicode-2-0-UTF-7':
+		if lcharset == 'x-unicode-2-0-utf-7':
 			return 'utf-7'
 		if lcharset == 'tscii':
 			# No support for this charset :S Map it down to ascii
