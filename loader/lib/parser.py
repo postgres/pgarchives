@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 import datetime
 import dateutil.parser
@@ -106,9 +105,6 @@ class ArchivesParser(object):
 			return 'ms949'
 		if lcharset == 'pt_pt' or lcharset == 'de_latin' or lcharset == 'de':
 			# This is a locale, and not a charset, but most likely it's this one
-			return 'iso-8859-1'
-		if lcharset == 'ýso-8859-1':
-			# Nice mis-encoding. But shows up for several mails...
 			return 'iso-8859-1'
 		if lcharset == 'iso-8858-15':
 			# How is this a *common* mistake?
