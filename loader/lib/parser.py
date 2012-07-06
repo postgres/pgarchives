@@ -371,10 +371,6 @@ class ArchivesParser(object):
 		hdr = hdr.replace("\n\t","")
 		try:
 			return " ".join([unicode(s, charset and self.clean_charset(charset) or 'us-ascii', errors='ignore') for s,charset in decode_header(hdr)])
-			(s, charset) = decode_header(hdr)[0]
-			if charset:
-				return unicode(s, self.clean_charset(charset), errors='ignore')
-			return unicode(s, 'us-ascii', errors='ignore')
 		except HeaderParseError, e:
 			# Parser error is typically someone specifying an encoding,
 			# but then not actually using that encoding. We'll do the best
