@@ -325,6 +325,8 @@ class ArchivesParser(object):
 			d = d.replace('-Juin-','-Jun-')
 		if d.find('-Juil-') > 0:
 			d = d.replace('-Juil-','-Jul-')
+		if d.find(' 0 (GMT)'):
+			d = d.replace(' +0000')
 
 		if self._date_multiminus_re.search(d):
 			d = self._date_multiminus_re.sub(' \\1', d)
