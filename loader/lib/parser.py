@@ -315,6 +315,8 @@ class ArchivesParser(object):
 			d = d.replace('-800', '-0800')
 		if d.endswith('+05-30'):
 			d = d.replace('+05-30', '+0530')
+		if d.endswith('+0-900'):
+			d = d.replace('+0-900', '-0900')
 		if d.endswith('Mexico/General'):
 			d = d.replace('Mexico/General','CDT')
 		if d.endswith('Pacific Daylight Time'):
