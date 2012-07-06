@@ -57,7 +57,7 @@ class ArchivesParser(object):
 			# Special case where we don't know... We'll assume
 			# us-ascii and use replacements
 			return 'us-ascii'
-		if lcharset == '0' or lcharset == 'x-user-defined' or lcharset == '_autodetect_all':
+		if lcharset == '0' or lcharset == 'x-user-defined' or lcharset == '_autodetect_all' or lcharset == 'default_charset':
 			# Seriously broken charset definitions, map to us-ascii
 			# and throw away the rest with replacements
 			return 'us-ascii'
@@ -91,13 +91,18 @@ class ArchivesParser(object):
 			return 'iso-8859-1'
 		if lcharset == 'x-windows-949':
 			return 'ms949'
-		if lcharset == 'pt_pt':
+		if lcharset == 'pt_pt' or lcharset == 'de_latin' or lcharset == 'de':
 			# This is a locale, and not a charset, but most likely it's this one
 			return 'iso-8859-1'
+		if lcharset == 'iso-8858-15':
+			# How is this a *common* mistake?
+			return 'iso-8859-15'
 		if lcharset == 'macintosh':
 			return 'mac_roman'
 		if lcharset == 'cn-big5':
 			return 'big5'
+		if lcharset == 'x-unicode-2-0-UTF-7':
+			return 'utf-7'
 		if lcharset == 'tscii':
 			# No support for this charset :S Map it down to ascii
 			# and throw away all the rest. sucks, but we have to
