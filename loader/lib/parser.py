@@ -291,11 +291,25 @@ class ArchivesParser(object):
 		if d.endswith('+-100'):
 			d = d.replace('+-100', '+0100')
 		if d.endswith('+500'):
-			d = d.replace('+500', '0500')
+			d = d.replace('+500', '+0500')
+		if d.endswith('-500'):
+			d = d.replace('-500', '-0500')
+		if d.endswith('-700'):
+			d = d.replace('-700', '-0700')
+		if d.endswith('-800'):
+			d = d.replace('-800', '-0800')
+		if d.endswith('+05-30'):
+			d = d.replace('+05-30', '+0530')
 		if d.endswith('Mexico/General'):
 			d = d.replace('Mexico/General','CDT')
 		if d.endswith('Pacific Daylight Time'):
 			d = d.replace('Pacific Daylight Time', 'PDT')
+		if d.endswith(' ZE2'):
+			d = d.replace(' ZE2',' +0200')
+		if d.find('-Juin-') > 0:
+			d = d.replace('-Juin-','-Jun-')
+		if d.find('-Juil-') > 0:
+			d = d.replace('-Juil-','-Jul-')
 
 		if self._date_multiminus_re.search(d):
 			d = self._date_multiminus_re.sub(' \\1', d)
