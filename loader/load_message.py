@@ -41,6 +41,7 @@ if __name__ == "__main__":
 	optparser.add_option('-m', '--mbox', dest='mbox', help='Load all messages in mbox')
 	optparser.add_option('-i', '--interactive', dest='interactive', action='store_true', help='Prompt after each message')
 	optparser.add_option('-v', '--verbose', dest='verbose', action='store_true', help='Verbose output')
+	optparser.add_option('--force-date', dest='force_date', help='Override date (used for dates that can\'t be parsed)')
 
 	(opt, args) = optparser.parse_args()
 
@@ -56,6 +57,11 @@ if __name__ == "__main__":
 
 	if opt.directory and opt.mbox:
 		print "Can't specify both directory and mbox!"
+		optparser.print_usage()
+		sys.exit(1)
+
+	if opt.force_date and (opt.directory or opt.mbox):
+		print "Can't use force_date with directory or mbox - only individual messages"
 		optparser.print_usage()
 		sys.exit(1)
 
@@ -125,7 +131,7 @@ if __name__ == "__main__":
 		ap = ArchivesParserStorage()
 		ap.parse(sys.stdin)
 		try:
-			ap.analyze()
+			ap.analyze(date_override=opt.force_date)
 		except IgnorableException, e:
 			log_failed_message(listid, "stdin","", ap, e)
 			conn.close()

@@ -19,13 +19,16 @@ class ArchivesParser(object):
 	def parse(self, stream):
 		self.msg = self.parser.parse(stream)
 
-	def analyze(self):
+	def analyze(self, date_override=None):
 		self.msgid = self.clean_messageid(self.decode_mime_header(self.get_mandatory('Message-ID')))
 		self._from = self.decode_mime_header(self.get_mandatory('From'))
 		self.to = self.decode_mime_header(self.get_optional('To'))
 		self.cc = self.decode_mime_header(self.get_optional('CC'))
 		self.subject = self.decode_mime_header(self.get_optional('Subject'))
-		self.date = self.forgiving_date_decode(self.decode_mime_header(self.get_mandatory('Date')))
+		if date_override:
+			self.date = self.forgiving_date_decode(date_override)
+		else:
+			self.date = self.forgiving_date_decode(self.decode_mime_header(self.get_mandatory('Date')))
 		self.bodytxt = self.get_body()
 		self.attachments = []
 		self.get_attachments()
