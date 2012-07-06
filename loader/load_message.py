@@ -42,6 +42,7 @@ if __name__ == "__main__":
 	optparser.add_option('-i', '--interactive', dest='interactive', action='store_true', help='Prompt after each message')
 	optparser.add_option('-v', '--verbose', dest='verbose', action='store_true', help='Verbose output')
 	optparser.add_option('--force-date', dest='force_date', help='Override date (used for dates that can\'t be parsed)')
+	optparser.add_option('--filter-msgid', dest='filter_msgid', help='Only process message with given msgid')
 
 	(opt, args) = optparser.parse_args()
 
@@ -60,8 +61,13 @@ if __name__ == "__main__":
 		optparser.print_usage()
 		sys.exit(1)
 
-	if opt.force_date and (opt.directory or opt.mbox):
+	if opt.force_date and (opt.directory or opt.mbox) and not opt.filter_msgid:
 		print "Can't use force_date with directory or mbox - only individual messages"
+		optparser.print_usage()
+		sys.exit(1)
+
+	if opt.filter_msgid and not (opt.directory or opt.mbox):
+		print "filter_msgid makes no sense without directory or mbox!"
 		optparser.print_usage()
 		sys.exit(1)
 
@@ -89,6 +95,8 @@ if __name__ == "__main__":
 			with open(os.path.join(opt.directory, x)) as f:
 				ap = ArchivesParserStorage()
 				ap.parse(f)
+				if opt.filter_msgid and not ap.is_msgid(opt.filter_msgid):
+					continue
 				try:
 					ap.analyze()
 				except IgnorableException, e:
@@ -115,6 +123,8 @@ if __name__ == "__main__":
 			msg = mboxparser.next()
 			if not msg: break
 			ap.parse(msg)
+			if opt.filter_msgid and not ap.is_msgid(opt.filter_msgid):
+				continue
 			try:
 				ap.analyze()
 			except IgnorableException, e:

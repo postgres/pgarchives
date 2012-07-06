@@ -19,6 +19,15 @@ class ArchivesParser(object):
 	def parse(self, stream):
 		self.msg = self.parser.parse(stream)
 
+	def is_msgid(self, msgid):
+		# Look for a specific messageid. This means we might parse it twice,
+		# but so be it. Any exception means we know it's not this one...
+		try:
+			if self.clean_messageid(self.decode_mime_header(self.get_mandatory('Message-ID'))) == msgid:
+				return True
+		except Exception, e:
+			return False
+
 	def analyze(self, date_override=None):
 		self.msgid = self.clean_messageid(self.decode_mime_header(self.get_mandatory('Message-ID')))
 		self._from = self.decode_mime_header(self.get_mandatory('From'))
