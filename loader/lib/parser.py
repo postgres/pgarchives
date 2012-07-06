@@ -86,7 +86,7 @@ class ArchivesParser(object):
 			return 'koi8-r'
 		if lcharset == 'cp 1252':
 			return 'cp1252'
-		if lcharset == 'iso-8859-1,iso-8859-2':
+		if lcharset == 'iso-8859-1,iso-8859-2' or lcharset == 'iso-8859-1:utf8:us-ascii':
 			# Why did this show up more than once?!
 			return 'iso-8859-1'
 		if lcharset == 'x-windows-949':
