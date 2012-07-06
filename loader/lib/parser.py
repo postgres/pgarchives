@@ -130,6 +130,8 @@ class ArchivesParser(object):
 			else:
 				# XXX: reasonable default?
 				return unicode(b, errors='ignore')
+		# Return None or empty string, depending on what we got back
+		return b
 
 	def get_body(self):
 		b = self._get_body()
@@ -143,11 +145,17 @@ class ArchivesParser(object):
 	def _get_body(self):
 		# This is where the magic happens - try to figure out what the body
 		# of this message should render as.
+		hasempty = False
 
 		# First see if this is a single-part message that we can just
 		# decode and go.
 		b = self.get_payload_as_unicode(self.msg)
 		if b: return b
+		if b == '':
+			# We found something, but it was empty. We'll keep looking as
+			# there might be something better available, but make a note
+			# that empty exists.
+			hasempty = True
 
 		# Ok, it's multipart. Find the first part that is text/plain,
 		# and use that one. Do this recursively, since we may have something
@@ -159,6 +167,8 @@ class ArchivesParser(object):
 		#   application/octet-stream (attachment)
 		b = self.recursive_first_plaintext(self.msg)
 		if b: return b
+		if b == '':
+			hasempty = True
 
 		# Couldn't find a plaintext. Look for the first HTML in that case.
 		# Fallback, but what can we do at this point...
@@ -166,7 +176,12 @@ class ArchivesParser(object):
 		if b:
 			b = self.html_clean(b)
 			if b: return b
+		if b == '':
+			hasempty = True
 
+		if hasempty:
+			log.status('Found empty body in %s' % self.msgid)
+			return ''
 		raise IgnorableException("Don't know how to read the body from %s" % self.msgid)
 
 	def recursive_first_plaintext(self, container, html_instead=False):
@@ -191,7 +206,7 @@ class ArchivesParser(object):
 				return self.get_payload_as_unicode(p)
 			if p.is_multipart():
 				b = self.recursive_first_plaintext(p, html_instead)
-				if b: return b
+				if b or b == '': return b
 
 		# Yikes, nothing here! Hopefully we'll find something when
 		# we continue looping at a higher level.
