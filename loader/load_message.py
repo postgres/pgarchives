@@ -98,7 +98,7 @@ if __name__ == "__main__":
 				if opt.filter_msgid and not ap.is_msgid(opt.filter_msgid):
 					continue
 				try:
-					ap.analyze()
+					ap.analyze(date_override=opt.force_date)
 				except IgnorableException, e:
 					log_failed_message(listid, "directory", os.path.join(opt.directory, x), ap, e)
 					opstatus.failed += 1
@@ -126,7 +126,7 @@ if __name__ == "__main__":
 			if opt.filter_msgid and not ap.is_msgid(opt.filter_msgid):
 				continue
 			try:
-				ap.analyze()
+				ap.analyze(date_override=opt.force_date)
 			except IgnorableException, e:
 				log_failed_message(listid, "mbox", opt.mbox, ap, e)
 				opstatus.failed += 1
