@@ -43,6 +43,7 @@ def scan_message(messageid, olddate, curs):
 		d = dateutil.parser.parse(ds)
 	except:
 		print "Could not parse date '%s', sorry." % ds
+		return
 
 	while True:
 		x = raw_input("Parsed this as date %s. Update? " % d)
