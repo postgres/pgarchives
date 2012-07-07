@@ -34,6 +34,10 @@ def scan_message(messageid, olddate, curs):
 		if m:
 			ds = m.group(1)
 			break
+		m = re.search(';\s*(.*)\s*\(envelope-from [^\)]+\)$', r)
+		if m:
+			ds = m.group(1)
+			break
 
 	if not ds:
 		print "Could not find date. Sorry."
