@@ -25,18 +25,25 @@ def scan_message(messageid, olddate, curs):
 	f.close()
 
 	# Can be either one of them, but we really don't care...
-	r = msg['Received']
-	m = re.search(';\s*(.*)$', r)
-	if not m:
+	ds = None
+	for k,r in msg.items():
+		if k != 'Received': continue
+
+		print "Trying on %s" % r
+		m = re.search(';\s*(.*)$', r)
+		if m:
+			ds = m.group(1)
+			break
+
+	if not ds:
 		print "Could not find date. Sorry."
 		return False
 	d = None
 	try:
-		d = dateutil.parser.parse(m.group(1))
+		d = dateutil.parser.parse(ds)
 	except:
-		print "Could not parse date '%s', sorry." % m.group(1)
+		print "Could not parse date '%s', sorry." % ds
 
-	print 
 	while True:
 		x = raw_input("Parsed this as date %s. Update? " % d)
 		if x.upper() == 'Y':
