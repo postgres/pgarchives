@@ -154,6 +154,8 @@ if __name__ == "__main__":
 			conn.close()
 			sys.exit(1)
 		ap.store(conn, listid)
+		if opstatus.stored:
+			log.log("Stored message with message-id %s" % ap.msgid)
 
 	conn.commit()
 	conn.close()
