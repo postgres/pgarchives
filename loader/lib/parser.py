@@ -157,7 +157,7 @@ class ArchivesParser(object):
 				b = b.replace(u'\udbff\n\udef8', '')
 
 		# Remove postgres specific mail footer - if it's there
-		m = _re_footer.match(b)
+		m = self._re_footer.match(b)
 		if m:
 			b = m.group(1)
 		return b
