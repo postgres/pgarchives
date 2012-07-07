@@ -75,7 +75,7 @@ if __name__ == "__main__":
 	log.set(opt.verbose)
 
 	cfg = ConfigParser()
-	cfg.read('load_message.ini')
+	cfg.read('%s/load_message.ini' % os.path.realpath(os.path.dirname(sys.argv[0])))
 	try:
 		connstr = cfg.get('db','connstr')
 	except:
