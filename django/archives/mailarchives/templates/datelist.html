@@ -11,7 +11,7 @@
 <h3>{{m.date.date}}</h3>
 <ul>
 {%endifchanged%}
-  <li><a href="/message-id/{{m.messageid}}">{{m.subject}}</a> {{m.mailfrom|nameonly}} ({{m.date.time|time:"H:i"}})</li>
+  <li><a href="/message-id/{{m.messageid}}">{{m.subject|default:"[No subject]"}}</a> {{m.mailfrom|nameonly}} ({{m.date.time|time:"H:i"}})</li>
 {%if forloop.last%}
 </ul>
 {%endif%}
