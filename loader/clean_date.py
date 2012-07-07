@@ -69,7 +69,7 @@ if __name__ == "__main__":
 	conn = psycopg2.connect(connstr)
 
 	curs = conn.cursor()
-	curs.execute("SELECT messageid, date FROM messages WHERE date>(CURRENT_TIMESTAMP+'1 day'::interval) OR date < '1996-01-01'")
+	curs.execute("SELECT messageid, date FROM messages WHERE date>(CURRENT_TIMESTAMP+'1 day'::interval) OR date < '1997-01-01'")
 	for messageid, date in curs.fetchall():
 		scan_message(messageid, date, curs)
 
