@@ -75,7 +75,7 @@ if __name__ == "__main__":
 	log.set(opt.verbose)
 
 	cfg = ConfigParser()
-	cfg.read('%s/arcives.ini' % os.path.realpath(os.path.dirname(sys.argv[0])))
+	cfg.read('%s/archives.ini' % os.path.realpath(os.path.dirname(sys.argv[0])))
 	try:
 		connstr = cfg.get('db','connstr')
 	except:
