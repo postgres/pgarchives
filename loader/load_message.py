@@ -155,8 +155,6 @@ if __name__ == "__main__":
 			sys.exit(1)
 		ap.store(conn, listid)
 
-	log.status("Committing...")
 	conn.commit()
-	log.status("Done.")
 	conn.close()
 	opstatus.print_status()
