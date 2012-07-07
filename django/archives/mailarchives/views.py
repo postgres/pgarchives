@@ -33,11 +33,14 @@ def render_datelist_from(request, l, d, title, to=None):
 
 	mlist = Message.objects.select_related().filter(datefilter).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('date')[:200]
 
-	return render_to_response('datelist.html', {
+	threads = set([m.threadid for m in mlist])
+	r = render_to_response('datelist.html', {
 			'list': l,
 			'messages': list(mlist),
 			'title': title,
 			})
+	r['X-pgthread'] = ":%s:" % (":".join([str(t) for t in threads]))
+	return r
 
 def render_datelist_to(request, l, d, title):
 	# Need to sort this backwards in the database to get the LIMIT applied
@@ -45,11 +48,14 @@ def render_datelist_to(request, l, d, title):
 	# the second sort safely in python since it's not a lot of items..
 	mlist = sorted(Message.objects.select_related().filter(date__lte=d).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('-date')[:200], key=lambda m: m.date)
 
-	return render_to_response('datelist.html', {
+	threads = set([m.threadid for m in mlist])
+	r = render_to_response('datelist.html', {
 			'list': l,
 			'messages': list(mlist),
 			'title': title,
 			})
+	r['X-pgthread'] = ":%s:" % (":".join([str(t) for t in threads]))
+	return r
 
 def datelistsince(request, listname, msgid):
 	l = get_object_or_404(List, listname=listname)
@@ -117,23 +123,27 @@ def message(request, msgid):
 				break
 	else:
 		parent = None
-	return render_to_response('message.html', {
+	r = render_to_response('message.html', {
 			'msg': m,
 			'threadstruct': threadstruct,
 			'responses': responses,
 			'parent': parent,
 			'lists': lists,
 			})
+	r['X-pgthread'] = ":%s:" % m.threadid
+	return r
 
 def message_flat(request, msgid):
 	msg = get_object_or_404(Message, messageid=msgid)
 	allmsg = Message.objects.filter(threadid=msg.threadid).order_by('date')
 	# XXX: need to get the complete list of lists!
 
-	return render_to_response('message_flat.html', {
+	r = render_to_response('message_flat.html', {
 			'msg': msg,
 			'allmsg': allmsg,
 			})
+	r['X-pgthread'] = ":%s:" % msg.threadid
+	return r
 
 def testview(request, seqid):
 	m = Message.objects.get(pk=seqid)
