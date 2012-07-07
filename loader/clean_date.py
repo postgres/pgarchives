@@ -17,7 +17,7 @@ import psycopg2
 
 def scan_message(messageid, olddate, curs):
 	u = "http://archives.postgresql.org/msgtxt.php?id=%s" % messageid
-	print "Scanning message at %s..." %u
+	print "Scanning message at %s (date reported as %s)..." % (u, olddate)
 
 	f = urlopen(u)
 	p = Parser()
