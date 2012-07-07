@@ -8,6 +8,7 @@ import os
 import sys
 
 from optparse import OptionParser
+from ConfigParser import ConfigParser
 
 import psycopg2
 
@@ -73,8 +74,14 @@ if __name__ == "__main__":
 
 	log.set(opt.verbose)
 
-	# Yay for hardcoding
-	conn = psycopg2.connect("dbname=archives")
+	cfg = ConfigParser()
+	cfg.read('load_message.ini')
+	try:
+		connstr = cfg.get('db','connstr')
+	except:
+		connstr = 'need_connstr'
+
+	conn = psycopg2.connect(connstr)
 
 	# Get the listid we're working on
 	curs = conn.cursor()
