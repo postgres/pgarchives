@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
+import sys
+from ConfigParser import ConfigParser
 import psycopg2
 import psycopg2.extras
 import urllib
@@ -54,8 +57,15 @@ def sync_listinfo(conn, objtype, tablename, attrmap, data):
 
 
 if __name__=="__main__":
+	cfg = ConfigParser()
+	cfg.read('%s/archives.ini' % os.path.realpath(os.path.dirname(sys.argv[0])))
+	try:
+		connstr = cfg.get('db','connstr')
+	except:
+		connstr = 'need_connstr'
+
 	psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
-	conn = psycopg2.connect("dbname=archives")
+	conn = psycopg2.connect(connstr)
 
 	u = urllib.urlopen("http://www.postgresql.org/community/lists/listinfo/")
 	obj = json.load(u)
