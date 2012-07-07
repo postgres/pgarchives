@@ -2,40 +2,79 @@
 # -*- coding: utf-8 -*-
 
 import psycopg2
+import psycopg2.extras
 import urllib
 import simplejson as json
+
+def sync_listinfo(conn, objtype, tablename, attrmap, data):
+	curs = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+	reversemap = dict((v,k) for k,v in attrmap.items())
+
+	curs.execute("SELECT %s FROM %s" % (",".join(attrmap.keys()), tablename))
+	dbdata = curs.fetchall()
+
+	# First look for all that's already in the db, and might need changing
+	for g in dbdata:
+		match = [x for x in data if x['id'] == g[reversemap['id']]]
+		if len(match) == 0:
+			# We never remove a group. Should we warn?
+			continue
+		else:
+			# Compare the contents. Assume keys are always present.
+			match = match[0]
+			changedattr = [a for a in attrmap.keys() if match[attrmap[a]] != g[a]]
+			if len(changedattr):
+				for a in changedattr:
+					print "%s %s changed %s from %s to %s" % (
+						objtype,
+						match['id'],
+						a,
+						g[a],
+						match[attrmap[a]])
+				transformed = dict([(reversemap[k],v) for k,v in match.items() if reversemap.has_key(k)])	
+				curs.execute("UPDATE %s SET %s WHERE %s=%%(%s)s" % (
+					tablename,
+					",".join(["%s=%%(%s)s" % (a,a) for a in changedattr]),
+					reversemap['id'],reversemap['id']
+					),
+							 transformed)
+
+	# Now look for everything that's not in the db (yet)
+	for d in data:
+		match = [x for x in dbdata if x[reversemap['id']] == d['id']]
+		if len(match) == 0:
+			print "Adding %s %s" % (objtype, d['name'])
+			transformed = dict([(reversemap[k],v) for k,v in d.items() if reversemap.has_key(k)])	
+			curs.execute("INSERT INTO %s (%s) VALUES (%s)" % (
+					tablename,
+					",".join(attrmap.keys()),
+					",".join(["%%(%s)s" % k for k in attrmap.keys()]),
+					),
+					transformed)
+
 
 if __name__=="__main__":
 	psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 	conn = psycopg2.connect("dbname=archives")
-	curs = conn.cursor()
 
 	u = urllib.urlopen("http://www.postgresql.org/community/lists/listinfo/")
 	obj = json.load(u)
 	u.close()
 
-	# XXX: need to fix group processing as well at some point
-	curs.execute("SELECT listid, listname FROM lists")
-	lists = curs.fetchall()
-	for id, name in lists:
-		thislist = [x for x in obj['lists'] if x['id'] == id]
-		if len(thislist) == 0:
-			# We never remove lists from the archives, even if the main
-			# db claims they shouldn't exist anymore.
-			# XXX: should it still be a warning?
-			continue
-		else:
-			# Compare contents of list
-			l = thislist[0]
-			if l['name'] != name:
-				print "Renaming list %s -> %s" % (name, l['name'])
-				curs.execute("UPDATE lists SET listname=%(name)s WHERE listid=%(id)s", l)
+	# Start by syncing groups
+	sync_listinfo(conn,
+				  "group",
+				  "listgroups",
+				  {'groupid':'id', 'groupname': 'name'},
+				  obj['groups'],
+				  )
 
-	for l in obj['lists']:
-		thislist = [x for x in lists if x[0] == l['id']]
-		if len(thislist) == 0:
-			print "Adding list %s" % l['name']
-			curs.execute("INSERT INTO lists (listid, listname) VALUES (%(id)s, %(name)s)",
-						 l)
+	# Now also do groups
+	sync_listinfo(conn,
+				  "list",
+				  "lists",
+				  {'listid':'id', 'listname': 'name', 'shortdesc':'shortdesc', 'description':'description', 'active':'active', 'groupid':'groupid'},
+				  obj['lists'],
+				  )
 
 	conn.commit()

@@ -28,10 +28,18 @@ CREATE TABLE unresolved_messages(
 
 CREATE UNIQUE INDEX idx_unresolved_msgid_message ON unresolved_messages(msgid, message);
 
+CREATE TABLE listgroups(
+   groupid int NOT NULL PRIMARY KEY,
+   groupname text NOT NULL UNIQUE
+);
 
 CREATE TABLE lists(
    listid int NOT NULL PRIMARY KEY,
-   listname text NOT NULL UNIQUE
+   listname text NOT NULL UNIQUE,
+   shortdesc text NOT NULL,
+   description text NOT NULL,
+   active boolean NOT NULL,
+   groupid int NOT NULL REFERENCES listgroups(groupid)
 );
 
 CREATE TABLE list_months(

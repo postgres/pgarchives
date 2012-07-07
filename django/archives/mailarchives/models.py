@@ -23,9 +23,20 @@ class Message(models.Model):
 	def shortdate(self):
 		return self.date.strftime("%Y%m%d%H%M")
 
+class ListGroup(models.Model):
+	groupid = models.IntegerField(null=False, primary_key=True)
+	groupname = models.CharField(max_length=200, null=False, blank=False)
+
+	class Meta:
+		db_table = 'listgroups'
+
 class List(models.Model):
 	listid = models.IntegerField(null=False, primary_key=True)
 	listname = models.CharField(max_length=200, null=False, blank=False, unique=True)
+	shortdesc = models.TextField(null=False, blank=False)
+	description = models.TextField(null=False, blank=False)
+	active = models.BooleanField(null=False, blank=False)
+	gorupid = models.ForeignKey(ListGroup)
 
 	class Meta:
 		db_table = 'lists'
