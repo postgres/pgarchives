@@ -145,6 +145,9 @@ class ArchivesParser(object):
 		# Return None or empty string, depending on what we got back
 		return b
 
+	# Regular expression matching the PostgreSQL custom mail footer that
+	# is appended to all emails.
+	_re_footer = re.compile('(.*)--\s+\nSent via [^\s]+ mailing list \([^\)]+\)\nTo make changes to your subscription:\nhttp://www\.postgresql\.org/mailpref/[^\s]+\s*$', re.DOTALL)
 	def get_body(self):
 		b = self._get_body()
 		if b:
@@ -152,6 +155,11 @@ class ArchivesParser(object):
 			# later reject..
 			if b.find(u'\udbff\n\udef8'):
 				b = b.replace(u'\udbff\n\udef8', '')
+
+		# Remove postgres specific mail footer - if it's there
+		m = _re_footer.match(b)
+		if m:
+			b = m.group(1)
 		return b
 
 	def _get_body(self):
