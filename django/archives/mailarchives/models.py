@@ -36,7 +36,7 @@ class List(models.Model):
 	shortdesc = models.TextField(null=False, blank=False)
 	description = models.TextField(null=False, blank=False)
 	active = models.BooleanField(null=False, blank=False)
-	groupid = models.ForeignKey(ListGroup)
+	groupid = models.ForeignKey(ListGroup, db_column='groupid')
 
 	class Meta:
 		db_table = 'lists'
