@@ -65,14 +65,18 @@ def ensure_subscribed(listname):
 	# Now validate the checkboxes
 	checkedboxes = set(re.findall('<td align="center"><input type="checkbox" name="%s@%s" value="([^"]+)" checked>' % (listname, cfg.get('mail', 'server')), s))
 	shouldbechecked = set(('hideaddress', 'hideall', 'postblock', 'selfcopy'))
+	ok=True
 	if checkedboxes.difference(shouldbechecked):
 		print "Subscriber for %s has options %s that should NOT be set!" % (
 			listname,
 			",".join(checkedboxes.difference(shouldbechecked)))
+		ok = False
 	if shouldbechecked.difference(checkedboxes):
 		print "Subscriber for %s is missing options %s that SHOULD Be set!" % (
 			listname,
 			",".join(shouldbechecked.difference(checkedboxes)))
+		ok = False
+	return ok
 
 if __name__=="__main__":
 	cfg = ConfigParser()
