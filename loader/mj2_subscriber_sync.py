@@ -24,7 +24,34 @@ def ensure_subscribed(listname):
 	f.close()
 	if s.find("No matching addresses were found") > 0:
 		print "User %s@%s is not subscribed to list %s" % (listname, cfg.get('mail', 'server'), listname)
-		return False
+		if os.isatty(sys.stdout.fileno()):
+			while True:
+				x = raw_input("Attempt to subscribe? ")
+				if x.upper() == 'N': return False
+				if x.upper() != 'Y': continue
+				u = 'http://%s/mj/mj_wwwadm?%s' % (cfg.get('majordomo','server'), urlencode((
+							('passw', cfg.get('majordomo', 'password')),
+							('list', listname),
+							('func', 'subscribe-set-nowelcome'),
+							('setting', 'hideaddress'),
+							('setting', 'hideall'),
+							('setting', 'postblock'),
+							('setting', 'selfcopy'),
+							('setting', 'each'),
+							('victims', '%s@%s' % (listname, cfg.get('mail', 'server'))),
+							)))
+				f = urlopen(u)
+				s = f.read()
+				f.close()
+				if s.find("%s@%s was added to the %s mailing list." % (
+						listname,
+						cfg.get('mail', 'server'),
+						listname)) > 0:
+					print "SUCCESS!"
+					return True
+				else:
+					print "FAILED to add the subscriber!"
+					return False
 
 	# Wow this is ugly - but regexps are useful
 	m = re.search('Addresses found: (\d+)\s', s)
