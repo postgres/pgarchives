@@ -6,18 +6,19 @@
 import os
 import sys
 import re
-from urllib import urlopen
+from urllib import urlopen, urlencode
 from ConfigParser import ConfigParser
 import psycopg2
 
 def ensure_subscribed(listname):
-	u = 'http://%s/mj/mj_wwwadm?passw=%s&list=%s&func=who-enhanced&pattern=%s@%s' % (
+	u = 'http://%s/mj/mj_wwwadm?%s' % (
 		cfg.get('majordomo', 'server'),
-		cfg.get('majordomo', 'password'),
-		listname,
-		listname,
-		cfg.get('mail', 'server'),
-		)
+		urlencode((
+				('passw', cfg.get('majordomo', 'password')),
+				('list', listname),
+				('func', 'who-enhanced'),
+				('pattern', '%s@%s' % (listname, cfg.get('mail', 'server'))),
+				)))
 	f = urlopen(u)
 	s = f.read()
 	f.close()
