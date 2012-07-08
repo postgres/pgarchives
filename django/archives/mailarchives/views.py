@@ -100,12 +100,12 @@ def attachment(request, attid):
 def _build_thread_structure(threadid):
 	# Yeah, this is *way* too complicated for the django ORM
 	curs = connection.cursor()
-	curs.execute("""WITH RECURSIVE t(id, _from, subject, date, messageid, has_attachment, parentid, parentpath) AS(
-  SELECT id,_from,subject,date,messageid,has_attachment,parentid,array[]::int[] FROM messages m WHERE m.threadid=%(threadid)s AND parentid IS NULL
+	curs.execute("""WITH RECURSIVE t(id, _from, subject, date, messageid, has_attachment, parentid, datepath) AS(
+  SELECT id,_from,subject,date,messageid,has_attachment,parentid,array[]::timestamptz[] FROM messages m WHERE m.threadid=%(threadid)s AND parentid IS NULL
  UNION ALL
-  SELECT m.id,m._from,m.subject,m.date,m.messageid,m.has_attachment,m.parentid,t.parentpath||t.id FROM messages m INNER JOIN t ON t.id=m.parentid WHERE m.threadid=%(threadid)s
+  SELECT m.id,m._from,m.subject,m.date,m.messageid,m.has_attachment,m.parentid,t.datepath||t.date FROM messages m INNER JOIN t ON t.id=m.parentid WHERE m.threadid=%(threadid)s
 )
-SELECT id,_from,subject,date,messageid,has_attachment,parentid,parentpath FROM t ORDER BY parentpath, date
+SELECT id,_from,subject,date,messageid,has_attachment,parentid,datepath FROM t ORDER BY datepath||date
 """, {'threadid': threadid})
 	lastpath = []
 	for id,_from,subject,date,messageid,has_attachment,parentid,parentpath in curs.fetchall():
