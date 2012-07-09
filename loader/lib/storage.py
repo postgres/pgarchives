@@ -131,7 +131,7 @@ class ArchivesParserStorage(ArchivesParser):
 		if len(curs.fetchall()):
 			log.status("Tagged thread %s with listid %s" % (self.threadid, listid))
 
-		curs.execute("INSERT INTO messages (parentid, threadid, _from, _to, cc, subject, date, has_attachment, messageid, bodytxt) VALUES (%(parentid)s, %(threadid)s, %(from)s, %(to)s, %(cc)s, %(subject)s, %(date)s, %(has_attachment)s, %(messageid)s, %(bodytxt)s) RETURNING id", {
+		curs.execute("INSERT INTO messages (parentid, threadid, _from, _to, cc, subject, date, has_attachment, messageid, bodytxt, rawtxt) VALUES (%(parentid)s, %(threadid)s, %(from)s, %(to)s, %(cc)s, %(subject)s, %(date)s, %(has_attachment)s, %(messageid)s, %(bodytxt)s, %(rawtxt)s) RETURNING id", {
 				'parentid': self.parentid,
 				'threadid': self.threadid,
 				'from': self._from,
@@ -142,6 +142,7 @@ class ArchivesParserStorage(ArchivesParser):
 				'has_attachment': len(self.attachments) > 0,
 				'messageid': self.msgid,
 				'bodytxt': self.bodytxt,
+				'rawtxt': self.rawtxt,
 				})
 		id = curs.fetchall()[0][0]
 		if len(self.attachments):
