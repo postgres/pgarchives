@@ -315,6 +315,8 @@ class ArchivesParser(object):
 	_date_multi_re2 = re.compile(' ([\+-]\d{4}) \([^)]+\)$')
 	_date_multiminus_re = re.compile(' -(-\d+)$')
 	def forgiving_date_decode(self, d):
+		if d.strip() == '':
+			raise IgnorableException("Failed to parse empty date")
 		# Strange timezones requiring manual adjustments
 		if d.endswith('-7700 (EST)'):
 			d = d.replace('-7700 (EST)', 'EST')
