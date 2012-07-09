@@ -105,6 +105,10 @@ table.message td
 {
 	vertical-align: top;
 }
+table.message th
+{
+	width: 8em;
+}
 
 table.message
 {
