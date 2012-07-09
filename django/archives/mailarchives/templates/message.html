@@ -21,32 +21,54 @@ ul.threadlist li {
    margin-left: 0px;
 }
 span.listname {
-   background-color: lightgray;
+   background-color: #F7F7F7;
    padding: 0.2em;
-   margin: 2ex 10px 2ex 0ex;
-   background: #F7F7F7;
    border: 1px solid #CFCFCF;
-   -moz-border-radius: 8px;
-   -webkit-border-radius: 8px;
-   -khtml-border-radius: 8px;
-   border-radius: 8px;
 }
 </style>
 {%endblock%}
 {%block layoutblock%}
 <h2>{{msg.subject}}</h2>
-<strong>From:</strong> {{msg.mailfrom|hidemail}}<br/>
-<strong>To:</strong> {{msg.to|hidemail}}<br/>
-{%if msg.cc%}<strong>Cc:</strong> {{msg.cc|hidemail}}<br/>{%endif%}
-<strong>Subject:</strong> {{msg.subject}}<br/>
-<strong>Date:</strong> {{msg.printdate}}<br/>
-<strong>Message-ID:</strong> <a href="http://archives.postgresql.org/message-id/{{msg.messageid}}">{{msg.messageid}}</a> (view <a href="/message-id/{{msg.messageid}}/raw">raw</a>)<br/>
-<strong>Thread:</strong> <select id="thread_select" onChange="onThreadSelect()">
-{%for m in threadstruct%}{%if m.id%}<option value="{{m.messageid}}"{%if m.id = msg.id%} SELECTED{%endif%}>{{m.indent|safe}}{{m.printdate}} from {{m.mailfrom}}</option>{%endif%}
+<table class="message">
+ <tr>
+  <th>From:</th>
+  <td>{{msg.mailfrom|hidemail}}</td>
+ </tr>
+{%if msg.cc%}<tr>
+  <th>To:</th>
+  <td>{{msg.to|hidemail}}</td>
+ </tr>
+{%endif%}
+ <tr>
+  <th>Cc:</th>
+  <td>{{msg.cc|hidemail}}</td>
+ </tr>
+ <tr>
+  <th>Subject:</th>
+  <td>{{msg.subject}}</td>
+ </tr>
+ <tr>
+  <th>Date:</th>
+  <td>{{msg.printdate}}</td>
+ </tr>
+ <tr>
+  <th>Message-ID:</th>
+  <td><a href="http://archives.postgresql.org/message-id/{{msg.messageid}}">{{msg.messageid}}</a> (view <a href="/message-id/{{msg.messageid}}/raw">raw</a>)</td>
+ </tr>
+ <tr>
+  <th>Thread:</th>
+  <td>
+   <select id="thread_select" onChange="onThreadSelect()">
+{%for m in threadstruct%}{%if m.id%}<option value="{{m.messageid}}"{%if m.id = msg.id%} selected="selected"{%endif%}>{{m.indent|safe}}{{m.printdate}} from {{m.mailfrom}}</option>{%endif%}
 {%endfor%}
-</select><br/>
-<strong>Lists:</strong> {%for l in lists %}<span class="listname"><a href="/{{l.listname}}/since/{{msg.shortdate}}">{{l.listname}}</a></span>{%endfor%}<br/>
-<hr/>
+   </select>
+  </td>
+ </tr>
+ <tr>
+  <th>Lists:</th>
+  <td>{%for l in lists %}<span class="listname"><a href="/{{l.listname}}/since/{{msg.shortdate}}">{{l.listname}}</a></span>{%endfor%}</td>
+ </tr>
+</table>
 <div class="bodywrapper">
 <pre>{{msg.bodytxt|urlize}}</pre>
 
@@ -62,14 +84,14 @@ Description: {{a.contenttype}}
 {%if parent%}
 <h3>In response to</h3>
 <ul>
-<li><a href="/message-id/{{parent.messageid}}">{{parent.subject}}</a> at {{parent.printdate}} from {{parent.mailfrom|nameonly}}</a></li>
+<li><a href="/message-id/{{parent.messageid}}">{{parent.subject}}</a> at {{parent.printdate}} from {{parent.mailfrom|nameonly}}</li>
 </ul>
 {%endif%}
 {%if responses %}
 <h3>Responses</h3>
 <ul>
 {%for m in responses%}
-<li><a href="/message-id/{{m.messageid}}">{{m.subject}}</a> at {{m.printdate}} from {{m.mailfrom|nameonly}}</a></li>
+<li><a href="/message-id/{{m.messageid}}">{{m.subject}}</a> at {{m.printdate}} from {{m.mailfrom|nameonly}}</li>
 {%endfor%}
 </ul>
 {%endif%}

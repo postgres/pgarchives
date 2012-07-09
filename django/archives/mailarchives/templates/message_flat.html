@@ -14,7 +14,7 @@ window.onload = load;
 </script>
 <style>
 div.msgwrap {
-   border: 2px solid blue;
+   border: 2px solid lightGray;
    margin-bottom: 10px;
 }
 </style>
@@ -24,13 +24,33 @@ div.msgwrap {
 {%for m in allmsg %}
 <div class="msgwrap">
 <a name="{{m.messageid}}"></a>
-<strong>From:</strong> {{m.mailfrom|hidemail}}<br/>
-<strong>To:</strong> {{m.to|hidemail}}<br/>
-{%if m.cc%}<strong>Cc:</strong> {{m.cc|hidemail}}<br/>{%endif%}
-<strong>Subject:</strong> {{m.subject}}<br/>
-<strong>Date:</strong> {{m.printdate}}<br/>
-<strong>Message-ID:</strong> <a href="http://archives.postgresql.org/message-id/{{m.messageid}}">{{m.messageid}}</a> (view <a href="/message-id/{{m.messageid}}/raw">raw</a>)<br/>
-<hr/>
+<table class="message">
+ <tr>
+  <th>From:</th>
+  <td>{{m.mailfrom|hidemail}}</td>
+ </tr>
+{%if msg.cc%}<tr>
+  <th>To:</th>
+  <td>{{m.to|hidemail}}</td>
+ </tr>
+{%endif%}
+ <tr>
+  <th>Cc:</th>
+  <td>{{m.cc|hidemail}}</td>
+ </tr>
+ <tr>
+  <th>Subject:</th>
+  <td>{{m.subject}}</td>
+ </tr>
+ <tr>
+  <th>Date:</th>
+  <td>{{m.printdate}}</td>
+ </tr>
+ <tr>
+  <th>Message-ID:</th>
+  <td><a href="http://archives.postgresql.org/message-id/{{m.messageid}}">{{m.messageid}}</a> (view <a href="/message-id/{{m.messageid}}/raw">raw</a>)</td>
+ </tr>
+</table>
 <div class="bodywrapper">
 <pre>{{m.bodytxt|urlize}}</pre>
 

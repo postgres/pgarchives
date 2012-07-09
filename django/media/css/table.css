@@ -99,3 +99,23 @@ div.tblBasic table td.colLastRT {
         text-align: right;
         vertical-align: top;
 }
+
+table.message th,
+table.message td
+{
+	vertical-align: top;
+}
+
+table.message
+{
+	background-color: rgb(240,240,240);
+	padding-bottom: 5px;
+	border: 2px solid lightGray;
+	width: 100%;
+}
+
+.msgwrap table.message
+{
+	border-width: 0;
+}
+
