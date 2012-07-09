@@ -24,7 +24,6 @@ div.msgwrap {
 {%for m in allmsg %}
 <div class="msgwrap">
 <a name="{{m.messageid}}"></a>
-<<<<<<< HEAD
 <table class="message">
  <tr>
   <th>From:</th>
@@ -49,7 +48,7 @@ div.msgwrap {
  </tr>
  <tr>
   <th>Message-ID:</th>
-  <td><a href="http://archives.postgresql.org/message-id/{{m.messageid}}">{{m.messageid}}</a> (view <a href="/message-id/{{m.messageid}}/raw">raw</a>)</td>
+  <td><a href="http://archives.postgresql.org/message-id/{{m.messageid}}">{{m.messageid}}</a> (view <a href="/raw/{{m.messageid}}">raw</a>)</td>
  </tr>
 </table>
 <div class="bodywrapper">
