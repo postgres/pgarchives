@@ -74,3 +74,13 @@ CREATE TABLE loaderrors(
    src text NOT NULL,
    err text NOT NULL
 );
+
+
+/* legacy site */
+CREATE TABLE legacyurls(
+   listid int NOT NULL,
+   year int NOT NULL,
+   month int NOT NULL,
+   seq int NOT NULL,
+   msgid text NOT NULL
+);
