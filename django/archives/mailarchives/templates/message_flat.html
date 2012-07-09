@@ -29,7 +29,7 @@ div.msgwrap {
 {%if m.cc%}<strong>Cc:</strong> {{m.cc|hidemail}}<br/>{%endif%}
 <strong>Subject:</strong> {{m.subject}}<br/>
 <strong>Date:</strong> {{m.printdate}}<br/>
-<strong>Message-ID:</strong> <a href="http://archives.postgresql.org/message-id/{{m.messageid}}">{{m.messageid}}</a><br/>
+<strong>Message-ID:</strong> <a href="http://archives.postgresql.org/message-id/{{m.messageid}}">{{m.messageid}}</a> (view <a href="/message-id/{{m.messageid}}/raw">raw</a>)<br/>
 <hr/>
 <div class="bodywrapper">
 <pre>{{m.bodytxt|urlize}}</pre>

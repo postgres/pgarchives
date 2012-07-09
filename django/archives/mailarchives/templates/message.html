@@ -40,7 +40,7 @@ span.listname {
 {%if msg.cc%}<strong>Cc:</strong> {{msg.cc|hidemail}}<br/>{%endif%}
 <strong>Subject:</strong> {{msg.subject}}<br/>
 <strong>Date:</strong> {{msg.printdate}}<br/>
-<strong>Message-ID:</strong> <a href="http://archives.postgresql.org/message-id/{{msg.messageid}}">{{msg.messageid}}</a><br/>
+<strong>Message-ID:</strong> <a href="http://archives.postgresql.org/message-id/{{msg.messageid}}">{{msg.messageid}}</a> (view <a href="/message-id/{{msg.messageid}}/raw">raw</a>)<br/>
 <strong>Thread:</strong> <select id="thread_select" onChange="onThreadSelect()">
 {%for m in threadstruct%}{%if m.id%}<option value="{{m.messageid}}"{%if m.id = msg.id%} SELECTED{%endif%}>{{m.indent|safe}}{{m.printdate}} from {{m.mailfrom}}</option>{%endif%}
 {%endfor%}
