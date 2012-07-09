@@ -147,6 +147,7 @@ a:hover                         { color:#000000; text-decoration: underline; }
 .bodywrapper pre,
 .bodywrapper tt {
   word-wrap: break-word;
+  white-space: pre-wrap;
   font-size: 1.2em;
   padding-top: 1em;
   padding-left: 2em;
