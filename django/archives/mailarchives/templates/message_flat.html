@@ -23,10 +23,10 @@ div.msgwrap {
 <h2>{{msg.subject}}</h2>
 {%for m in allmsg %}
 <div class="msgwrap">
-<a name="{{msg.messageid}}"></a>
+<a name="{{m.messageid}}"></a>
 <strong>From:</strong> {{m.mailfrom|hidemail}}<br/>
 <strong>To:</strong> {{m.to|hidemail}}<br/>
-{%if msg.cc%}<strong>Cc:</strong> {{m.cc|hidemail}}<br/>{%endif%}
+{%if m.cc%}<strong>Cc:</strong> {{m.cc|hidemail}}<br/>{%endif%}
 <strong>Subject:</strong> {{m.subject}}<br/>
 <strong>Date:</strong> {{m.printdate}}<br/>
 <strong>Message-ID:</strong> <a href="http://archives.postgresql.org/message-id/{{m.messageid}}">{{m.messageid}}</a><br/>
