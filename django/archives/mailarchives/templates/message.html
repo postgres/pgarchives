@@ -70,7 +70,7 @@ span.listname {
  </tr>
 </table>
 <div class="bodywrapper">
-<pre>{{msg.bodytxt|urlize}}</pre>
+<pre>{{msg.bodytxt|hideallemail|urlize}}</pre>
 
 {%if msg.has_attachment%}
 {%for a in msg.attachment_set.all%}

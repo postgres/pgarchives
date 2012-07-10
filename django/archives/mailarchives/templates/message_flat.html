@@ -52,7 +52,7 @@ div.msgwrap {
  </tr>
 </table>
 <div class="bodywrapper">
-<pre>{{m.bodytxt|urlize}}</pre>
+<pre>{{m.bodytxt|hideallemail|urlize}}</pre>
 
 {%if m.has_attachment%}
 {%for a in m.attachment_set.all%}
