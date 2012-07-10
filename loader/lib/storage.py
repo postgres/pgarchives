@@ -142,7 +142,7 @@ class ArchivesParserStorage(ArchivesParser):
 				'has_attachment': len(self.attachments) > 0,
 				'messageid': self.msgid,
 				'bodytxt': self.bodytxt,
-				'rawtxt': self.rawtxt,
+				'rawtxt': bytearray(self.rawtxt),
 				})
 		id = curs.fetchall()[0][0]
 		if len(self.attachments):

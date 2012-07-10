@@ -12,7 +12,7 @@ CREATE TABLE messages (
    has_attachment boolean NOT NULL,
    messageid text NOT NULL,
    bodytxt text NOT NULL,
-   rawtxt text NOT NULL
+   rawtxt bytea NOT NULL
 );
 CREATE INDEX idx_messages_threadid ON messages(threadid);
 CREATE UNIQUE INDEX idx_messages_msgid ON messages(messageid);
