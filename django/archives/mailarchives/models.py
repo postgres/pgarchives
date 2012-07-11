@@ -28,6 +28,7 @@ class Message(models.Model):
 class ListGroup(models.Model):
 	groupid = models.IntegerField(null=False, primary_key=True)
 	groupname = models.CharField(max_length=200, null=False, blank=False)
+	sortkey = models.IntegerField(null=False)
 
 	class Meta:
 		db_table = 'listgroups'

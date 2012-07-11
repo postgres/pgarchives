@@ -1,14 +1,19 @@
 {%extends "base.html"%}
 {%block title%}PostgreSQL Mailing List Archives{%endblock%}
 {%load pgfilters%}
-{%block layoutblock%}
+{%block contents%}
 <h1>PostgreSQL Mailing List Archives</h1>
 <p>
-(Yes, we want this to look better..)
 </p>
 <ul>
-{%for l in lists%}
-<li><a href="/{{l.listname}}/">{{l.listname}}</a></li>
+{%for g in groups%}
+ <li>{{g.groupname}}
+   <ul>
+{%for l in g.lists%}
+     <li><a href="/{{l.listname}}/">{{l.listname}}</a></li>
+{%endfor%}
+   </ul>
+ </li>
 {%endfor%}
 </ul>
 

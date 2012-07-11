@@ -75,7 +75,7 @@ if __name__=="__main__":
 	sync_listinfo(conn,
 				  "group",
 				  "listgroups",
-				  {'groupid':'id', 'groupname': 'name'},
+				  {'groupid':'id', 'groupname': 'name', 'sortkey': 'sort',},
 				  obj['groups'],
 				  )
 

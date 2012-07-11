@@ -1,3 +1,4 @@
+from django.template import RequestContext
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.db import connection
@@ -9,11 +10,53 @@ from datetime import datetime, timedelta
 
 from models import *
 
+def get_all_groups_and_lists(listid=None):
+	# Django doesn't (yet) support traversing the reverse relationship,
+	# so we'll get all the lists and rebuild it backwards.
+	lists = List.objects.select_related('group').all()
+	listgroupid = None
+	groups = {}
+	for l in lists:
+		if l.listid == listid:
+			listgroupid = l.group.groupid
+
+		if groups.has_key(l.group.groupid):
+			groups[l.group.groupid]['lists'].append(l)
+		else:
+			groups[l.group.groupid] = {
+				'groupid': l.group.groupid,
+				'groupname': l.group.groupname,
+				'sortkey': l.group.sortkey,
+				'lists': [l,],
+				'homelink': l.listname,
+				}
+
+	return (sorted(groups.values(), key=lambda g: g['sortkey']), listgroupid)
+
+
+class NavContext(RequestContext):
+	def __init__(self, request, listid=None, all_groups=None):
+		RequestContext.__init__(self, request)
+
+		if all_groups:
+			groups = all_groups
+		else:
+			(groups, listgroupid) = get_all_groups_and_lists(listid)
+		for g in groups:
+			# On the root page, remove *all* entries
+			# On other lists, remove the entries in all groups other than our
+			# own.
+			if (not listid) or listgroupid != g['groupid']:
+				# Root page, so remove *all* entries
+				g['lists'] = []
+
+		self.update({'listgroups': groups})
+
 def index(request):
-	lists = List.objects.all().extra(where=["EXISTS (SELECT listid FROM list_months lm WHERE lm.listid = lists.listid)"]).order_by('listname')
+	(groups, listgroupid) = get_all_groups_and_lists()
 	return render_to_response('index.html', {
-			'lists': lists,
-			})
+			'groups': [{'groupname': g['groupname'], 'lists': g['lists']} for g in groups],
+			}, NavContext(request, all_groups=groups))
 
 def monthlist(request, listname):
 	l = get_object_or_404(List, listname=listname)
@@ -24,7 +67,7 @@ def monthlist(request, listname):
 	return render_to_response('monthlist.html', {
 			'list': l,
 			'months': months,
-			})
+			}, NavContext(request, l.listid))
 
 def render_datelist_from(request, l, d, title, to=None):
 	datefilter = Q(date__gte=d)
@@ -38,7 +81,7 @@ def render_datelist_from(request, l, d, title, to=None):
 			'list': l,
 			'messages': list(mlist),
 			'title': title,
-			})
+			}, NavContext(request, l.listid))
 	r['X-pgthread'] = ":%s:" % (":".join([str(t) for t in threads]))
 	return r
 
@@ -53,7 +96,7 @@ def render_datelist_to(request, l, d, title):
 			'list': l,
 			'messages': list(mlist),
 			'title': title,
-			})
+			}, NavContext(request, l.listid))
 	r['X-pgthread'] = ":%s:" % (":".join([str(t) for t in threads]))
 	return r
 
@@ -133,7 +176,7 @@ def message(request, msgid):
 			'responses': responses,
 			'parent': parent,
 			'lists': lists,
-			})
+			}, NavContext(request, lists[0].listid))
 	r['X-pgthread'] = ":%s:" % m.threadid
 	return r
 
@@ -148,7 +191,7 @@ def message_flat(request, msgid):
 	r = render_to_response('message_flat.html', {
 			'msg': msg,
 			'allmsg': allmsg,
-			})
+			}, NavContext(request))
 	r['X-pgthread'] = ":%s:" % msg.threadid
 	return r
 

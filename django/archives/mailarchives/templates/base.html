@@ -77,7 +77,34 @@
 	 </div> <!-- pgTopNav -->
 	</div> <!-- pgHeaderContainer -->
 	<div id="pgContent">
-{%block layoutblock%}{%endblock%}
+         <div id="pgSideWrap">
+          <div id="pgSideNav">
+           <ul>
+	     <li><a href="http://www.postgresql.org/community/">Community</a></li>
+	     <li><a href="http://www.postgresql.org/community/contributors/">Contributors</a></li>
+	     <li><a href="/">Mailing Lists</a>
+	       <ul>
+{%for g in listgroups%}
+                <li><a href="/{{g.homelink}}/">{{g.groupname}}</a><ul>
+{%for l in g.lists%}
+                  <li><a href="/{{l.listname}}/">{{l.shortdesc}}</a></li>
+{%endfor%}
+		</ul></li>
+{%endfor%}
+               </ul>
+	     </li>
+	     <li><a href="http://www.postgresql.org/community/irc">IRC</a></li>
+	     <li><a href="http://www.postgresql.org/about/users">Featured Users</a></li>
+	     <li><a href="http://www.postgresql.org/community/international">International Sites</a></li>
+	     <li><a href="http://www.postgresql.org/community/propaganda">Propaganda</a></li>
+	     <li><a href="http://www.postgresql.org/community/resources">Resources</a></li>
+	     <li><a href="http://www.postgresql.org/community/weeklynews/">Weekly News</a></li>
+           </ul>
+          </div>
+        </div> <!-- pgSideWrap -->
+        <div id="pgContentWrap">
+{%block contents%}{%endblock%}
+        </div> <!-- pgContentWrap-->
      <br class="pgClearBoth" />
     </div> <!-- pgContent -->
 	<div id="pgFooter">
