@@ -13,7 +13,7 @@ from models import *
 def get_all_groups_and_lists(listid=None):
 	# Django doesn't (yet) support traversing the reverse relationship,
 	# so we'll get all the lists and rebuild it backwards.
-	lists = List.objects.select_related('group').all()
+	lists = List.objects.select_related('group').all().order_by('listname')
 	listgroupid = None
 	groups = {}
 	for l in lists:
