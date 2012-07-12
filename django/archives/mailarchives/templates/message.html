@@ -59,7 +59,7 @@ span.listname {
   <th>Thread:</th>
   <td>
    <select id="thread_select" onChange="onThreadSelect()">
-{%for m in threadstruct%}{%if m.id%}<option value="{{m.messageid}}"{%if m.id = msg.id%} selected="selected"{%endif%}>{{m.indent|safe}}{{m.printdate}} from {{m.mailfrom}}</option>{%endif%}
+{%for m in threadstruct%}{%if m.id%}<option value="{{m.messageid}}"{%if m.id = msg.id%} selected="selected"{%endif%}>{{m.indent|safe}}{{m.printdate}} from {{m.mailfrom|hidemail}}</option>{%endif%}
 {%endfor%}
    </select>
   </td>
