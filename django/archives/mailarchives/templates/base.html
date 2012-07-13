@@ -85,11 +85,15 @@
 	     <li><a href="/">Mailing Lists</a>
 	       <ul>
 {%for g in listgroups%}
-                <li><a href="/{{g.homelink}}/">{{g.groupname}}</a><ul>
+                <li><a href="/{{g.homelink}}/">{{g.groupname}}</a>
+{%if g.lists%}
+	         <ul>
 {%for l in g.lists%}
                   <li><a href="/{{l.listname}}/">{{l.shortdesc}}</a></li>
 {%endfor%}
-		</ul></li>
+		 </ul>
+{%endif%}
+	        </li>
 {%endfor%}
                </ul>
 	     </li>
