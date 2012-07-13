@@ -29,15 +29,15 @@ div.msgwrap {
   <th>From:</th>
   <td>{{m.mailfrom|hidemail}}</td>
  </tr>
-{%if m.cc%}<tr>
   <th>To:</th>
   <td>{{m.to|hidemail}}</td>
  </tr>
-{%endif%}
+{%if m.cc%}<tr>
  <tr>
   <th>Cc:</th>
   <td>{{m.cc|hidemail}}</td>
  </tr>
+{%endif%}
  <tr>
   <th>Subject:</th>
   <td>{{m.subject}}</td>

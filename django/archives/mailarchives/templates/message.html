@@ -34,15 +34,15 @@ span.listname {
   <th>From:</th>
   <td>{{msg.mailfrom|hidemail}}</td>
  </tr>
-{%if msg.cc%}<tr>
   <th>To:</th>
   <td>{{msg.to|hidemail}}</td>
  </tr>
-{%endif%}
+{%if msg.cc%}<tr>
  <tr>
   <th>Cc:</th>
   <td>{{msg.cc|hidemail}}</td>
  </tr>
+{%endif%}
  <tr>
   <th>Subject:</th>
   <td>{{msg.subject}}</td>
