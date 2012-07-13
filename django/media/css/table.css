@@ -112,10 +112,18 @@ table.message th
 
 table.message
 {
-	background-color: rgb(240,240,240);
-	padding-bottom: 5px;
-	border: 2px solid lightGray;
 	width: 100%;
+}
+
+table.message select
+{
+	width: 100%;
+}
+
+table.message span.listname
+{
+	line-height: 1.4em;
+	float: left;
 }
 
 .msgwrap table.message
