@@ -107,6 +107,8 @@ class ArchivesParserStorage(ArchivesParser):
 			# Batch all the children for repointing. We can't do the actual
 			# repointing until later, since we don't know our own id yet.
 			self.children = [r[0] for r in childrows]
+			log.status("Children set to %s with mergethreads being %s (from childrows %s and threadid %s)" % (
+					self.children, mergethreads, childrows, self.threadid))
 
 			# Finally, remove all the pending messages that had a higher
 			# priority value (meaning less important) than us
@@ -145,6 +147,8 @@ class ArchivesParserStorage(ArchivesParser):
 				'rawtxt': bytearray(self.rawtxt),
 				})
 		id = curs.fetchall()[0][0]
+		log.status("Message %s, got id %s, set thread %s, parent %s" % (
+				self.msgid, id, self.threadid, self.parentid))
 		if len(self.attachments):
 			# Insert attachments
 			curs.executemany("INSERT INTO attachments (message, filename, contenttype, attachment) VALUES (%(message)s, %(filename)s, %(contenttype)s, %(attachment)s)",[ {
@@ -155,7 +159,7 @@ class ArchivesParserStorage(ArchivesParser):
 						} for a in self.attachments])
 
 		if len(self.children):
-			log.status("Setting %s other threads to children of %s" % (len(self.children), self.msgid))
+			log.status("Setting %s other messages to children of %s" % (len(self.children), self.msgid))
 			curs.executemany("UPDATE messages SET parentid=%(parent)s WHERE id=%(id)s",
 							 [{'parent': id, 'id': c} for c in self.children])
 		if len(self.parents):
