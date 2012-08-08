@@ -82,7 +82,14 @@ class ArchivesParserStorage(ArchivesParser):
 			# In the best case, the threadid is the same for all threads.
 			# But it might be different if this it the "glue message" that's
 			# holding other threads together.
-			self.threadid = childrows[0][2]
+			if self.threadid:
+				# Already have a threadid, means that we have a glue message
+				print "Message %s resolved to existing thread %s, while being somebodys parent" % (self.msgid, self.threadid)
+			else:
+				print "Message %s did not resolve to existing thread, but is somebodys parent" % self.msgid
+				# In this case, just pick the first thread from the list and merge into that
+				# one.
+				self.threadid = childrows[0][2]
 
 			# Get a unique list (set) of all threads *except* the primary one,
 			# because we'll be merging into that one.
