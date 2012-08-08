@@ -7,6 +7,7 @@ from django.db.models import Q
 import urllib
 import re
 from datetime import datetime, timedelta
+import calendar
 
 from models import *
 
@@ -77,10 +78,21 @@ def render_datelist_from(request, l, d, title, to=None):
 	mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().filter(datefilter).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('date')[:200]
 
 	threads = set([m.threadid for m in mlist])
+	allmonths = set([m.date.month for m in mlist])
+	if len(allmonths) == 1:
+		# All hits are from one month, so generate month links
+		yearmonth = "%s%02d" % (mlist[0].date.year, mlist[0].date.month)
+		daysinmonth = range(1, calendar.monthrange(mlist[0].date.year, mlist[0].date.month)[1]+1)
+	else:
+		daysinmonth = None
+		yearmonth = None
+
 	r = render_to_response('datelist.html', {
 			'list': l,
 			'messages': list(mlist),
 			'title': title,
+			'daysinmonth': daysinmonth,
+			'yearmonth': yearmonth,
 			}, NavContext(request, l.listid))
 	r['X-pgthread'] = ":%s:" % (":".join([str(t) for t in threads]))
 	return r

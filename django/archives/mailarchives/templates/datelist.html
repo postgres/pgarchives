@@ -24,4 +24,7 @@
 <a href="/{{list.listname}}/since/{{lastmsg.shortdate}}">Next</a>
 {%endwith%}
 
+{%if daysinmonth%}
+<div class="daylinks">Jump to day: {%for d in daysinmonth%}<a href="/{{list.listname}}/since/{{yearmonth}}{{d|stringformat:"02d"}}0000/">{{d}}</a> {%endfor%}</div>
+{%endif%}
 {%endblock%}
