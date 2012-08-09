@@ -31,9 +31,9 @@ class ArchivesParser(object):
 
 	def analyze(self, date_override=None):
 		self.msgid = self.clean_messageid(self.decode_mime_header(self.get_mandatory('Message-ID')))
-		self._from = self.decode_mime_header(self.get_mandatory('From'))
-		self.to = self.decode_mime_header(self.get_optional('To'))
-		self.cc = self.decode_mime_header(self.get_optional('CC'))
+		self._from = self.decode_mime_header(self.get_mandatory('From'), True)
+		self.to = self.decode_mime_header(self.get_optional('To'), True)
+		self.cc = self.decode_mime_header(self.get_optional('CC'), True)
 		self.subject = self.decode_mime_header(self.get_optional('Subject'))
 		if date_override:
 			self.date = self.forgiving_date_decode(date_override)
@@ -386,7 +386,9 @@ class ArchivesParser(object):
 		except Exception, e:
 			raise IgnorableException("Failed to parse date '%s': %s" % (d, e))
 
-	def _decode_mime_header(self, hdr):
+	# Workaround for broken quoting in some MUAs (see below)
+	_re_mailworkaround = re.compile('"(=\?[^\?]+\?[QB]\?[^\?]+\?=)"', re.IGNORECASE)
+	def _decode_mime_header(self, hdr, email_workaround):
 		if hdr == None:
 			return None
 
@@ -396,6 +398,16 @@ class ArchivesParser(object):
 		# anybody *actually* putting that sequence in the header (since we
 		# won't match the encoded contents)
 		hdr = hdr.replace("\n\t","")
+
+		# In at least some cases, at least gmail (and possibly other MUAs)
+		# incorrectly put double quotes in the name/email field even when
+		# it's encoded. That's not allowed - they have to be escaped - but
+		# since there's a fair amount of those, we apply a regex to get
+		# rid of them.
+		m = _re_mailworkaround.search(hdr)
+		if m:
+			hdr = hdr.sub(r'\1', hdr)
+
 		try:
 			return " ".join([unicode(s, charset and self.clean_charset(charset) or 'us-ascii', errors='ignore') for s,charset in decode_header(hdr)])
 		except HeaderParseError, e:
@@ -404,9 +416,9 @@ class ArchivesParser(object):
 			# we can, which is cut it down to ascii and ignore errors
 			return unicode(hdr, 'us-ascii', errors='ignore')
 
-	def decode_mime_header(self, hdr):
+	def decode_mime_header(self, hdr, email_workaround=False):
 		try:
-			return self._decode_mime_header(hdr)
+			return self._decode_mime_header(hdr, email_workaround)
 		except LookupError, e:
 			raise IgnorableException("Failed to decode header value '%s': %s" % (hdr, e))
 		except ValueError, ve:
