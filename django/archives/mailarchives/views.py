@@ -79,6 +79,8 @@ def render_datelist_from(request, l, d, title, to=None):
 
 	threads = set([m.threadid for m in mlist])
 	allmonths = set([m.date.month for m in mlist])
+	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
+
 	if len(allmonths) == 1:
 		# All hits are from one month, so generate month links
 		yearmonth = "%s%02d" % (mlist[0].date.year, mlist[0].date.month)
@@ -94,7 +96,7 @@ def render_datelist_from(request, l, d, title, to=None):
 			'daysinmonth': daysinmonth,
 			'yearmonth': yearmonth,
 			}, NavContext(request, l.listid))
-	r['X-pgthread'] = ":%s:" % (":".join([str(t) for t in threads]))
+	r['X-pglm'] = ':%s:' % (':'.join(['%s/%s/%s' % (l.listid, year, month) for year,month in allyearmonths]))
 	return r
 
 def render_datelist_to(request, l, d, title):
@@ -104,12 +106,14 @@ def render_datelist_to(request, l, d, title):
 	mlist = sorted(Message.objects.defer('bodytxt', 'cc', 'to').select_related().filter(date__lte=d).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('-date')[:200], key=lambda m: m.date)
 
 	threads = set([m.threadid for m in mlist])
+	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
+
 	r = render_to_response('datelist.html', {
 			'list': l,
 			'messages': list(mlist),
 			'title': title,
 			}, NavContext(request, l.listid))
-	r['X-pgthread'] = ":%s:" % (":".join([str(t) for t in threads]))
+	r['X-pglm'] = ':%s:' % (':'.join(['%s/%s/%s' % (l.listid, year, month) for year,month in allyearmonths]))
 	return r
 
 def datelistsince(request, listname, msgid):
