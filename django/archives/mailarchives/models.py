@@ -6,7 +6,7 @@ class Message(models.Model):
 	to = models.TextField(null=False, db_column='_to')
 	cc = models.TextField(null=False)
 	subject = models.TextField(null=False)
-	date = models.DateTimeField(null=False)
+	date = models.DateTimeField(null=False, db_index=True)
 	messageid = models.TextField(null=False)
 	bodytxt = models.TextField(null=False)
 	# rawtxt is a bytea field, which django doesn't support (easily)
