@@ -406,7 +406,7 @@ class ArchivesParser(object):
 		# rid of them.
 		m = self._re_mailworkaround.search(hdr)
 		if m:
-			hdr = hdr.sub(r'\1', hdr)
+			hdr = self._re_mailworkaround.sub(r'\1', hdr)
 
 		try:
 			return " ".join([unicode(s, charset and self.clean_charset(charset) or 'us-ascii', errors='ignore') for s,charset in decode_header(hdr)])
