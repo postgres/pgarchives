@@ -1,5 +1,7 @@
 \set ON_ERROR_STOP on
 
+BEGIN;
+
 CREATE TABLE messages (
    id SERIAL NOT NULL PRIMARY KEY,
    parentid int REFERENCES messages,
@@ -124,3 +126,5 @@ CREATE TRIGGER messages_fti_trigger
  BEFORE INSERT OR UPDATE OF subject, bodytxt ON  messages
  FOR EACH ROW EXECUTE PROCEDURE messages_fti_trigger_func();
 CREATE INDEX messages_fti_idx ON messages USING gin(fti);
+
+\echo Dont forget to commit!
