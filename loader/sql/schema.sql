@@ -32,7 +32,8 @@ CREATE UNIQUE INDEX idx_unresolved_msgid_message ON unresolved_messages(msgid, m
 
 CREATE TABLE listgroups(
    groupid int NOT NULL PRIMARY KEY,
-   groupname text NOT NULL UNIQUE
+   groupname text NOT NULL UNIQUE,
+   sortkey int NOT NULL
 );
 
 CREATE TABLE lists(
