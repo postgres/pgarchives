@@ -404,7 +404,7 @@ class ArchivesParser(object):
 		# it's encoded. That's not allowed - they have to be escaped - but
 		# since there's a fair amount of those, we apply a regex to get
 		# rid of them.
-		m = _re_mailworkaround.search(hdr)
+		m = self._re_mailworkaround.search(hdr)
 		if m:
 			hdr = hdr.sub(r'\1', hdr)
 
