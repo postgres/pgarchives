@@ -22,6 +22,9 @@ urlpatterns = patterns('',
     (r'^message-id/([^/]+)$', 'archives.mailarchives.views.message'),
     (r'^flat/([^/]+)$', 'archives.mailarchives.views.message_flat'),
     (r'^raw/([^/]+)$', 'archives.mailarchives.views.message_raw'),
+    (r'^search/', 'archives.mailarchives.views.search'),
+
+    # Date etc indexes
     (r'^([\w-]+)/$', 'archives.mailarchives.views.monthlist'),
     (r'^([\w-]+)/(\d+)-(\d+)/$', 'archives.mailarchives.views.datelist'),
     (r'^([\w-]+)/since/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})', 'archives.mailarchives.views.datelistsincetime'),

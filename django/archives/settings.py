@@ -149,3 +149,5 @@ LOGGING = {
 
 # Required for lighttpd
 FORCE_SCRIPT_NAME=""
+
+from settings_local import *

@@ -9,10 +9,10 @@ class Message(models.Model):
 	date = models.DateTimeField(null=False)
 	messageid = models.TextField(null=False)
 	bodytxt = models.TextField(null=False)
-#	rawtxt = models.TextField(null=True)
-	# rawtxt is a bytea field, which django doesn't support
+	# rawtxt is a bytea field, which django doesn't support (easily)
 	parentid = models.IntegerField(null=False, blank=False)
 	has_attachment = models.BooleanField(null=False, default=False)
+	# fti is a tsvector field, which django doesn't support (easily)
 
 	class Meta:
 		db_table = 'messages'

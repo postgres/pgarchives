@@ -1,13 +1,16 @@
 from django.template import RequestContext
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, HttpResponseForbidden, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.db import connection
 from django.db.models import Q
+from django.conf import settings
 
 import urllib
 import re
 from datetime import datetime, timedelta
 import calendar
+
+import simplejson as json
 
 from models import *
 
@@ -246,3 +249,79 @@ def oldsite(request, msgid):
 	u = urllib.urlopen('http://archives.postgresql.org/message-id/%s' % msgid)
 	m = re.search('<!--X-Body-of-Message-->(.*)<!--X-Body-of-Message-End-->', u.read(), re.DOTALL)
 	return HttpResponse(m.groups(1), content_type='text/html')
+
+def search(request):
+	# Only certain hosts are allowed to call the search API
+	if not request.META['REMOTE_ADDR'] in settings.SEARCH_CLIENTS:
+		return HttpResponseForbidden('Invalid host')
+
+	# Perform a search of the archives and return a JSON document.
+	# Expects the following (optional) POST parameters:
+	# q = query to search for
+	# l = comma separated list of lists to search for
+	# d = number of days back to search for, or -1 (or not specified)
+	#     to search the full archives
+	# s = sort results by ['r'=rank, 'd'=date]
+	if not request.method == 'POST':
+		raise Http404('I only respond to POST')
+
+	if not request.POST.has_key('q'):
+		raise Http404('No search query specified')
+	query = request.POST['q']
+
+	if request.POST.has_key('l'):
+		try:
+			lists = [int(x) for x in request.POST['l'].split(',')]
+		except:
+			# If failing to parse list of lists, just search all
+			lists = None
+	else:
+		lists = None
+
+	if request.POST.has_key('d'):
+		days = int(request.POST['d'])
+		if days < 1 or days > 365:
+			firstdate = None
+		else:
+			firstdate = datetime.now() - timedelta(days=days)
+	else:
+		firstdate = None
+
+	if request.POST.has_key('s'):
+		list_sort = request.POST['s'] == 'd' and 'd' or 'r'
+	else:
+		list_sort = 'r'
+
+	# Ok, we have all we need to do the search
+	curs = connection.cursor()
+	qstr = "SELECT listname, messageid, date, subject, _from, ts_rank_cd(fti, plainto_tsquery(%(q)s)), ts_headline(bodytxt, plainto_tsquery(%(q)s),'StartSel=\"[[[[[[\",StopSel=\"]]]]]]\"') FROM messages m INNER JOIN list_threads lt ON lt.threadid=m.threadid INNER JOIN lists l ON l.listid=lt.listid WHERE fti @@ plainto_tsquery(%(q)s)"
+	params = {
+		'q': query,
+	}
+	if lists:
+		qstr += " AND lt.listid=ANY(%(lists)s) "
+		params['lists'] = lists
+	if firstdate:
+		qstr += " AND m.date > %(date)s"
+		params['date'] = firstdate
+	if list_sort == 'r':
+		qstr += " ORDER BY ts_rank_cd(fti, plainto_tsquery(%(q)s)) DESC LIMIT 1000"
+	else:
+		qstr += " ORDER BY date DESC LIMIT 1000"
+
+	curs.execute(qstr, params)
+
+	resp = HttpResponse(mimetype='application/json')
+
+	json.dump([{
+				'l': listname,
+				'm': messageid,
+				'd': date.isoformat(),
+				's': subject,
+				'f': mailfrom,
+				'r': rank,
+				'a': abstract.replace("[[[[[[", "<b>").replace("]]]]]]","</b>"),
+
+				} for listname, messageid, date, subject, mailfrom, rank, abstract in curs.fetchall()],
+			  resp)
+	return resp
