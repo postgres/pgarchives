@@ -32,6 +32,9 @@ urlpatterns = patterns('',
 
     (r'^message-id/attachment/(\d+)/.*$', 'archives.mailarchives.views.attachment'),
 
+    # Legacy forwarding from old archives site
+    (r'^message-id/legacy/([\w-]+)/(\d+)-(\d+)/msg(\d+).php$', 'archives.mailarchives.views.legacy'),
+
     # Normally served by the webserver, but needed for development installs
     (r'^media/(.*)$', 'django.views.static.serve', {
 			'document_root': '../media',

@@ -127,4 +127,13 @@ CREATE TRIGGER messages_fti_trigger
  FOR EACH ROW EXECUTE PROCEDURE messages_fti_trigger_func();
 CREATE INDEX messages_fti_idx ON messages USING gin(fti);
 
+CREATE TABLE legacymap(
+       listid int not null,
+       year int not null,
+       month int not null,
+       msgnum int not null,
+       msgid text not null,
+CONSTRAINT legacymap_pk PRIMARY KEY (listid, year, month, msgnum)
+);
+
 \echo Dont forget to commit!

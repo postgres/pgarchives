@@ -1,5 +1,6 @@
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseForbidden, Http404
+from django.http import HttpResponsePermanentRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.db import connection
 from django.db.models import Q
@@ -382,3 +383,18 @@ def web_sync_timestamp(request):
 	r = HttpResponse(s, mimetype='text/plain')
 	r['Content-Length'] = len(s)
 	return r
+
+@cache(hours=8)
+def legacy(request, listname, year, month, msgnum):
+	curs = connection.cursor()
+	curs.execute("SELECT msgid FROM legacymap WHERE listid=(SELECT listid FROM lists WHERE listname=%(list)s) AND year=%(year)s AND month=%(month)s AND msgnum=%(msgnum)s", {
+			'list': listname,
+			'year': year,
+			'month': month,
+			'msgnum': msgnum,
+			})
+	r = curs.fetchall()
+	if len(r) != 1:
+		print "Meh, not found!"
+		raise Http404('Message does not exist')
+	return HttpResponsePermanentRedirect('/message-id/%s' % r[0][0])

@@ -2,7 +2,7 @@
 
 # Scan the old archives, including all subdirs, and generate
 # a mapping table on the format:
-# <listname>;<year>;<month>;num;<messageid>
+# <listid>;<year>;<month>;num;<messageid>
 
 # Used to map from the old site
 
