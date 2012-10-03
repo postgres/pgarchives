@@ -128,22 +128,23 @@ h4 {
 
 /* Link Styles */
 
-a:link                          { color:#0085B0; text-decoration: underline; }
-a:visited                       { color:#004E66; text-decoration: underline; }
-a:active                        { color:#0085B0; text-decoration: underline; }
-a:hover                         { color:#000000; text-decoration: underline; }
 
-#pgFooter a:link                { color:#666; text-decoration: underline; }
-#pgFooter a:visited             { color:#666; text-decoration: underline; }
-#pgFooter a:active              { color:#666; text-decoration: underline; }
-#pgFooter a:hover               { color:#000000; text-decoration: underline; }
+a                               { text-decoration: underline; }
 
-#txtFrontUserName a:link                { color:#666; text-decoration: underline; }
-#txtFrontUserName a:visited             { color:#666; text-decoration: underline; }
-#txtFrontUserName a:active              { color:#666; text-decoration: underline; }
-#txtFrontUserName a:hover               { color:#000; text-decoration: underline; }
+a:link                          { color:#0085B0; }
+a:visited                       { color:#004E66; }
+a:active                        { color:#0085B0; }
+a:hover                         { color:#000000; }
 
-.bodywrapper a:visited	{ color:#00536E; text-decoration: underline; }
+select a                        { text-decoration: none }
+
+#pgFooter a                     { color:#666; }
+#pgFooter a:hover               { color:#000; }
+
+#txtFrontUserName a             { color:#666; }
+#txtFrontUserName a:hover       { color:#000; }
+
+.bodywrapper a:visited	        { color:#00536E; }
 .bodywrapper pre,
 .bodywrapper tt {
   word-wrap: break-word;
