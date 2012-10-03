@@ -111,6 +111,10 @@ def render_datelist_from(request, l, d, title, to=None):
 		# All hits are from one month, so generate month links
 		yearmonth = "%s%02d" % (mlist[0].date.year, mlist[0].date.month)
 		daysinmonth = range(1, calendar.monthrange(mlist[0].date.year, mlist[0].date.month)[1]+1)
+	elif len(allmonths) == 0:
+		# No hits at all, so generate month links from the specified date
+		yearmonth = "%s%02d" % (d.year, d.month)
+		daysinmonth = range(1, calendar.monthrange(d.year, d.month)[1]+1)
 	else:
 		daysinmonth = None
 		yearmonth = None
