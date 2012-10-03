@@ -7,6 +7,7 @@ from django.conf import settings
 
 import urllib
 import re
+import base64
 from datetime import datetime, timedelta
 import calendar
 
@@ -25,6 +26,13 @@ def cache(days=0, hours=0, minutes=0, seconds=0):
 			return resp
 		return __cache
 	return _cache
+
+def nocache(fn):
+	def _nocache(request, *_args, **_kwargs):
+		resp = fn(request, *_args, **_kwargs)
+		resp['Cache-Control'] = 's-maxage=0'
+		return resp
+	return _nocache
 
 
 def get_all_groups_and_lists(listid=None):
@@ -236,19 +244,34 @@ def message_flat(request, msgid):
 	r['X-pgthread'] = ":%s:" % msg.threadid
 	return r
 
-@cache(hours=1)
+@nocache
 def message_raw(request, msgid):
-	curs = connection.cursor()
-	curs.execute("SELECT threadid, rawtxt FROM messages WHERE messageid=%(messageid)s", {
-			'messageid': msgid,
-			})
-	row = curs.fetchall()
-	if len(row) != 1:
-		raise Http404('Message does not exist')
+	if 'HTTP_AUTHORIZATION' in request.META:
+		auth = request.META['HTTP_AUTHORIZATION'].split()
+		if len(auth) != 2:
+			return HttpResponseForbidden("Invalid authentication")
+		if auth[0].lower() == "basic":
+			user, pwd = base64.b64decode(auth[1]).split(':')
+			if user == 'archives' and pwd == 'antispam':
+				curs = connection.cursor()
+				curs.execute("SELECT threadid, rawtxt FROM messages WHERE messageid=%(messageid)s", {
+						'messageid': msgid,
+						})
+				row = curs.fetchall()
+				if len(row) != 1:
+					raise Http404('Message does not exist')
 
-	r = HttpResponse(row[0][1], content_type='text/plain')
-	r['X-pgthread'] = ":%s:" % row[0][0]
-	return r
+				r = HttpResponse(row[0][1], content_type='text/plain')
+				r['X-pgthread'] = ":%s:" % row[0][0]
+				return r
+			# Invalid password falls through
+		# Other authentication types fall through
+
+	# Require authentication
+	response = HttpResponse()
+	response.status_code = 401
+	response['WWW-Authenticate'] = 'Basic realm="Please authenticate with user archives and password antispam"'
+	return response
 
 def testview(request, seqid):
 	m = Message.objects.get(pk=seqid)
