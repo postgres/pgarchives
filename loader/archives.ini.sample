@@ -7,3 +7,6 @@ server=arkaria.postgresql.org
 [majordomo]
 server=mail.postgresql.org
 password=topsecret
+
+[varnish]
+pgqconnstr=host=somewhere dbname=something

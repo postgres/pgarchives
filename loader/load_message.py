@@ -95,6 +95,8 @@ if __name__ == "__main__":
 		sys.exit(1)
 	listid = r[0][0]
 
+	purges = set()
+
 	if opt.directory:
 		# Parse all files in directory
 		for x in os.listdir(opt.directory):
@@ -111,6 +113,7 @@ if __name__ == "__main__":
 					opstatus.failed += 1
 					continue
 				ap.store(conn, listid)
+				purges.update(ap.purges)
 			if opt.interactive:
 				print "Interactive mode, committing transaction"
 				conn.commit()
@@ -139,6 +142,7 @@ if __name__ == "__main__":
 				opstatus.failed += 1
 				continue
 			ap.store(conn, listid)
+			purges.update(ap.purges)
 		if mboxparser.returncode():
 			log.error("Failed to parse mbox:")
 			log.error(mboxparser.stderr_output())
@@ -154,9 +158,27 @@ if __name__ == "__main__":
 			conn.close()
 			sys.exit(1)
 		ap.store(conn, listid)
+		purges.update(ap.purges)
 		if opstatus.stored:
 			log.log("Stored message with message-id %s" % ap.msgid)
 
 	conn.commit()
 	conn.close()
 	opstatus.print_status()
+
+	if len(purges):
+		# There is something to purge
+		if cfg.has_option('varnish', 'pgqconnstr'):
+			conn = psycopg2.connect(cfg.get('varnish', 'pgqconnstr'))
+			curs = conn.cursor()
+			for p in purges:
+				if isinstance(p, tuple):
+					# Purging a list
+					purgeexp = 'obj.http.x-pglm ~ :%s/%s/%s:' % p
+				else:
+					# Purging individual thread
+					purgeexp = 'obj.http.x-pgthread ~ :%s:' % p
+				curs.execute("SELECT varnish_purge_expr(%(p)s)", {'p': purgeexp})
+			conn.commit()
+			conn.close()
+			log.log("Purged %s records" % len(purges))

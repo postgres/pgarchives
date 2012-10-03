@@ -5,6 +5,13 @@ from lib.log import log, opstatus
 class ArchivesParserStorage(ArchivesParser):
 	def __init__(self):
 		super(ArchivesParserStorage, self).__init__()
+		self.purges = set()
+
+	def purge_list(self, listid, year, month):
+		self.purges.add((int(listid), int(year), int(month)))
+
+	def purge_thread(self, threadid):
+		self.purges.add(int(threadid))
 
 	def store(self, conn, listid):
 		curs = conn.cursor()
@@ -32,12 +39,17 @@ class ArchivesParserStorage(ArchivesParser):
 						'listid': listid,
 						})
 				opstatus.tagged += 1
+				self.purge_list(listid, self.date.year, self.date.month)
+				self.purge_thread(r[0][0])
 			else:
 				opstatus.dupes += 1
 
 			#FIXME: option to overwrite existing message!
 			log.status("Message %s already stored" % self.msgid)
 			return
+
+		# Always purge the primary list for this thread
+		self.purge_list(listid, self.date.year, self.date.month)
 
 		# Resolve own thread
 		curs.execute("SELECT id, messageid, threadid FROM messages WHERE messageid=ANY(%(parents)s)", {
@@ -110,6 +122,9 @@ class ArchivesParserStorage(ArchivesParser):
 				curs.execute("DELETE FROM list_threads WHERE threadid=ANY(%(oldthreadids)s)", {
 						'oldthreadids': list(mergethreads),
 						})
+				# Purge varnish records for all the threads we just removed
+				for t in mergethreads:
+					self.purge_thread(t)
 
 			# Batch all the children for repointing. We can't do the actual
 			# repointing until later, since we don't know our own id yet.
@@ -131,6 +146,10 @@ class ArchivesParserStorage(ArchivesParser):
 			curs.execute("SELECT nextval('threadid_seq')")
 			self.threadid = curs.fetchall()[0][0]
 			log.status("Message %s resolved to no parent (out of %s) and no child, new thread %s" % (self.msgid, len(self.parents), self.threadid))
+		else:
+			# We have a threadid already, so we're not a new thread. Thus,
+			# we need to purge the old thread
+			self.purge_thread(self.threadid)
 
 		# Insert a thread tag if we're on a new list
 		curs.execute("INSERT INTO list_threads (threadid, listid) SELECT %(threadid)s, %(listid)s WHERE NOT EXISTS (SELECT * FROM list_threads t2 WHERE t2.threadid=%(threadid)s AND t2.listid=%(listid)s) RETURNING threadid", {
