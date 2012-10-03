@@ -178,7 +178,7 @@ if __name__ == "__main__":
 					exprlist.append('obj.http.x-pglm ~ :%s/%s/%s:' % p)
 				else:
 					# Purging individual thread
-					exprlist.append(purgeexp = 'obj.http.x-pgthread ~ :%s:' % p)
+					exprlist.append('obj.http.x-pgthread ~ :%s:' % p)
 			purgedict = dict(zip(['p%s' % n for n in range(0, len(exprlist))], exprlist))
 			purgedict['n'] = len(exprlist)
 			r = urllib.urlopen(purgeurl, urllib.urlencode({'purges': purgedict}))
