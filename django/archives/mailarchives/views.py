@@ -14,6 +14,19 @@ import simplejson as json
 
 from models import *
 
+# Decorator to set cache age
+def cache(days=0, hours=0, minutes=0, seconds=0):
+	"Set the server to cache object a specified time. td must be a timedelta object"
+	def _cache(fn):
+		def __cache(request, *_args, **_kwargs):
+			resp = fn(request, *_args, **_kwargs)
+			td = timedelta(hours=hours, minutes=minutes, seconds=seconds)
+			resp['Cache-Control'] = 's-maxage=%s' % (td.days*3600*24 + td.seconds)
+			return resp
+		return __cache
+	return _cache
+
+
 def get_all_groups_and_lists(listid=None):
 	# Django doesn't (yet) support traversing the reverse relationship,
 	# so we'll get all the lists and rebuild it backwards.
@@ -56,12 +69,14 @@ class NavContext(RequestContext):
 
 		self.update({'listgroups': groups})
 
+@cache(hours=4)
 def index(request):
 	(groups, listgroupid) = get_all_groups_and_lists()
 	return render_to_response('index.html', {
 			'groups': [{'groupname': g['groupname'], 'lists': g['lists']} for g in groups],
 			}, NavContext(request, all_groups=groups))
 
+@cache(hours=8)
 def monthlist(request, listname):
 	l = get_object_or_404(List, listname=listname)
 	curs = connection.cursor()
@@ -119,27 +134,32 @@ def render_datelist_to(request, l, d, title):
 	r['X-pglm'] = ':%s:' % (':'.join(['%s/%s/%s' % (l.listid, year, month) for year,month in allyearmonths]))
 	return r
 
+@cache(hours=2)
 def datelistsince(request, listname, msgid):
 	l = get_object_or_404(List, listname=listname)
 	msg = get_object_or_404(Message, messageid=msgid)
 	return render_datelist_from(request, l, msg.date, "%s since %s" % (l.listname, msg.date.strftime("%Y-%m-%d %H:%M:%S")))
 
+# Longer cache since this will be used for the fixed date links
+@cache(hours=4)
 def datelistsincetime(request, listname, year, month, day, hour, minute):
 	l = get_object_or_404(List, listname=listname)
 	d = datetime(int(year), int(month), int(day), int(hour), int(minute))
 	return render_datelist_from(request, l, d, "%s since %s" % (l.listname, d.strftime("%Y-%m-%d %H:%M")))
 
+@cache(hours=2)
 def datelistbefore(request, listname, msgid):
 	l = get_object_or_404(List, listname=listname)
 	msg = get_object_or_404(Message, messageid=msgid)
 	return render_datelist_to(request, l, msg.date, "%s before %s" % (l.listname, msg.date.strftime("%Y-%m-%d %H:%M:%S")))
 
+@cache(hours=2)
 def datelistbeforetime(request, listname, year, month, day, hour, minute):
 	l = get_object_or_404(List, listname=listname)
 	d = datetime(int(year), int(month), int(day), int(hour), int(minute))
 	return render_datelist_to(request, l, d, "%s before %s" % (l.listname, d.strftime("%Y-%m-%d %H:%M")))
 
-
+@cache(hours=4)
 def datelist(request, listname, year, month):
 	l = get_object_or_404(List, listname=listname)
 	d = datetime(int(year), int(month), 1)
@@ -147,7 +167,7 @@ def datelist(request, listname, year, month):
 	enddate = datetime(enddate.year, enddate.month, 1)
 	return render_datelist_from(request, l, d, "%s - %s %s" % (l.listname, d.strftime("%B"), d.year), enddate)
 
-
+@cache(hours=4)
 def attachment(request, attid):
 	# Use a direct query instead of django, since it has bad support for
 	# bytea
@@ -173,6 +193,7 @@ SELECT id,_from,subject,date,messageid,has_attachment,parentid,datepath FROM t O
 	for id,_from,subject,date,messageid,has_attachment,parentid,parentpath in curs.fetchall():
 		yield {'id':id, 'mailfrom':_from, 'subject': subject, 'printdate': date.strftime("%Y-%m-%d %H:%M:%S"), 'messageid': messageid, 'hasattachment': has_attachment, 'parentid': parentid, 'indent': "&nbsp;" * len(parentpath)}
 
+@cache(hours=4)
 def message(request, msgid):
 	try:
 		m = Message.objects.get(messageid=msgid)
@@ -199,6 +220,7 @@ def message(request, msgid):
 	r['X-pgthread'] = ":%s:" % m.threadid
 	return r
 
+@cache(hours=4)
 def message_flat(request, msgid):
 	try:
 		msg = Message.objects.get(messageid=msgid)
@@ -214,6 +236,7 @@ def message_flat(request, msgid):
 	r['X-pgthread'] = ":%s:" % msg.threadid
 	return r
 
+@cache(hours=1)
 def message_raw(request, msgid):
 	curs = connection.cursor()
 	curs.execute("SELECT threadid, rawtxt FROM messages WHERE messageid=%(messageid)s", {
@@ -326,6 +349,7 @@ def search(request):
 			  resp)
 	return resp
 
+@cache(seconds=10)
 def web_sync_timestamp(request):
 	s = datetime.now().strftime("%Y-%m-%d %H:%M:%S\n")
 	r = HttpResponse(s, mimetype='text/plain')
