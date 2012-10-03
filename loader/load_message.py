@@ -10,6 +10,7 @@ import sys
 from optparse import OptionParser
 from ConfigParser import ConfigParser
 import urllib
+import urllib2
 
 import psycopg2
 
@@ -181,6 +182,10 @@ if __name__ == "__main__":
 					exprlist.append('obj.http.x-pgthread ~ :%s:' % p)
 			purgedict = dict(zip(['p%s' % n for n in range(0, len(exprlist))], exprlist))
 			purgedict['n'] = len(exprlist)
-			r = urllib.urlopen(purgeurl, urllib.urlencode({'purges': purgedict}))
-			if r.getcode() != 200:
+			r = urllib2.Request(purgeurl, data=urllib.urlencode(purgedict))
+			r.add_header('Content-type', 'application/x-www-form-urlencoded')
+			r.add_header('Host', 'www.postgresql.org')
+			r.get_method = lambda: 'POST'
+			u = urllib2.urlopen(r)
+			if u.getcode() != 200:
 				log.error("Failed to send purge request!")
