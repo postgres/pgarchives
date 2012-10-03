@@ -29,7 +29,7 @@ def ensure_subscribed(listname):
 				x = raw_input("Attempt to subscribe? ")
 				if x.upper() == 'N': return False
 				if x.upper() != 'Y': continue
-				u = 'http://%s/mj/mj_wwwadm?%s' % (cfg.get('majordomo','server'), urlencode((
+				u = 'https://%s/mj/mj_wwwadm?%s' % (cfg.get('majordomo','server'), urlencode((
 							('passw', cfg.get('majordomo', 'password')),
 							('list', listname),
 							('func', 'subscribe-set-nowelcome'),
