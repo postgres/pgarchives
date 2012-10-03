@@ -15,24 +15,21 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
 
-    (r'^test/(\d+)/$', 'archives.mailarchives.views.testview'),
-    (r'^test/oldsite/([^/]+)/$', 'archives.mailarchives.views.oldsite'),
-
     (r'^$', 'archives.mailarchives.views.index'),
     (r'^message-id/([^/]+)$', 'archives.mailarchives.views.message'),
-    (r'^flat/([^/]+)$', 'archives.mailarchives.views.message_flat'),
-    (r'^raw/([^/]+)$', 'archives.mailarchives.views.message_raw'),
-    (r'^search/', 'archives.mailarchives.views.search'),
+    (r'^message-id/flat/([^/]+)$', 'archives.mailarchives.views.message_flat'),
+    (r'^message-id/raw/([^/]+)$', 'archives.mailarchives.views.message_raw'),
+    (r'^archives-search/', 'archives.mailarchives.views.search'),
 
     # Date etc indexes
-    (r'^([\w-]+)/$', 'archives.mailarchives.views.monthlist'),
-    (r'^([\w-]+)/(\d+)-(\d+)/$', 'archives.mailarchives.views.datelist'),
-    (r'^([\w-]+)/since/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})', 'archives.mailarchives.views.datelistsincetime'),
-    (r'^([\w-]+)/since/([^/]+)/$', 'archives.mailarchives.views.datelistsince'),
-    (r'^([\w-]+)/before/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})', 'archives.mailarchives.views.datelistbeforetime'),
-    (r'^([\w-]+)/before/([^/]+)$', 'archives.mailarchives.views.datelistbefore'),
+    (r'^list/([\w-]+)/$', 'archives.mailarchives.views.monthlist'),
+    (r'^list/([\w-]+)/(\d+)-(\d+)/$', 'archives.mailarchives.views.datelist'),
+    (r'^list/([\w-]+)/since/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})', 'archives.mailarchives.views.datelistsincetime'),
+    (r'^list/([\w-]+)/since/([^/]+)/$', 'archives.mailarchives.views.datelistsince'),
+    (r'^list/([\w-]+)/before/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})', 'archives.mailarchives.views.datelistbeforetime'),
+    (r'^list/([\w-]+)/before/([^/]+)$', 'archives.mailarchives.views.datelistbefore'),
 
-    (r'^attachment/(\d+)/.*$', 'archives.mailarchives.views.attachment'),
+    (r'^message-id/attachment/(\d+)/.*$', 'archives.mailarchives.views.attachment'),
 
     # Normally served by the webserver, but needed for development installs
     (r'^media/(.*)$', 'django.views.static.serve', {

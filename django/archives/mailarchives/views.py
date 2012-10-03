@@ -32,7 +32,7 @@ def get_all_groups_and_lists(listid=None):
 				'groupname': l.group.groupname,
 				'sortkey': l.group.sortkey,
 				'lists': [l,],
-				'homelink': l.listname,
+				'homelink': 'list/%s' % l.listname,
 				}
 
 	return (sorted(groups.values(), key=lambda g: g['sortkey']), listgroupid)

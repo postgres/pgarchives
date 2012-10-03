@@ -62,7 +62,7 @@ span.listname {
  </tr>
  <tr>
   <th>Message-ID:</th>
-  <td><a href="http://archives.postgresql.org/message-id/{{msg.messageid}}">{{msg.messageid}}</a> (view <a href="/raw/{{msg.messageid}}">raw</a> or <a href="/flat/{{msg.messageid}}">flat</a>)</td>
+  <td><a href="/message-id/{{msg.messageid}}">{{msg.messageid}}</a> (view <a href="/message-id/raw/{{msg.messageid}}">raw</a> or <a href="/message-id/flat/{{msg.messageid}}">flat</a>)</td>
  </tr>
  <tr>
   <th>Thread:</th>
@@ -75,7 +75,7 @@ span.listname {
  </tr>
  <tr>
   <th>Lists:</th>
-  <td>{%for l in lists %}<span class="listname"><a href="/{{l.listname}}/since/{{msg.shortdate}}">{{l.listname}}</a></span>{%endfor%}</td>
+  <td>{%for l in lists %}<span class="listname"><a href="/list/{{l.listname}}/since/{{msg.shortdate}}">{{l.listname}}</a></span>{%endfor%}</td>
  </tr>
 </table>
 <div class="bodywrapper">
@@ -84,7 +84,7 @@ span.listname {
 {%if msg.has_attachment%}
 {%for a in msg.attachment_set.all%}
 <div>
-<b>Attachment: <a href="/attachment/{{a.id}}/{{a.filename}}">{{a.filename}}</a></b><br/>
+<b>Attachment: <a href="/message-id/attachment/{{a.id}}/{{a.filename}}">{{a.filename}}</a></b><br/>
 Description: {{a.contenttype}}
 </div>
 {%endfor%}

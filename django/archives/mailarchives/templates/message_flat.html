@@ -48,7 +48,7 @@ div.msgwrap {
  </tr>
  <tr>
   <th>Message-ID:</th>
-  <td><a href="/message-id/{{m.messageid}}">{{m.messageid}}</a> (view <a href="/raw/{{m.messageid}}">raw</a>)</td>
+  <td><a href="/message-id/{{m.messageid}}">{{m.messageid}}</a> (view <a href="/message-id/raw/{{m.messageid}}">raw</a>)</td>
  </tr>
 </table>
 <div class="bodywrapper">
@@ -57,7 +57,7 @@ div.msgwrap {
 {%if m.has_attachment%}
 {%for a in m.attachment_set.all%}
 <div>
-<b>Attachment: <a href="/attachment/{{a.id}}/{{a.filename}}">{{a.filename}}</a></b><br/>
+<b>Attachment: <a href="/message-id/attachment/{{a.id}}/{{a.filename}}">{{a.filename}}</a></b><br/>
 Description: {{a.contenttype}}
 </div>
 {%endfor%}

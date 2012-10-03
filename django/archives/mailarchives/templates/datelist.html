@@ -17,14 +17,14 @@
 {%endif%}
 {%endfor%}
 {%with messages|first as firstmsg%}
-<a href="/{{list.listname}}/before/{{firstmsg.shortdate}}">Prev</a>
+<a href="/list/{{list.listname}}/before/{{firstmsg.shortdate}}">Prev</a>
 {%endwith%}
 |
 {%with messages|last as lastmsg%}
-<a href="/{{list.listname}}/since/{{lastmsg.shortdate}}">Next</a>
+<a href="/list/{{list.listname}}/since/{{lastmsg.shortdate}}">Next</a>
 {%endwith%}
 
 {%if daysinmonth%}
-<div class="daylinks">Jump to day: {%for d in daysinmonth%}<a href="/{{list.listname}}/since/{{yearmonth}}{{d|stringformat:"02d"}}0000/">{{d}}</a> {%endfor%}</div>
+<div class="daylinks">Jump to day: {%for d in daysinmonth%}<a href="/list/{{list.listname}}/since/{{yearmonth}}{{d|stringformat:"02d"}}0000/">{{d}}</a> {%endfor%}</div>
 {%endif%}
 {%endblock%}
