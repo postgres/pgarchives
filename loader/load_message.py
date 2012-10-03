@@ -9,6 +9,7 @@ import sys
 
 from optparse import OptionParser
 from ConfigParser import ConfigParser
+import urllib
 
 import psycopg2
 
@@ -168,17 +169,18 @@ if __name__ == "__main__":
 
 	if len(purges):
 		# There is something to purge
-		if cfg.has_option('varnish', 'pgqconnstr'):
-			conn = psycopg2.connect(cfg.get('varnish', 'pgqconnstr'))
-			curs = conn.cursor()
+		if cfg.has_option('varnish', 'purgeurl'):
+			purgeurl = cfg.get('varnish', 'purgeurl')
+			exprlist = []
 			for p in purges:
 				if isinstance(p, tuple):
 					# Purging a list
-					purgeexp = 'obj.http.x-pglm ~ :%s/%s/%s:' % p
+					exprlist.append('obj.http.x-pglm ~ :%s/%s/%s:' % p)
 				else:
 					# Purging individual thread
-					purgeexp = 'obj.http.x-pgthread ~ :%s:' % p
-				curs.execute("SELECT varnish_purge_expr(%(p)s)", {'p': purgeexp})
-			conn.commit()
-			conn.close()
-			log.log("Purged %s records" % len(purges))
+					exprlist.append(purgeexp = 'obj.http.x-pgthread ~ :%s:' % p)
+			purgedict = dict(zip(['p%s' % n for n in range(0, len(exprlist))], exprlist))
+			purgedict['n'] = len(exprlist)
+			r = urllib.urlopen(purgeurl, urllib.urlencode({'purges': purgedict}))
+			if r.getcode() != 200:
+				log.error("Failed to send purge request!")

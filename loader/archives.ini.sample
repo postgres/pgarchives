@@ -9,4 +9,4 @@ server=mail.postgresql.org
 password=topsecret
 
 [varnish]
-pgqconnstr=host=somewhere dbname=something
+purgeurl=https://wrigleys.postgresql.org/api/varnish/purge/
