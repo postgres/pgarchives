@@ -99,35 +99,3 @@ div.tblBasic table td.colLastRT {
         text-align: right;
         vertical-align: top;
 }
-
-table.message th,
-table.message td
-{
-	vertical-align: top;
-}
-table.message th
-{
-	width: 8em;
-}
-
-table.message
-{
-	width: 100%;
-}
-
-table.message select
-{
-	width: 100%;
-}
-
-table.message span.listname
-{
-	line-height: 1.4em;
-	float: left;
-}
-
-.msgwrap table.message
-{
-	border-width: 0;
-}
-

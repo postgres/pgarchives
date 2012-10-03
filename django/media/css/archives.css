@@ -1,0 +1,69 @@
+/* replacement for base.css used on archives */
+@import url("/media/css/global.css");
+@import url("/media/css/layout.css");
+@import url("/media/css/text.css");
+@import url("/media/css/navigation.css");
+@import url("/media/css/table.css");
+
+@import url("/media/css/iefixes.css");
+
+
+a                               { text-decoration: underline; }
+
+a:link                          { color:#0085B0; }
+a:visited                       { color:#004E66; }
+a:active                        { color:#0085B0; }
+a:hover                         { color:#000000; }
+
+select a                        { text-decoration: none }
+
+#pgFooter a                     { color:#666; }
+#pgFooter a:hover               { color:#000; }
+
+#txtFrontUserName a             { color:#666; }
+#txtFrontUserName a:hover       { color:#000; }
+
+.bodywrapper a:visited	        { color:#00536E; }
+.bodywrapper pre,
+.bodywrapper tt {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  font-size: 1.2em;
+  padding: 1em 0 1em 2em;
+  border-width: 2px 0;
+  border-color: lightGray;
+  border-style: solid;
+}
+
+
+table.message th,
+table.message td
+{
+	vertical-align: top;
+}
+table.message th
+{
+	width: 8em;
+}
+
+table.message
+{
+	width: 100%;
+}
+
+table.message select
+{
+	width: 100%;
+}
+
+table.message span.listname
+{
+	line-height: 1.4em;
+	float: left;
+}
+
+.msgwrap table.message
+{
+	border-width: 0;
+}
+

@@ -35,5 +35,9 @@ urlpatterns = patterns('',
     # Normally served by the webserver, but needed for development installs
     (r'^media/(.*)$', 'django.views.static.serve', {
 			'document_root': '../media',
-    })
+    }),
+    (r'^media-archives/(.*)$', 'django.views.static.serve', {
+			'document_root': '../media',
+    }),
+
 )

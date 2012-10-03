@@ -128,33 +128,24 @@ h4 {
 
 /* Link Styles */
 
+a:link                          { color:#0085B0; text-decoration: underline; }
+a:visited                       { color:#004E66; text-decoration: underline; }
+a:active                        { color:#0085B0; text-decoration: underline; }
+a:hover                         { color:#000000; text-decoration: underline; }
 
-a                               { text-decoration: underline; }
+#pgFooter a:link                { color:#666; text-decoration: underline; }
+#pgFooter a:visited             { color:#666; text-decoration: underline; }
+#pgFooter a:active              { color:#666; text-decoration: underline; }
+#pgFooter a:hover               { color:#000000; text-decoration: underline; }
 
-a:link                          { color:#0085B0; }
-a:visited                       { color:#004E66; }
-a:active                        { color:#0085B0; }
-a:hover                         { color:#000000; }
+#txtFrontUserName a:link                { color:#666; text-decoration: underline; }
+#txtFrontUserName a:visited             { color:#666; text-decoration: underline; }
+#txtFrontUserName a:active              { color:#666; text-decoration: underline; }
+#txtFrontUserName a:hover               { color:#000; text-decoration: underline; }
 
-select a                        { text-decoration: none }
-
-#pgFooter a                     { color:#666; }
-#pgFooter a:hover               { color:#000; }
-
-#txtFrontUserName a             { color:#666; }
-#txtFrontUserName a:hover       { color:#000; }
-
-.bodywrapper a:visited	        { color:#00536E; }
-.bodywrapper pre,
-.bodywrapper tt {
-  word-wrap: break-word;
-  white-space: pre-wrap;
-  font-size: 1.2em;
-  padding: 1em 0 1em 2em;
-  border-width: 2px 0;
-  border-color: lightGray;
-  border-style: solid;
-}
+#txtArchives a:visited	{ color:#00536E; text-decoration: underline; }
+#txtArchives pre 	{ word-wrap: break-word; font-size: 150%; }
+#txtArchives tt 	{ word-wrap: break-word; font-size: 150%; }
 
 #pgFrontUSSContainer h2, #pgFrontUSSContainer h3 {
   margin: 0;
