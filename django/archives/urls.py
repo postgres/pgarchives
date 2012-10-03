@@ -15,6 +15,7 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
 
+    (r'^web_sync_timestamp$', 'archives.mailarchives.views.web_sync_timestamp'),
     (r'^$', 'archives.mailarchives.views.index'),
     (r'^message-id/([^/]+)$', 'archives.mailarchives.views.message'),
     (r'^message-id/flat/([^/]+)$', 'archives.mailarchives.views.message_flat'),

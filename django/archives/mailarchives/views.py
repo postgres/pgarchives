@@ -325,3 +325,9 @@ def search(request):
 				} for listname, messageid, date, subject, mailfrom, rank, abstract in curs.fetchall()],
 			  resp)
 	return resp
+
+def web_sync_timestamp(request):
+	s = datetime.now().strftime("%Y-%m-%d %H:%M:%S\n")
+	r = HttpResponse(s, mimetype='text/plain')
+	r['Content-Length'] = len(s)
+	return r
