@@ -59,6 +59,7 @@ CREATE TABLE list_threads(
    listid int NOT NULL REFERENCES lists(listid),
    CONSTRAINT pg_list_threads PRIMARY KEY (threadid, listid)
 );
+CREATE INDEX list_threads_listid_idx ON list_threads(listid);
 
 CREATE TABLE attachments(
    id serial not null primary key,
