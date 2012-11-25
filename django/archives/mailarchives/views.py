@@ -54,7 +54,7 @@ def get_all_groups_and_lists(listid=None):
 				'groupname': l.group.groupname,
 				'sortkey': l.group.sortkey,
 				'lists': [l,],
-				'homelink': 'list/%s' % l.listname,
+				'homelink': 'list/-%s' % l.group.groupid,
 				}
 
 	return (sorted(groups.values(), key=lambda g: g['sortkey']), listgroupid)
@@ -83,6 +83,13 @@ def index(request):
 	(groups, listgroupid) = get_all_groups_and_lists()
 	return render_to_response('index.html', {
 			'groups': [{'groupname': g['groupname'], 'lists': g['lists']} for g in groups],
+			}, NavContext(request, all_groups=groups))
+
+@cache(hours=8)
+def groupindex(request, groupid):
+	(groups, listgroupid) = get_all_groups_and_lists()
+	return render_to_response('index.html', {
+			'groups': [{'groupname': g['groupname'], 'lists': g['lists']} for g in groups if g['groupid']==int(groupid)],
 			}, NavContext(request, all_groups=groups))
 
 @cache(hours=8)
