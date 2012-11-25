@@ -108,18 +108,27 @@ def render_datelist_from(request, l, d, title, to=None):
 	allmonths = set([m.date.month for m in mlist])
 	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
 
+	monthdate = None
+	daysinmonth = None
 	if len(allmonths) == 1:
 		# All hits are from one month, so generate month links
-		yearmonth = "%s%02d" % (mlist[0].date.year, mlist[0].date.month)
-		daysinmonth = range(1, calendar.monthrange(mlist[0].date.year, mlist[0].date.month)[1]+1)
+		monthdate = mlist[0].date
 	elif len(allmonths) == 0:
 		# No hits at all, so generate month links from the specified date
-		yearmonth = "%s%02d" % (d.year, d.month)
-		daysinmonth = range(1, calendar.monthrange(d.year, d.month)[1]+1)
-	else:
-		daysinmonth = None
-		yearmonth = None
+		monthdate = d
 
+	if monthdate:
+		curs = connection.cursor()
+		curs.execute("SELECT DISTINCT extract(day FROM date) FROM messages WHERE date >= %(startdate)s AND date < %(enddate)s AND threadid IN (SELECT threadid FROM list_threads WHERE listid=%(listid)s) ORDER BY 1", {
+				'startdate': monthdate,
+				'enddate': monthdate + timedelta(days=calendar.monthrange(monthdate.year, monthdate.month)[1]),
+				'listid': l.listid,
+				})
+		daysinmonth = [int(r[0]) for r in curs.fetchall()]
+
+	yearmonth = None
+	if monthdate:
+		yearmonth = "%s%02d" % (monthdate.year, monthdate.month)
 	r = render_to_response('datelist.html', {
 			'list': l,
 			'messages': list(mlist),
