@@ -127,7 +127,7 @@ def render_datelist_from(request, l, d, title, to=None):
 	if monthdate:
 		curs = connection.cursor()
 		curs.execute("SELECT DISTINCT extract(day FROM date) FROM messages WHERE date >= %(startdate)s AND date < %(enddate)s AND threadid IN (SELECT threadid FROM list_threads WHERE listid=%(listid)s) ORDER BY 1", {
-				'startdate': monthdate,
+				'startdate': datetime(year=monthdate.year, month=monthdate.month, day=1),
 				'enddate': monthdate + timedelta(days=calendar.monthrange(monthdate.year, monthdate.month)[1]),
 				'listid': l.listid,
 				})
