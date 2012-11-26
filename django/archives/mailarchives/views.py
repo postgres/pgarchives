@@ -104,17 +104,8 @@ def monthlist(request, listname):
 			'months': months,
 			}, NavContext(request, l.listid))
 
-def render_datelist_from(request, l, d, title, to=None):
-	datefilter = Q(date__gte=d)
-	if to:
-		datefilter.add(Q(date__lt=to), Q.AND)
-
-	mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().filter(datefilter).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('date')[:200]
-
-	threads = set([m.threadid for m in mlist])
+def get_monthday_info(mlist, l):
 	allmonths = set([m.date.month for m in mlist])
-	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
-
 	monthdate = None
 	daysinmonth = None
 	if len(allmonths) == 1:
@@ -136,6 +127,19 @@ def render_datelist_from(request, l, d, title, to=None):
 	yearmonth = None
 	if monthdate:
 		yearmonth = "%s%02d" % (monthdate.year, monthdate.month)
+	return (yearmonth, daysinmonth)
+
+def render_datelist_from(request, l, d, title, to=None):
+	datefilter = Q(date__gte=d)
+	if to:
+		datefilter.add(Q(date__lt=to), Q.AND)
+
+	mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().filter(datefilter).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('date')[:200]
+
+	threads = set([m.threadid for m in mlist])
+	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
+	(yearmonth, daysinmonth) = get_monthday_info(mlist, l)
+
 	r = render_to_response('datelist.html', {
 			'list': l,
 			'messages': list(mlist),
@@ -154,11 +158,14 @@ def render_datelist_to(request, l, d, title):
 
 	threads = set([m.threadid for m in mlist])
 	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
+	(yearmonth, daysinmonth) = get_monthday_info(mlist, l)
 
 	r = render_to_response('datelist.html', {
 			'list': l,
 			'messages': list(mlist),
 			'title': title,
+			'daysinmonth': daysinmonth,
+			'yearmonth': yearmonth,
 			}, NavContext(request, l.listid))
 	r['X-pglm'] = ':%s:' % (':'.join(['%s/%s/%s' % (l.listid, year, month) for year,month in allyearmonths]))
 	return r
