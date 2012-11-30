@@ -29,29 +29,32 @@ def ensure_subscribed(listname):
 				x = raw_input("Attempt to subscribe? ")
 				if x.upper() == 'N': return False
 				if x.upper() != 'Y': continue
-				u = 'https://%s/mj/mj_wwwadm?%s' % (cfg.get('majordomo','server'), urlencode((
-							('passw', cfg.get('majordomo', 'password')),
-							('list', listname),
-							('func', 'subscribe-set-nowelcome'),
-							('setting', 'hideaddress'),
-							('setting', 'hideall'),
-							('setting', 'postblock'),
-							('setting', 'selfcopy'),
-							('setting', 'each'),
-							('victims', '%s@%s' % (listname, cfg.get('mail', 'server'))),
-							)))
-				f = urlopen(u)
-				s = f.read()
-				f.close()
-				if s.find("%s@%s was added to the %s mailing list." % (
-						listname,
-						cfg.get('mail', 'server'),
-						listname)) > 0:
-					print "SUCCESS!"
-					return True
-				else:
-					print "FAILED to add the subscriber!"
-					return False
+		else:
+			# Output is not a tty, so don't prompt.
+			print "Attempting to subscribe..."
+			u = 'https://%s/mj/mj_wwwadm?%s' % (cfg.get('majordomo','server'), urlencode((
+						('passw', cfg.get('majordomo', 'password')),
+						('list', listname),
+						('func', 'subscribe-set-nowelcome'),
+						('setting', 'hideaddress'),
+						('setting', 'hideall'),
+						('setting', 'postblock'),
+						('setting', 'selfcopy'),
+						('setting', 'each'),
+						('victims', '%s@%s' % (listname, cfg.get('mail', 'server'))),
+						)))
+			f = urlopen(u)
+			s = f.read()
+			f.close()
+			if s.find("%s@%s was added to the %s mailing list." % (
+					listname,
+					cfg.get('mail', 'server'),
+					listname)) > 0:
+				print "SUCCESS!"
+				return True
+			else:
+				print "FAILED to add the subscriber!"
+				return False
 
 	# Wow this is ugly - but regexps are useful
 	m = re.search('Addresses found: (\d+)\s', s)
