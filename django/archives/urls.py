@@ -44,5 +44,5 @@ urlpatterns = patterns('',
     (r'^media-archives/(.*)$', 'django.views.static.serve', {
 			'document_root': '../media',
     }),
-
+    (r'^list/([\w-]+)/mbox/(\d{4})', 'archives.mailarchives.views.mbox'),
 )

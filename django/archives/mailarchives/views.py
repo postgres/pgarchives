@@ -421,3 +421,7 @@ def legacy(request, listname, year, month, msgnum):
 		print "Meh, not found!"
 		raise Http404('Message does not exist')
 	return HttpResponsePermanentRedirect('/message-id/%s' % r[0][0])
+
+@cache(hours=8)
+def mbox(request, listname, mboxname):
+	return HttpResponse('This needs to be handled by the webserver. This view should never be called.', content_type='text/plain')
