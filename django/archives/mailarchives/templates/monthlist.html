@@ -9,7 +9,7 @@
  <li>{{year.grouper}}
   <ul>
    {%for month in year.list%}
-    <li><a href="/list/{{list.listname}}/{{month.year}}-{{month.month|stringformat:"02d"}}/">{{month.date|date:"F"}}</a> (<a href="/list/{{list.listname}}/mbox/{{month.year}}{{month.month|stringformat:"02d"}}">mbox</a>)</li>
+    <li><a href="/list/{{list.listname}}/{{month.year}}-{{month.month|stringformat:"02d"}}/">{{month.date|date:"F"}}</a> (<a href="/list/{{list.listname}}/mbox/{{list.listname}}.{{month.year}}{{month.month|stringformat:"02d"}}">mbox</a>)</li>
    {%endfor%}
   </ul>
  </li>
