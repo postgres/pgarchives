@@ -80,17 +80,6 @@ CREATE TABLE loaderrors(
    err text NOT NULL
 );
 
-
-/* legacy site */
-CREATE TABLE legacyurls(
-   listid int NOT NULL,
-   year int NOT NULL,
-   month int NOT NULL,
-   seq int NOT NULL,
-   msgid text NOT NULL
-);
-
-
 /* textsearch configs */
 CREATE TEXT SEARCH CONFIGURATION pg (COPY = pg_catalog.english );
 
