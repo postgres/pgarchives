@@ -116,4 +116,4 @@ for (dirpath, dirnames, filenames) in os.walk(root):
 		for fn in filenames:
 			m2 = fnre.match(fn)
 			if m2:
-				print "%s;%s;%s;%s;%s" % (listmap[listname], m.group(1), m.group(2), m2.group(1), get_messageid("%s/%s" % (dirpath, fn)))
+				print "%s;%s;%s;%s;\"%s\"" % (listmap[listname], m.group(1), m.group(2), m2.group(1), get_messageid("%s/%s" % (dirpath, fn)))
