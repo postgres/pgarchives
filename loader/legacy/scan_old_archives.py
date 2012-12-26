@@ -10,6 +10,7 @@ import os
 import os.path
 import sys
 import re
+from HTMLParser import HTMLParser
 
 root = "/srv/archives/repo/archives/html"
 
@@ -96,12 +97,15 @@ listmap = {
 'vepug':56,
 }
 
+
+hp = HTMLParser()
+
 def get_messageid(fn):
 	with open(fn) as f:
 		for l in f:
 			if l.startswith('<!--X-Message-Id: '):
 				# Found it!
-				return l[18:-5]
+				return hp.unescape(l[18:-5])
 	raise Exception("No messageid in %s" % fn)
 
 dirre = re.compile("^(\d+)-(\d+)$")
