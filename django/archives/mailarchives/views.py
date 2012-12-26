@@ -104,7 +104,7 @@ def monthlist(request, listname):
 			'months': months,
 			}, NavContext(request, l.listid))
 
-def get_monthday_info(mlist, l):
+def get_monthday_info(mlist, l, d):
 	allmonths = set([m.date.month for m in mlist])
 	monthdate = None
 	daysinmonth = None
@@ -138,7 +138,7 @@ def render_datelist_from(request, l, d, title, to=None):
 
 	threads = set([m.threadid for m in mlist])
 	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
-	(yearmonth, daysinmonth) = get_monthday_info(mlist, l)
+	(yearmonth, daysinmonth) = get_monthday_info(mlist, l, d)
 
 	r = render_to_response('datelist.html', {
 			'list': l,
@@ -158,7 +158,7 @@ def render_datelist_to(request, l, d, title):
 
 	threads = set([m.threadid for m in mlist])
 	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
-	(yearmonth, daysinmonth) = get_monthday_info(mlist, l)
+	(yearmonth, daysinmonth) = get_monthday_info(mlist, l, d)
 
 	r = render_to_response('datelist.html', {
 			'list': l,
