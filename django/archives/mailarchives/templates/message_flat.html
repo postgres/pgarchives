@@ -2,7 +2,7 @@
 {%block title%}{{msg.subject}}{%endblock%}
 {%load pgfilters%}
 {%block extrahead%}
-<script language="javascript">
+<script type="text/javascript">
 /* This should be moved into a common JS file */
 
 function load() {
@@ -13,10 +13,6 @@ function load() {
 window.onload = load;
 </script>
 <style>
-div.msgwrap {
-   border: 2px solid lightGray;
-   margin-bottom: 10px;
-}
 </style>
 {%endblock%}
 {%block contents%}
@@ -29,6 +25,7 @@ div.msgwrap {
   <th>From:</th>
   <td>{{m.mailfrom|hidemail}}</td>
  </tr>
+ <tr>
   <th>To:</th>
   <td>{{m.to|hidemail}}</td>
  </tr>

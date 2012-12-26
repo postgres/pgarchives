@@ -67,6 +67,11 @@ table.message span.listname
 	border-width: 0;
 }
 
+div.msgwrap {
+   border: 2px solid lightGray;
+   margin-bottom: 10px;
+}
+
 span.listname {
    background-color: #F7F7F7;
    padding: 0.2em;
