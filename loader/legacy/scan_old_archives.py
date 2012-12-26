@@ -16,6 +16,8 @@ root = "/srv/archives/repo/archives/html"
 
 # Holy crap this is ugly, but yes, this is a direct dump from the
 # global database. Because, well, it doesn't actually matter :)
+# Run (in \a mode):
+#  select '''' || listname || ''':' || listid || ',' from lists order by listname;
 listmap = {
 'adelaide-au-pug':63,
 'am-central-pug':62,
@@ -81,6 +83,7 @@ listmap = {
 'pgsql-testers':72,
 'pgsql-tr-genel':31,
 'pgsql-www':24,
+'pgsql-zh-general':81,
 'pgus-general':46,
 'psycopg':75,
 'rgnpug':67,
