@@ -67,3 +67,22 @@ table.message span.listname
 	border-width: 0;
 }
 
+span.listname {
+   background-color: #F7F7F7;
+   padding: 0.2em;
+   border: 1px solid #CFCFCF;
+}
+a.ui-selectmenu {
+   text-decoration: none;
+   color: black;
+}
+.ui-selectmenu-status {
+   font-weight: bold;
+}
+.ui-widget {
+   font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif;
+   font-size: 1em;
+}
+.ui-selectmenu-menu, .ui-selectmenu-status {
+   white-space: nowrap;
+}
