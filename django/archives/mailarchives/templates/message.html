@@ -2,7 +2,7 @@
 {%block title%}{{msg.subject}}{%endblock%}
 {%load pgfilters%}
 {%block extrahead%}
-<script language="javascript">
+<script type="text/javascript">
 /* This should be moved into a common JS file */
 function onThreadSelect() {
    document.location.href = '/message-id/' + document.getElementById('thread_select').value;
@@ -47,6 +47,7 @@ a.ui-selectmenu {
   <th>From:</th>
   <td>{{msg.mailfrom|hidemail}}</td>
  </tr>
+ <tr>
   <th>To:</th>
   <td>{{msg.to|hidemail}}</td>
  </tr>
