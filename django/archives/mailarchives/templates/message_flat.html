@@ -12,8 +12,6 @@ function load() {
 }
 window.onload = load;
 </script>
-<style>
-</style>
 {%endblock%}
 {%block contents%}
 <h2>{{msg.subject}}</h2>
@@ -29,7 +27,7 @@ window.onload = load;
   <th>To:</th>
   <td>{{m.to|hidemail}}</td>
  </tr>
-{%if m.cc%}<tr>
+{%if m.cc%}
  <tr>
   <th>Cc:</th>
   <td>{{m.cc|hidemail}}</td>
