@@ -3,8 +3,7 @@
 {%load pgfilters%}
 {%block contents%}
 <h1>PostgreSQL Mailing List Archives</h1>
-<p>
-</p>
+{%include "searchform.html" %}
 <ul>
 {%for g in groups%}
  <li>{{g.groupname}}

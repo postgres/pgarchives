@@ -77,6 +77,9 @@ class NavContext(RequestContext):
 				g['lists'] = []
 
 		self.update({'listgroups': groups})
+		if listid:
+			self.update({'searchform_list': listid})
+
 
 @cache(hours=4)
 def index(request):

@@ -3,6 +3,7 @@
 {%load pgfilters%}
 {%block contents%}
 <h1>{{list.listname}}</h1>
+{%include "searchform.html" %}
 {%regroup months by year as yearmonth %}
 <ul>
 {%for year in yearmonth%}

@@ -3,6 +3,7 @@
 {%load pgfilters%}
 {%block contents%}
 <h1>{{title}}</h1>
+{%include "searchform.html"%}
 {%for m in messages%}
 {%ifchanged m.date.date%}
 {%if not forloop.first%}
