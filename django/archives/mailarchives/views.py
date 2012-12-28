@@ -61,18 +61,21 @@ def get_all_groups_and_lists(listid=None):
 
 
 class NavContext(RequestContext):
-	def __init__(self, request, listid=None, all_groups=None):
+	def __init__(self, request, listid=None, all_groups=None, expand_groupid=None):
 		RequestContext.__init__(self, request)
 
 		if all_groups:
 			groups = all_groups
+			if expand_groupid:
+				listgroupid = int(expand_groupid)
 		else:
 			(groups, listgroupid) = get_all_groups_and_lists(listid)
+
 		for g in groups:
 			# On the root page, remove *all* entries
 			# On other lists, remove the entries in all groups other than our
 			# own.
-			if (not listid) or listgroupid != g['groupid']:
+			if (not listid and not expand_groupid) or listgroupid != g['groupid']:
 				# Root page, so remove *all* entries
 				g['lists'] = []
 
@@ -97,7 +100,7 @@ def groupindex(request, groupid):
 
 	return render_to_response('index.html', {
 			'groups': mygroups,
-			}, NavContext(request, all_groups=groups))
+			}, NavContext(request, all_groups=groups, expand_groupid=groupid))
 
 @cache(hours=8)
 def monthlist(request, listname):
