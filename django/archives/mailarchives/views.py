@@ -442,3 +442,12 @@ def legacy(request, listname, year, month, msgnum):
 @cache(hours=8)
 def mbox(request, listname, mboxname):
 	return HttpResponse('This needs to be handled by the webserver. This view should never be called.', content_type='text/plain')
+
+# Redirect to the requested url, with a slash first. This is used to remove
+# trailing slashes on messageid links by doing a permanent redirect. This is
+# better than just eating them, since this way we only end up with one copy
+# in the cache.
+@cache(hours=8)
+def slash_redirect(request, url):
+	print url
+	return HttpResponsePermanentRedirect("/%s" % url)

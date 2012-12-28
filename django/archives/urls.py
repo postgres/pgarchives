@@ -24,6 +24,9 @@ urlpatterns = patterns('',
     (r'^message-id/raw/([^/]+)$', 'archives.mailarchives.views.message_raw'),
     (r'^archives-search/', 'archives.mailarchives.views.search'),
 
+    # message-id with a slash needs to be redirected to one without it
+    (r'^(message-id/.*)/$', 'archives.mailarchives.views.slash_redirect'),
+
     # Date etc indexes
     (r'^list/([\w-]+)/$', 'archives.mailarchives.views.monthlist'),
     (r'^list/([\w-]+)/(\d+)-(\d+)/$', 'archives.mailarchives.views.datelist'),
