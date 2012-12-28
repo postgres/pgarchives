@@ -187,7 +187,10 @@ def datelistsince(request, listname, msgid):
 @cache(hours=4)
 def datelistsincetime(request, listname, year, month, day, hour, minute):
 	l = get_object_or_404(List, listname=listname)
-	d = datetime(int(year), int(month), int(day), int(hour), int(minute))
+	try:
+		d = datetime(int(year), int(month), int(day), int(hour), int(minute))
+	except ValueError:
+		raise Http404("Invalid date format, not found")
 	return render_datelist_from(request, l, d, "%s since %s" % (l.listname, d.strftime("%Y-%m-%d %H:%M")))
 
 @cache(hours=2)
@@ -199,13 +202,20 @@ def datelistbefore(request, listname, msgid):
 @cache(hours=2)
 def datelistbeforetime(request, listname, year, month, day, hour, minute):
 	l = get_object_or_404(List, listname=listname)
-	d = datetime(int(year), int(month), int(day), int(hour), int(minute))
+	try:
+		d = datetime(int(year), int(month), int(day), int(hour), int(minute))
+	except ValueError:
+		raise Http404("Invalid date format, not found")
 	return render_datelist_to(request, l, d, "%s before %s" % (l.listname, d.strftime("%Y-%m-%d %H:%M")))
 
 @cache(hours=4)
 def datelist(request, listname, year, month):
 	l = get_object_or_404(List, listname=listname)
-	d = datetime(int(year), int(month), 1)
+	try:
+		d = datetime(int(year), int(month), 1)
+	except ValueError:
+		raise Http404("Malformatted date, month not found")
+
 	enddate = d+timedelta(days=31)
 	enddate = datetime(enddate.year, enddate.month, 1)
 	return render_datelist_from(request, l, d, "%s - %s %s" % (l.listname, d.strftime("%B"), d.year), enddate)
