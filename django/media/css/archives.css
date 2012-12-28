@@ -91,3 +91,6 @@ a.ui-selectmenu {
 .ui-selectmenu-menu, .ui-selectmenu-status {
    white-space: nowrap;
 }
+.ui-selectmenu-menu-dropdown a {
+   color: black;
+}
