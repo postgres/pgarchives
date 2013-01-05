@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
-# load_message.py - takes a single email on standard input
-# and reads it into the database.
+# load_message.py - takes a single email or mbox formatted
+# file on stdin or in a file and reads it into the database.
 #
 
 import os
