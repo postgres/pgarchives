@@ -18,6 +18,7 @@ from lib.storage import ArchivesParserStorage
 from lib.mbox import MailboxBreakupParser
 from lib.exception import IgnorableException
 from lib.log import log, opstatus
+from lib.varnish import VarnishPurger
 
 def log_failed_message(listid, srctype, src, msg, err):
 	try:
@@ -168,24 +169,4 @@ if __name__ == "__main__":
 	conn.close()
 	opstatus.print_status()
 
-	if len(purges):
-		# There is something to purge
-		if cfg.has_option('varnish', 'purgeurl'):
-			purgeurl = cfg.get('varnish', 'purgeurl')
-			exprlist = []
-			for p in purges:
-				if isinstance(p, tuple):
-					# Purging a list
-					exprlist.append('obj.http.x-pglm ~ :%s/%s/%s:' % p)
-				else:
-					# Purging individual thread
-					exprlist.append('obj.http.x-pgthread ~ :%s:' % p)
-			purgedict = dict(zip(['p%s' % n for n in range(0, len(exprlist))], exprlist))
-			purgedict['n'] = len(exprlist)
-			r = urllib2.Request(purgeurl, data=urllib.urlencode(purgedict))
-			r.add_header('Content-type', 'application/x-www-form-urlencoded')
-			r.add_header('Host', 'www.postgresql.org')
-			r.get_method = lambda: 'POST'
-			u = urllib2.urlopen(r)
-			if u.getcode() != 200:
-				log.error("Failed to send purge request!")
+	VarnishPurger(cfg).purge(purges)
