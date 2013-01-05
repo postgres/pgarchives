@@ -297,6 +297,10 @@ class ArchivesParser(object):
 					# Yes, it has a name
 					self.attachments.append((self._extract_filename(container), container.get_content_type(), container.get_payload(decode=True)))
 					return
+			# If it's content-disposition=attachment, we also want to save it
+			if container.has_key('Content-Disposition') and container['Content-Disposition'].startswith('attachment'):
+				self.attachments.append((self._extract_filename(container), container.get_content_type(), container.get_payload(decode=True)))
+				return
 			# No name, and text/plain, so ignore it
 
 	re_msgid = re.compile('^\s*<(.*)>\s*')
