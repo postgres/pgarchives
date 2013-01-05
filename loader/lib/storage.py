@@ -13,26 +13,27 @@ class ArchivesParserStorage(ArchivesParser):
 	def purge_thread(self, threadid):
 		self.purges.add(int(threadid))
 
-	def store(self, conn, listid):
+	def store(self, conn, listid, overwrite=False):
 		curs = conn.cursor()
 
 		# Potentially add the information that there exists a mail for
 		# this month. We do that this early since we're always going to
 		# make the check anyway, and this keeps the code in one place..
-		curs.execute("INSERT INTO list_months (listid, year, month) SELECT %(listid)s, %(year)s, %(month)s WHERE NOT EXISTS (SELECT listid FROM list_months WHERE listid=%(listid)s AND year=%(year)s AND month=%(month)s)", {
-						'listid': listid,
-						'year': self.date.year,
-						'month': self.date.month,
-						})
+		if not overwrite:
+			curs.execute("INSERT INTO list_months (listid, year, month) SELECT %(listid)s, %(year)s, %(month)s WHERE NOT EXISTS (SELECT listid FROM list_months WHERE listid=%(listid)s AND year=%(year)s AND month=%(month)s)", {
+					'listid': listid,
+					'year': self.date.year,
+					'month': self.date.month,
+					})
 
-		curs.execute("SELECT threadid, EXISTS(SELECT threadid FROM list_threads lt WHERE lt.listid=%(listid)s AND lt.threadid=m.threadid) FROM messages m WHERE m.messageid=%(messageid)s", {
+		curs.execute("SELECT threadid, EXISTS(SELECT threadid FROM list_threads lt WHERE lt.listid=%(listid)s AND lt.threadid=m.threadid), id FROM messages m WHERE m.messageid=%(messageid)s", {
 				'messageid': self.msgid,
 				'listid': listid,
 				})
 		r = curs.fetchall()
 		if len(r) > 0:
 			# Has to be 1 row, since we have a unique index on id
-			if not r[0][1]:
+			if not r[0][1] and not overwrite:
 				log.status("Tagging message %s with list %s" % (self.msgid, listid))
 				curs.execute("INSERT INTO list_threads (threadid, listid) VALUES (%(threadid)s, %(listid)s)", {
 						'threadid': r[0][0],
@@ -44,10 +45,44 @@ class ArchivesParserStorage(ArchivesParser):
 			else:
 				opstatus.dupes += 1
 
-			#FIXME: option to overwrite existing message!
-			log.status("Message %s already stored" % self.msgid)
+			if overwrite:
+				pk = r[0][2]
+				self.purge_thread(r[0][0])
+				# Overwrite an existing message. We do not attempt to
+				# "re-thread" a message, we just update the contents. We
+				# do remove all attachments and rewrite them. Of course, we
+				# don't change the messageid (since it's our primary
+				# identifyer), and we don't update the raw text of the message.
+				# (since we are expected to have used that raw text to do
+				# the re-parsing initially)
+				curs.execute("UPDATE messages SET _from=%(from)s, _to=%(to)s, cc=%(cc)s, subject=%(subject)s, date=%(date)s, has_attachment=%(has_attachment)s, bodytxt=%(bodytxt)s WHERE id=%(id)s", {
+						'id': pk,
+						'from': self._from,
+						'to': self.to or '',
+						'cc': self.cc or '',
+						'subject': self.subject or '',
+						'date': self.date,
+						'has_attachment': len(self.attachments) > 0,
+						'bodytxt': self.bodytxt,
+						})
+				curs.execute("DELETE FROM attachments WHERE message=%(message)s", {
+						'message': pk,
+						})
+				if len(self.attachments):
+					curs.executemany("INSERT INTO attachments (message, filename, contenttype, attachment) VALUES (%(message)s, %(filename)s, %(contenttype)s, %(attachment)s)",[ {
+								'message': pk,
+								'filename': a[0] or 'unknown_filename',
+								'contenttype': a[1],
+								'attachment': bytearray(a[2]),
+								} for a in self.attachments])
+				opstatus.overwritten += 1
+				log.status("Message %s overwritten" % self.msgid)
+			else:
+				log.status("Message %s already stored" % self.msgid)
 			return
 
+		if overwrite:
+			raise Exception("Attempt to overwrite message that doesn't exist!")
 		# Always purge the primary list for this thread
 		self.purge_list(listid, self.date.year, self.date.month)
 

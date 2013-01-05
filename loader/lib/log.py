@@ -24,9 +24,10 @@ class OpStatus(object):
 		self.dupes = 0
 		self.tagged = 0
 		self.failed = 0
+		self.overwritten = 0
 
 	def print_status(self):
-		print "%s stored, %s new-list tagged, %s dupes, %s failed" % (self.stored, self.tagged, self.dupes, self.failed)
+		print "%s stored, %s new-list tagged, %s dupes, %s failed, %s overwritten" % (self.stored, self.tagged, self.dupes, self.failed, self.overwritten)
 
 
 log = Log()
