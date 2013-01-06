@@ -25,6 +25,16 @@ class Message(models.Model):
 	def shortdate(self):
 		return self.date.strftime("%Y%m%d%H%M")
 
+	# We explicitly cache the attachments here, so we can use them
+	# multiple times from templates without generating multiple queries
+	# to the database.
+	_attachments = None
+	@property
+	def attachments(self):
+		if not self._attachments:
+			self._attachments = self.attachment_set.extra(select={'len': 'length(attachment)'}).all()
+		return self._attachments
+
 class ListGroup(models.Model):
 	groupid = models.IntegerField(null=False, primary_key=True)
 	groupname = models.CharField(max_length=200, null=False, blank=False)
@@ -52,3 +62,11 @@ class Attachment(models.Model):
 
 	class Meta:
 		db_table = 'attachments'
+
+	def inlineable(self):
+		# Return True if this image should be inlined
+		if self.contenttype in ('image/png', 'image/gif', 'image/jpg', 'image/jpeg'):
+			# Note! len needs to be set with extra(select=)
+			if self.len < 75000:
+				return True
+		return False

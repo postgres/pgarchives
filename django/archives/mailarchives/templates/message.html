@@ -65,10 +65,15 @@ $(function(){
 <pre>{{msg.bodytxt|hideallemail|urlize}}</pre>
 
 {%if msg.has_attachment%}
-{%for a in msg.attachment_set.all%}
+{%for a in msg.attachments%}
+{%if a.inlineable%}<a href="/message-id/attachment/{{a.id}}/{{a.filename}}"><img class="attachedimage" src="/message-id/attachment/{{a.id}}/{{a.filename}}" /></a>{%endif%}
+{%if forloop.last%}<hr/>{%endif%}
+{%endfor%}
+
+{%for a in msg.attachments%}
 <div>
 <b>Attachment: <a href="/message-id/attachment/{{a.id}}/{{a.filename}}">{{a.filename}}</a></b><br/>
-Description: {{a.contenttype}}
+Description: {{a.contenttype}} {%if a.inlineable%}(inlined above){%endif%}
 </div>
 {%endfor%}
 {%endif%}

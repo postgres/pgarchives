@@ -94,3 +94,7 @@ a.ui-selectmenu {
 .ui-selectmenu-menu-dropdown a {
    color: black;
 }
+
+img.attachedimage {
+   max-width: 600px;
+}
