@@ -234,6 +234,7 @@ class ArchivesParser(object):
 		return None
 
 	def get_attachments(self):
+		self.attachments_found_first_plaintext = False
 		self.recursive_get_attachments(self.msg)
 
 	def _clean_filename_encoding(self, filename):
@@ -275,6 +276,7 @@ class ArchivesParser(object):
 		elif container.get_content_type() == 'multipart/alternative':
 			# Alternative is not an attachment (we decide)
 			# It's typilcally plantext + html
+			self.attachments_found_first_plaintext = True
 			return
 		elif container.is_multipart():
 			# Other kinds of multipart, such as multipart/signed...
@@ -301,6 +303,22 @@ class ArchivesParser(object):
 			if container.has_key('Content-Disposition') and container['Content-Disposition'].startswith('attachment'):
 				self.attachments.append((self._extract_filename(container), container.get_content_type(), container.get_payload(decode=True)))
 				return
+			# If we have already found one text/plain part, make all
+			# further text/plain parts attachments
+			if self.attachments_found_first_plaintext:
+				# However, this will also *always* catch the MIME part added
+				# by majordomo with the footer. So if that one is present,
+				# we need to explicitly exclude it again.
+				b = container.get_payload(decode=True)
+				if not self._re_footer.match(b):
+					# We know there is no name for this one
+					self.attachments.append((None, container.get_content_type(), b))
+				return
+
+			# Ok, so this was a plaintext that we ignored. Set the flag
+			# that we have now ignored one, so we'll make the next one
+			# an attachment.
+			self.attachments_found_first_plaintext = True
 			# No name, and text/plain, so ignore it
 
 	re_msgid = re.compile('^\s*<(.*)>\s*')
