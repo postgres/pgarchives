@@ -406,12 +406,12 @@ def search(request):
 		# If not found, fall through to a regular search
 
 	curs.execute("SET gin_fuzzy_search_limit=10000")
-	qstr = "SELECT listname, messageid, date, subject, _from, ts_rank_cd(fti, plainto_tsquery('public.pg', %(q)s)), ts_headline(bodytxt, plainto_tsquery('public.pg', %(q)s),'StartSel=\"[[[[[[\",StopSel=\"]]]]]]\"') FROM messages m INNER JOIN list_threads lt ON lt.threadid=m.threadid INNER JOIN lists l ON l.listid=lt.listid WHERE fti @@ plainto_tsquery('public.pg', %(q)s)"
+	qstr = "SELECT messageid, date, subject, _from, ts_rank_cd(fti, plainto_tsquery('public.pg', %(q)s)), ts_headline(bodytxt, plainto_tsquery('public.pg', %(q)s),'StartSel=\"[[[[[[\",StopSel=\"]]]]]]\"') FROM messages m WHERE fti @@ plainto_tsquery('public.pg', %(q)s)"
 	params = {
 		'q': query,
 	}
 	if lists:
-		qstr += " AND lt.listid=ANY(%(lists)s) "
+		qstr += " AND EXISTS (SELECT 1 FROM list_threads lt WHERE lt.threadid=m.threadid AND lt.listid=ANY(%(lists)s))"
 		params['lists'] = lists
 	if firstdate:
 		qstr += " AND m.date > %(date)s"
@@ -426,7 +426,6 @@ def search(request):
 	resp = HttpResponse(mimetype='application/json')
 
 	json.dump([{
-				'l': listname,
 				'm': messageid,
 				'd': date.isoformat(),
 				's': subject,
@@ -434,7 +433,7 @@ def search(request):
 				'r': rank,
 				'a': abstract.replace("[[[[[[", "<b>").replace("]]]]]]","</b>"),
 
-				} for listname, messageid, date, subject, mailfrom, rank, abstract in curs.fetchall()],
+				} for messageid, date, subject, mailfrom, rank, abstract in curs.fetchall()],
 			  resp)
 	return resp
 
