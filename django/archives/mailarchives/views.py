@@ -388,6 +388,23 @@ def search(request):
 
 	# Ok, we have all we need to do the search
 	curs = connection.cursor()
+
+	if query.find('@') > 0:
+		# This could be a messageid. So try to get that one specifically first.
+		# We don't do a more specific check if it's a messageid because doing
+		# a key lookup is cheap...
+		curs.execute("SELECT messageid FROM messages WHERE messageid=%(q)s", {
+				'q': query,
+				})
+		a = curs.fetchall()
+		if len(a) == 1:
+			# Yup, this was a messageid
+			resp = HttpResponse(mimetype='application/json')
+
+			json.dump({'messageidmatch': 1}, resp)
+			return resp
+		# If not found, fall through to a regular search
+
 	curs.execute("SET gin_fuzzy_search_limit=10000")
 	qstr = "SELECT listname, messageid, date, subject, _from, ts_rank_cd(fti, plainto_tsquery('public.pg', %(q)s)), ts_headline(bodytxt, plainto_tsquery('public.pg', %(q)s),'StartSel=\"[[[[[[\",StopSel=\"]]]]]]\"') FROM messages m INNER JOIN list_threads lt ON lt.threadid=m.threadid INNER JOIN lists l ON l.listid=lt.listid WHERE fti @@ plainto_tsquery('public.pg', %(q)s)"
 	params = {
