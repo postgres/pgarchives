@@ -388,6 +388,7 @@ def search(request):
 
 	# Ok, we have all we need to do the search
 	curs = connection.cursor()
+	curs.execute("SET gin_fuzzy_search_limit=10000")
 	qstr = "SELECT listname, messageid, date, subject, _from, ts_rank_cd(fti, plainto_tsquery(%(q)s)), ts_headline(bodytxt, plainto_tsquery(%(q)s),'StartSel=\"[[[[[[\",StopSel=\"]]]]]]\"') FROM messages m INNER JOIN list_threads lt ON lt.threadid=m.threadid INNER JOIN lists l ON l.listid=lt.listid WHERE fti @@ plainto_tsquery(%(q)s)"
 	params = {
 		'q': query,
