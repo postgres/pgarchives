@@ -91,6 +91,23 @@ Description: {{a.contenttype}} {%if a.inlineable%}(inlined above){%endif%}
 {%endfor%}
 </ul>
 {%endif%}
+{%if nextprev%}
+{%for list, info in nextprev.items %}
+<h3>{{list}} by date</h3>
+<blockquote>
+ <table border="0">
+  {%if info.next%}
+   <tr><td><a href="/message-id/{{info.next.msgid}}">Next</a>:</td><td><b>From:</b> {{info.next.from|nameonly}}</td><td><b>Date:</b> {{info.next.date}}</td></tr>
+   <tr><td></td><td colspan="2"><b>Subject</b>: {{info.next.subject}}</td></tr>
+  {%endif%}
+  {%if info.prev%}
+   <tr><td><a href="/message-id/{{info.prev.msgid}}">Previous</a>:</td><td><b>From</b>: {{info.prev.from|nameonly}}</td><td><b>Date</b>: {{info.prev.date}}</td></tr>
+   <tr><td></td><td colspan="2"><b>Subject</b>: {{info.prev.subject}}</td></tr>
+  {%endif%}
+ </table>
+</blockquote>
+{%endfor%}
+{%endif%}
 
 </div>
 {%endblock%}
