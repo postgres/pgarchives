@@ -16,6 +16,7 @@
   <li><a href="/message-id/{{m.messageid}}">{{m.subject|default:"[No subject]"}}</a> {{m.mailfrom|nameonly}} ({{m.date.time|time:"H:i"}})</li>
 {%if forloop.last%}
 </ul>
+<p></p>
 {%endif%}
 {%endfor%}
 {%include "datelist_topandbottom.html"%}
