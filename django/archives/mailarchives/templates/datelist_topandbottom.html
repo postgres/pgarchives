@@ -1,0 +1,13 @@
+{%if messages%}
+{%with messages|first as firstmsg%}
+<a href="/list/{{list.listname}}/before/{{firstmsg.shortdate}}">Prev</a>
+{%endwith%}
+|
+{%with messages|last as lastmsg%}
+<a href="/list/{{list.listname}}/since/{{lastmsg.shortdate}}">Next</a>
+{%endwith%}
+{%endif%}
+
+{%if daysinmonth%}
+<div class="daylinks">Jump to day: {%for d in daysinmonth%}<a href="/list/{{list.listname}}/since/{{yearmonth}}{{d|stringformat:"02d"}}0000/">{{d}}</a> {%endfor%}</div>
+{%endif%}
