@@ -455,7 +455,6 @@ def legacy(request, listname, year, month, msgnum):
 			})
 	r = curs.fetchall()
 	if len(r) != 1:
-		print "Meh, not found!"
 		raise Http404('Message does not exist')
 	return HttpResponsePermanentRedirect('/message-id/%s' % r[0][0])
 
@@ -469,5 +468,4 @@ def mbox(request, listname, mboxname):
 # in the cache.
 @cache(hours=8)
 def slash_redirect(request, url):
-	print url
 	return HttpResponsePermanentRedirect("/%s" % url)
