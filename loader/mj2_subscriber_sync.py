@@ -11,7 +11,7 @@ from ConfigParser import ConfigParser
 import psycopg2
 
 def ensure_subscribed(listname):
-	u = 'http://%s/mj/mj_wwwadm?%s' % (
+	u = 'https://%s/mj/mj_wwwadm?%s' % (
 		cfg.get('majordomo', 'server'),
 		urlencode((
 				('passw', cfg.get('majordomo', 'password')),
