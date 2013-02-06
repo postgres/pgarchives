@@ -1,5 +1,6 @@
 {%extends "base.html"%}
 {%block title%}PostgreSQL Mailing Lists: {{list.listname}}{%endblock%}
+{%block extrahead%}<meta name="robots" content="noindex">{%endblock%}
 {%load pgfilters%}
 {%block contents%}
 <h1>{{list.listname}}</h1>
