@@ -73,7 +73,7 @@ $(function(){
 {%for a in msg.attachments%}
 <div>
 <b>Attachment: <a href="/message-id/attachment/{{a.id}}/{{a.filename}}">{{a.filename}}</a></b><br/>
-Description: {{a.contenttype}} {%if a.inlineable%}(inlined above){%endif%}
+Description: {{a.contenttype}} ({{a.len|filesizeformat}}) {%if a.inlineable%}(inlined above){%endif%}
 </div>
 {%endfor%}
 {%endif%}

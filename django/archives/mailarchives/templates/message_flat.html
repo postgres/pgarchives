@@ -49,10 +49,10 @@ window.onload = load;
 <pre>{{m.bodytxt|hideallemail|urlize}}</pre>
 
 {%if m.has_attachment%}
-{%for a in m.attachment_set.all%}
+{%for a in m.attachments.all%}
 <div>
 <b>Attachment: <a href="/message-id/attachment/{{a.id}}/{{a.filename}}">{{a.filename}}</a></b><br/>
-Description: {{a.contenttype}}
+Description: {{a.contenttype}} ({{a.len|filesizeformat}})
 </div>
 {%endfor%}
 {%endif%}
