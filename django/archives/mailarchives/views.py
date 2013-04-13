@@ -102,12 +102,18 @@ def groupindex(request, groupid):
 			'groups': mygroups,
 			}, NavContext(request, all_groups=groups, expand_groupid=groupid))
 
+def _has_mbox(listname, year, month):
+	return os.path.isfile("%s/%s/files/public/archive/%s.%04d%02d" % (
+			settings.MBOX_ARCHIVES_ROOT,
+			listname,
+			listname, year, month))
+
 @cache(hours=8)
 def monthlist(request, listname):
 	l = get_object_or_404(List, listname=listname)
 	curs = connection.cursor()
 	curs.execute("SELECT year, month FROM list_months WHERE listid=%(listid)s ORDER BY year DESC, month DESC", {'listid': l.listid})
-	months=[{'year':r[0],'month':r[1], 'date':datetime(r[0],r[1],1) }for r in curs.fetchall()]
+	months=[{'year':r[0],'month':r[1], 'date':datetime(r[0],r[1],1), 'hasmbox': _has_mbox(listname, r[0], r[1])} for r in curs.fetchall()]
 
 	return render_to_response('monthlist.html', {
 			'list': l,

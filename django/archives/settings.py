@@ -150,6 +150,9 @@ LOGGING = {
 # Required for lighttpd
 FORCE_SCRIPT_NAME=""
 
+# Always override!
+MBOX_ARCHIVES_ROOT="/dev/null"
+
 try:
 	from settings_local import *
 except ImportError:
