@@ -8,6 +8,7 @@ from django.conf import settings
 
 import urllib
 import re
+import os
 import base64
 from datetime import datetime, timedelta
 import calendar
