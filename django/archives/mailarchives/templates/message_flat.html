@@ -46,6 +46,9 @@ window.onload = load;
  </tr>
 </table>
 <div class="bodywrapper">
+{%if m.hiddenstatus%}
+<pre>{{m.hiddenreason}}</pre>
+{%else%}
 <pre>{{m.bodytxt|hideallemail|urlize}}</pre>
 
 {%if m.has_attachment%}
@@ -58,6 +61,7 @@ Description: {{a.contenttype}} ({{a.len|filesizeformat}})
 {%endif%}
 </div>
 
+{%endif%}{%comment%}hidden{%endcomment%}
 </div>
 {%endfor%}
 {%endblock%}

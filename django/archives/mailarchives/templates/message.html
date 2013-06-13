@@ -62,6 +62,9 @@ $(function(){
  </tr>
 </table>
 <div class="bodywrapper">
+{%if msg.hiddenstatus%}
+<pre>{{msg.hiddenreason}}</pre>
+{%else%}
 <pre>{{msg.bodytxt|hideallemail|urlize}}</pre>
 
 {%if msg.has_attachment%}
@@ -109,5 +112,6 @@ Description: {{a.contenttype}} ({{a.len|filesizeformat}}) {%if a.inlineable%}(in
 {%endfor%}
 {%endif%}
 
+{%endif%}{%comment%}hidden{%endcomment%}
 </div>
 {%endblock%}

@@ -12,6 +12,7 @@ CREATE TABLE messages (
    subject text NOT NULL,
    date timestamptz NOT NULL,
    has_attachment boolean NOT NULL,
+   hiddenstatus int NULL,
    messageid text NOT NULL,
    bodytxt text NOT NULL,
    rawtxt bytea NOT NULL,
@@ -20,6 +21,13 @@ CREATE TABLE messages (
 CREATE INDEX idx_messages_threadid ON messages(threadid);
 CREATE UNIQUE INDEX idx_messages_msgid ON messages(messageid);
 CREATE INDEX idx_messages_date ON messages(date);
+
+CREATE TABLE message_hide_reasons (
+   message int NOT NULL PRIMARY KEY REFERENCES messages,
+   dt timestamptz,
+   reason text,
+   by text
+);
 
 CREATE SEQUENCE threadid_seq;
 

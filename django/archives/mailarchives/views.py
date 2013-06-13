@@ -354,14 +354,17 @@ def message_raw(request, msgid):
 			user, pwd = base64.b64decode(auth[1]).split(':')
 			if user == 'archives' and pwd == 'antispam':
 				curs = connection.cursor()
-				curs.execute("SELECT threadid, rawtxt FROM messages WHERE messageid=%(messageid)s", {
+				curs.execute("SELECT threadid, hiddenstatus, rawtxt FROM messages WHERE messageid=%(messageid)s", {
 						'messageid': msgid,
 						})
 				row = curs.fetchall()
 				if len(row) != 1:
 					raise Http404('Message does not exist')
 
-				r = HttpResponse(row[0][1], content_type='text/plain')
+				if row[0][1]:
+					r = HttpResponse('This message has been hidden.', content_type='text/plain')
+				else:
+					r = HttpResponse(row[0][2], content_type='text/plain')
 				r['X-pgthread'] = ":%s:" % row[0][0]
 				return r
 			# Invalid password falls through
