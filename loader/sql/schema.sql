@@ -134,4 +134,25 @@ CREATE TABLE legacymap(
 CONSTRAINT legacymap_pk PRIMARY KEY (listid, year, month, msgnum)
 );
 
+/* Simple API for hiding messages */
+CREATE OR REPLACE FUNCTION hide_message(msgid_txt text, reason_code integer, user_txt text, reason_txt text)
+  RETURNS integer AS
+$BODY$
+DECLARE
+    returned_id integer;
+BEGIN
+    UPDATE messages SET hiddenstatus = reason_code WHERE messageid = msgid_txt RETURNING id INTO returned_id;
+
+    IF NOT FOUND THEN
+	RAISE EXCEPTION 'The specified message (%) could not be found.', msgid_txt;
+    END IF;
+
+    INSERT INTO message_hide_reasons (message, dt, reason, by) VALUES (returned_id, now(), reason_txt, user_txt);
+
+    RETURN returned_id;
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+
 \echo Dont forget to commit!
