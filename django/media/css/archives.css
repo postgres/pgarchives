@@ -95,6 +95,10 @@ a.ui-selectmenu {
    color: black;
 }
 
+.ui-selectmenu-menu ul {
+    overflow-x: auto;
+}
+
 img.attachedimage {
    max-width: 600px;
 }
