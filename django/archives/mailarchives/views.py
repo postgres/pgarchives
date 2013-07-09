@@ -235,7 +235,7 @@ def attachment(request, attid):
 	# Use a direct query instead of django, since it has bad support for
 	# bytea
 	curs = connection.cursor()
-	curs.execute("SELECT filename, contenttype, attachment FROM attachments WHERE id=%(id)s", { 'id': int(attid)})
+	curs.execute("SELECT filename, contenttype, attachment FROM attachments WHERE id=%(id)s AND EXISTS (SELECT 1 FROM messages WHERE messages.id=attachments.message AND messages.hiddenstatus IS NULL)", { 'id': int(attid)})
 	r = curs.fetchall()
 	if len(r) != 1:
 		return HttpResponse("Attachment not found")
