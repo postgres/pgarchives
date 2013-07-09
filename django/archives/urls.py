@@ -37,6 +37,10 @@ urlpatterns = patterns('',
 
     (r'^message-id/attachment/(\d+)/.*$', 'archives.mailarchives.views.attachment'),
 
+    # API calls
+    (r'^list/([\w-]+)/latest.json$', 'archives.mailarchives.api.latest'),
+    (r'^message-id.json/(.+)$', 'archives.mailarchives.api.thread'),
+
     # Legacy forwarding from old archives site
     (r'^message-id/legacy/([\w-]+)/(\d+)-(\d+)/msg(\d+).php$', 'archives.mailarchives.views.legacy'),
 
