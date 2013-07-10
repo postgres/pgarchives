@@ -153,7 +153,6 @@ def render_datelist_from(request, l, d, title, to=None):
 
 	mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().filter(datefilter).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('date')[:200]
 
-	threads = set([m.threadid for m in mlist])
 	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
 	(yearmonth, daysinmonth) = get_monthday_info(mlist, l, d)
 
@@ -173,7 +172,6 @@ def render_datelist_to(request, l, d, title):
 	# the second sort safely in python since it's not a lot of items..
 	mlist = sorted(Message.objects.defer('bodytxt', 'cc', 'to').select_related().filter(date__lte=d).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('-date')[:200], key=lambda m: m.date)
 
-	threads = set([m.threadid for m in mlist])
 	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
 	(yearmonth, daysinmonth) = get_monthday_info(mlist, l, d)
 
@@ -252,7 +250,7 @@ def _build_thread_structure(threadid):
 )
 SELECT id,_from,subject,date,messageid,has_attachment,parentid,datepath FROM t ORDER BY datepath||date
 """, {'threadid': threadid})
-	lastpath = []
+
 	for id,_from,subject,date,messageid,has_attachment,parentid,parentpath in curs.fetchall():
 		yield {'id':id, 'mailfrom':_from, 'subject': subject, 'printdate': date.strftime("%Y-%m-%d %H:%M:%S"), 'messageid': messageid, 'hasattachment': has_attachment, 'parentid': parentid, 'indent': "&nbsp;" * len(parentpath)}
 
@@ -301,7 +299,7 @@ SELECT l.listid,0,
 def message(request, msgid):
 	try:
 		m = Message.objects.get(messageid=msgid)
-	except Message.DoesNotExist, e:
+	except Message.DoesNotExist:
 		raise Http404('Message does not exist')
 
 	lists = List.objects.extra(where=["listid IN (SELECT listid FROM list_threads WHERE threadid=%s)" % m.threadid]).order_by('listname')
@@ -332,7 +330,7 @@ def message(request, msgid):
 def message_flat(request, msgid):
 	try:
 		msg = Message.objects.get(messageid=msgid)
-	except Message.DoesNotExist, e:
+	except Message.DoesNotExist:
 		raise Http404('Message does not exist')
 	allmsg = Message.objects.filter(threadid=msg.threadid).order_by('date')
 	# XXX: need to get the complete list of lists!
