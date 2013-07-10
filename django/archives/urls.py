@@ -19,9 +19,9 @@ urlpatterns = patterns('',
     (r'^$', 'archives.mailarchives.views.index'),
     (r'^list/$', 'archives.mailarchives.views.index'),
     (r'^list/group/(\d+)/$', 'archives.mailarchives.views.groupindex'),
-    (r'^message-id/flat/(.+)$', 'archives.mailarchives.views.message_flat'),
-    (r'^message-id/raw/(.+)$', 'archives.mailarchives.views.message_raw'),
-    (r'^message-id/(.+)$', 'archives.mailarchives.views.message'),
+    (r'^message-id/([^/]+)$', 'archives.mailarchives.views.message'),
+    (r'^message-id/flat/([^/]+)$', 'archives.mailarchives.views.message_flat'),
+    (r'^message-id/raw/([^/]+)$', 'archives.mailarchives.views.message_raw'),
     (r'^archives-search/', 'archives.mailarchives.views.search'),
 
     # message-id with a slash needs to be redirected to one without it
