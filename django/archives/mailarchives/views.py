@@ -1,7 +1,8 @@
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseForbidden, Http404
-from django.http import HttpResponsePermanentRedirect
+from django.http import HttpResponsePermanentRedirect, HttpResponseNotModified
 from django.shortcuts import render_to_response, get_object_or_404
+from django.utils.http import http_date, parse_http_date_safe
 from django.db import connection
 from django.db.models import Q
 from django.conf import settings
@@ -252,7 +253,7 @@ SELECT id,_from,subject,date,messageid,has_attachment,parentid,datepath FROM t O
 """, {'threadid': threadid})
 
 	for id,_from,subject,date,messageid,has_attachment,parentid,parentpath in curs.fetchall():
-		yield {'id':id, 'mailfrom':_from, 'subject': subject, 'printdate': date.strftime("%Y-%m-%d %H:%M:%S"), 'messageid': messageid, 'hasattachment': has_attachment, 'parentid': parentid, 'indent': "&nbsp;" * len(parentpath)}
+		yield {'id':id, 'mailfrom':_from, 'subject': subject, 'date': date, 'printdate': date.strftime("%Y-%m-%d %H:%M:%S"), 'messageid': messageid, 'hasattachment': has_attachment, 'parentid': parentid, 'indent': "&nbsp;" * len(parentpath)}
 
 
 def _get_nextprevious(listmap, dt):
@@ -305,7 +306,14 @@ def message(request, msgid):
 	lists = List.objects.extra(where=["listid IN (SELECT listid FROM list_threads WHERE threadid=%s)" % m.threadid]).order_by('listname')
 	listmap = dict([(l.listid, l.listname) for l in lists])
 	threadstruct = list(_build_thread_structure(m.threadid))
+	newest = calendar.timegm(max(threadstruct, key=lambda x: x['date'])['date'].utctimetuple())
+	if request.META.has_key('HTTP_IF_MODIFIED_SINCE') and not settings.DEBUG:
+		ims = parse_http_date_safe(request.META.get("HTTP_IF_MODIFIED_SINCE"))
+		if ims >= newest:
+			return HttpResponseNotModified()
+
 	responses = [t for t in threadstruct if t['parentid']==m.id]
+
 	if m.parentid:
 		for t in threadstruct:
 			if t['id'] == m.parentid:
@@ -324,6 +332,7 @@ def message(request, msgid):
 			'nextprev': nextprev,
 			}, NavContext(request, lists[0].listid))
 	r['X-pgthread'] = ":%s:" % m.threadid
+	r['Last-Modified'] = http_date(newest)
 	return r
 
 @cache(hours=4)
@@ -332,14 +341,21 @@ def message_flat(request, msgid):
 		msg = Message.objects.get(messageid=msgid)
 	except Message.DoesNotExist:
 		raise Http404('Message does not exist')
-	allmsg = Message.objects.filter(threadid=msg.threadid).order_by('date')
+	allmsg = list(Message.objects.filter(threadid=msg.threadid).order_by('date'))
 	# XXX: need to get the complete list of lists!
+
+	newest = calendar.timegm(max(allmsg, key=lambda x: x.date).date.utctimetuple())
+	if request.META.has_key('HTTP_IF_MODIFIED_SINCE') and not settings.DEBUG:
+		ims = parse_http_date_safe(request.META.get('HTTP_IF_MODIFIED_SINCE'))
+		if ims >= newest:
+			return HttpResponseNotModified()
 
 	r = render_to_response('message_flat.html', {
 			'msg': msg,
 			'allmsg': allmsg,
 			}, NavContext(request))
 	r['X-pgthread'] = ":%s:" % msg.threadid
+	r['Last-Modified'] = http_date(newest)
 	return r
 
 @nocache
