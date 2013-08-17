@@ -40,7 +40,7 @@ def log_failed_message(listid, srctype, src, msg, err):
 
 if __name__ == "__main__":
 	optparser = OptionParser()
-	optparser.add_option('-l', '--list', dest='list', help='Name of list to loiad message for')
+	optparser.add_option('-l', '--list', dest='list', help='Name of list to load message for')
 	optparser.add_option('-d', '--directory', dest='directory', help='Load all messages in directory')
 	optparser.add_option('-m', '--mbox', dest='mbox', help='Load all messages in mbox')
 	optparser.add_option('-i', '--interactive', dest='interactive', action='store_true', help='Prompt after each message')
