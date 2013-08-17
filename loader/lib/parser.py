@@ -261,7 +261,8 @@ class ArchivesParser(object):
 		return None
 
 	def recursive_get_attachments(self, container):
-		if container.get_content_type() == 'multipart/mixed':
+		# We start recursion in the "multipart" container if any
+		if container.get_content_type() == 'multipart/mixed' or container.get_content_type() == 'multipart/signed':
 			# Multipart - worth scanning into
 			if not container.is_multipart():
 				# Wow, this is broken. It's multipart/mixed, but doesn't
