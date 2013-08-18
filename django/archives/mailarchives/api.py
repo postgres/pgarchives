@@ -59,7 +59,8 @@ def thread(request, msgid):
 		 'date': m.date.isoformat(),
 		 'from': m.mailfrom,
 		 'subj': m.subject,
-		 'att': m.has_attachment}
+		 'atts': [a.id for a in m.attachment_set.all()],
+	 }
 		for m in mlist], resp)
 	resp['X-pgthread'] = m.threadid
 	return resp
