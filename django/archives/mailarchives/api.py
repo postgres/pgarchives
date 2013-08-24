@@ -25,10 +25,18 @@ def latest(request, listname):
 	if limit <= 0 or limit > 100:
 		limit = 50
 
+	extrawhere=[]
+
+	# Return only messages that have attachments?
+	if request.GET.has_key('a'):
+		if request.GET['a'] == '1':
+			extrawhere.append("has_attachment")
+
 	list = get_object_or_404(List, listname=listname)
-	mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % list.listid]).order_by('date')[:limit]
+	extrawhere.append("threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % list.listid)
+	mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().extra(where=extrawhere).order_by('date')[:limit]
 	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
-	
+
 	resp = HttpResponse(content_type='application/json')
 	json.dump([
 		{'msgid': m.messageid,
