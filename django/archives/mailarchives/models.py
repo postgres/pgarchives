@@ -72,6 +72,12 @@ class List(models.Model):
 	active = models.BooleanField(null=False, blank=False)
 	group = models.ForeignKey(ListGroup, db_column='groupid')
 
+	@property
+	def maybe_shortdesc(self):
+		if self.shortdesc:
+			return self.shortdesc
+		return self.listname
+
 	class Meta:
 		db_table = 'lists'
 

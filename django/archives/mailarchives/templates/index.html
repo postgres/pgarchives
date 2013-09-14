@@ -2,18 +2,46 @@
 {%block title%}PostgreSQL Mailing List Archives{%endblock%}
 {%load pgfilters%}
 {%block contents%}
-<h1>PostgreSQL Mailing List Archives</h1>
+<h1>PostgreSQL Mailing Lists</h1>
+
+<h3>How to Subscribe or Unsubscribe</h3>
+
+<p>Fill out this <a href="/community/lists/subscribe">form</a>.</p>
+
+<!-- this text is duplicated in system/form/subscribe.php -->
+<p>Please do not subscribe to mailing lists using e-mail accounts protected by
+mail-back anti-spam systems. These are extremely annoying to the list
+maintainers and other members, and you may be automatically unsubscribed.
+</p>
+
+<h3>Archives</h3>
+<p>Before posting to a list, you may wish to search the archives to see if
+your question has already been answered.</p>
+
 {%include "searchform.html" %}
-<ul>
+
+
 {%for g in groups%}
- <li>{{g.groupname}}
-   <ul>
+{%if not forloop.first%}
+ </table>
+</div>
+{%endif%}
+<h2>{{g.groupname}}</h2>
+<div class="tblBasic">
+<table border="0" cellpadding="0" cellspacing="0" class="tblBasicGrey">
+<tr>
+	<th class="colFirst">List</th>
+	<th class="colLast">Description</th>
+</tr>
+
 {%for l in g.lists%}
-     <li><a href="/list/{{l.listname}}/">{{l.listname}}</a></li>
+<tr>
+    <td class="colFirst"><a href="/list/{{l.listname}}/">{{l.maybe_shortdesc}}</a></td>
+    <td class="colLast">{{l.description|safe}}</td>
+</tr>
 {%endfor%}
-   </ul>
- </li>
 {%endfor%}
-</ul>
+ </table>
+</div>
 
 {%endblock%}
