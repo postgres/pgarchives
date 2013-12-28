@@ -531,6 +531,20 @@ def legacy(request, listname, year, month, msgnum):
 def mbox(request, listname, mboxname):
 	return HttpResponse('This needs to be handled by the webserver. This view should never be called.', content_type='text/plain')
 
+@cache(hours=8)
+def base_css(request):
+	# Generate a hardcoded list of CSS imports. This will only be used
+	# in development installs - in production, it will use the CSS from
+	# the main website.
+	return HttpResponse("""@import url("/media/css/global.css");
+@import url("/media/css/layout.css");
+@import url("/media/css/text.css");
+@import url("/media/css/navigation.css");
+@import url("/media/css/table.css");
+
+@import url("/media/css/iefixes.css");
+""", mimetype='text/css')
+
 # Redirect to the requested url, with a slash first. This is used to remove
 # trailing slashes on messageid links by doing a permanent redirect. This is
 # better than just eating them, since this way we only end up with one copy

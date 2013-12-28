@@ -44,6 +44,10 @@ urlpatterns = patterns('',
     # Legacy forwarding from old archives site
     (r'^message-id/legacy/([\w-]+)/(\d+)-(\d+)/msg(\d+).php$', 'archives.mailarchives.views.legacy'),
 
+    # Normally served off www.postgresql.org, but manually handled here for
+    # development installs.
+    (r'^dyncss/base.css', 'archives.mailarchives.views.base_css'),
+
     # Normally served by the webserver, but needed for development installs
     (r'^media/(.*)$', 'django.views.static.serve', {
 			'document_root': '../media',

@@ -1,12 +1,5 @@
 /* replacement for base.css used on archives */
-@import url("/media/css/global.css");
-@import url("/media/css/layout.css");
-@import url("/media/css/text.css");
-@import url("/media/css/navigation.css");
-@import url("/media/css/table.css");
-
-@import url("/media/css/iefixes.css");
-
+@import url("/dyncss/base.css");
 
 a                               { text-decoration: underline; }
 
