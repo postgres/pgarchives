@@ -34,7 +34,7 @@ def latest(request, listname):
 
 	list = get_object_or_404(List, listname=listname)
 	extrawhere.append("threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % list.listid)
-	mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().extra(where=extrawhere).order_by('date')[:limit]
+	mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().extra(where=extrawhere).order_by('-date')[:limit]
 	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
 
 	resp = HttpResponse(content_type='application/json')
