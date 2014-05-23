@@ -424,7 +424,7 @@ def search(request):
 	# l = comma separated list of lists to search for
 	# d = number of days back to search for, or -1 (or not specified)
 	#     to search the full archives
-	# s = sort results by ['r'=rank, 'd'=date]
+	# s = sort results by ['r'=rank, 'd'=date, 'i'=inverse date]
 	if not request.method == 'POST':
 		raise Http404('I only respond to POST')
 
@@ -451,7 +451,9 @@ def search(request):
 		firstdate = None
 
 	if request.POST.has_key('s'):
-		list_sort = request.POST['s'] == 'd' and 'd' or 'r'
+		list_sort = request.POST['s']
+		if not list_sort in ('d', 'r', 'i'):
+			list_stort = 'r'
 	else:
 		list_sort = 'r'
 
@@ -487,8 +489,10 @@ def search(request):
 		params['date'] = firstdate
 	if list_sort == 'r':
 		qstr += " ORDER BY ts_rank_cd(fti, plainto_tsquery(%(q)s)) DESC LIMIT 1000"
-	else:
+	elif list_sort == 'd':
 		qstr += " ORDER BY date DESC LIMIT 1000"
+	else:
+		qstr += " ORDER BY date ASC LIMIT 1000"
 
 	curs.execute(qstr, params)
 
