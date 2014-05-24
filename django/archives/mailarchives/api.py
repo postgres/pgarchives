@@ -26,15 +26,21 @@ def latest(request, listname):
 		limit = 50
 
 	extrawhere=[]
+	extraparams=[]
 
 	# Return only messages that have attachments?
 	if request.GET.has_key('a'):
 		if request.GET['a'] == '1':
 			extrawhere.append("has_attachment")
 
+	# Restrict by full text search
+	if request.GET.has_key('s') and request.GET['s']:
+		extrawhere.append("fti @@ plainto_tsquery('public.pg', %s)")
+		extraparams.append(request.GET['s'])
+
 	list = get_object_or_404(List, listname=listname)
 	extrawhere.append("threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % list.listid)
-	mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().extra(where=extrawhere).order_by('-date')[:limit]
+	mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().extra(where=extrawhere, params=extraparams).order_by('-date')[:limit]
 	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
 
 	resp = HttpResponse(content_type='application/json')
