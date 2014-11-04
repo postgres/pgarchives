@@ -556,3 +556,11 @@ def base_css(request):
 @cache(hours=8)
 def slash_redirect(request, url):
 	return HttpResponsePermanentRedirect("/%s" % url)
+
+
+# Redirect the requested URL to whatever happens to be in the regexp capture.
+# This is used for user agents that generate broken URLs that are easily
+# captured using regexp.
+@cache(hours=8)
+def re_redirect(request, prefix, msgid):
+	return HttpResponsePermanentRedirect("/%s%s" % (prefix, msgid))

@@ -19,9 +19,16 @@ urlpatterns = patterns('',
     (r'^$', 'archives.mailarchives.views.index'),
     (r'^list/$', 'archives.mailarchives.views.index'),
     (r'^list/group/(\d+)/$', 'archives.mailarchives.views.groupindex'),
+
+    # some user agents generate broken URLs that include <>
+    (r'^(?P<prefix>message-id/(|flat/|raw/))<(?P<msgid>.*)>$', 'archives.mailarchives.views.re_redirect'),
+
+    # Match regular messages
     (r'^message-id/([^/]+)$', 'archives.mailarchives.views.message'),
     (r'^message-id/flat/([^/]+)$', 'archives.mailarchives.views.message_flat'),
     (r'^message-id/raw/([^/]+)$', 'archives.mailarchives.views.message_raw'),
+
+    # Search
     (r'^archives-search/', 'archives.mailarchives.views.search'),
 
     # message-id with a slash needs to be redirected to one without it
