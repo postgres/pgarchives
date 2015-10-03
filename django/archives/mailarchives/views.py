@@ -442,7 +442,7 @@ def search(request):
 		# We don't do a more specific check if it's a messageid because doing
 		# a key lookup is cheap...
 		curs.execute("SELECT messageid FROM messages WHERE messageid=%(q)s", {
-				'q': query.lstrip("<").rstrip(">"),
+				'q': query,
 				})
 		a = curs.fetchall()
 		if len(a) == 1:
