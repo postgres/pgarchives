@@ -390,29 +390,6 @@ def message_raw(request, msgid):
 	response['WWW-Authenticate'] = 'Basic realm="Please authenticate with user archives and password antispam"'
 	return response
 
-def testview(request, seqid):
-	m = Message.objects.get(pk=seqid)
-	try:
-		nextm = Message.objects.filter(id__gt=m.id).order_by('id')[0]
-	except IndexError:
-		nextm = None
-	try:
-		prevm = Message.objects.filter(id__lt=m.id).order_by('-id')[0]
-	except IndexError:
-		prevm = None
-
-	return render_to_response('test.html', {
-			'msg': m,
-			'nextmsg': nextm,
-			'prevmsg': prevm,
-			})
-
-
-def oldsite(request, msgid):
-	u = urllib.urlopen('http://archives.postgresql.org/message-id/%s' % msgid)
-	m = re.search('<!--X-Body-of-Message-->(.*)<!--X-Body-of-Message-End-->', u.read(), re.DOTALL)
-	return HttpResponse(m.groups(1), content_type='text/html')
-
 def search(request):
 	# Only certain hosts are allowed to call the search API
 	if not request.META['REMOTE_ADDR'] in settings.SEARCH_CLIENTS:
