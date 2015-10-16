@@ -89,6 +89,8 @@ class Attachment(models.Model):
 
 	class Meta:
 		db_table = 'attachments'
+		# Predictable same-as-insert order
+		ordering = ('id',)
 
 	def inlineable(self):
 		# Return True if this image should be inlined
