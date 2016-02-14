@@ -17,8 +17,8 @@ class ArchivesParser(object):
 		self.parser = Parser()
 
 	def parse(self, stream):
-		self.msg = self.parser.parse(stream)
-		self.rawtxt = str(self.msg)
+		self.rawtxt = stream.read()
+		self.msg = self.parser.parse(StringIO.StringIO(self.rawtxt))
 
 	def is_msgid(self, msgid):
 		# Look for a specific messageid. This means we might parse it twice,
