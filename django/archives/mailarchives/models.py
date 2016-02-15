@@ -8,6 +8,7 @@ hide_reasons = [
 	'This message has been hidden because a virus was found in the message.', # 1
 	'This message has been hidden because the message violated policies.',    # 2
 	'This message has been hidden because for privacy reasons.',              # 3
+	'This message was corrupt',                                               # 4
 	]
 
 
