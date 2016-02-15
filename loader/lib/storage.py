@@ -1,3 +1,5 @@
+import difflib
+
 from parser import ArchivesParser
 
 from lib.log import log, opstatus
@@ -230,3 +232,55 @@ class ArchivesParserStorage(ArchivesParser):
 							 [{'id': id, 'priority': i, 'msgid': self.parents[i]} for i in range(0, len(self.parents))])
 
 		opstatus.stored += 1
+
+	def diff(self, conn, f, fromonlyf):
+		curs = conn.cursor()
+
+		# Fetch the old one so we have something to diff against
+		curs.execute("SELECT id, _from, _to, cc, subject, date, has_attachment, bodytxt FROM messages WHERE messageid=%(msgid)s", {
+			'msgid': self.msgid,
+			})
+		try:
+			id, _from, _to, cc, subject, date, has_attachment, bodytxt = curs.fetchone()
+		except TypeError, e:
+			f.write("---- %s ----\n" % self.msgid)
+			f.write("Could not re-find in archives: %s\n" % e)
+			f.write("\n-------------------------------\n\n")
+			return
+
+
+		if bodytxt.decode('utf8') != self.bodytxt:
+			log.status("Message %s has changes " % self.msgid)
+			tempdiff = list(difflib.unified_diff(bodytxt.decode('utf8').splitlines(),
+												 self.bodytxt.splitlines(),
+												 fromfile='old',
+												 tofile='new',
+												 n=0,
+												 lineterm=''))
+			if (len(tempdiff)-2) % 3 == 0:
+				# 3 rows to a diff, two header rows.
+				# Then verify that each slice of 3 contains one @@ row (header), one -From and one +>From,
+				# which indicates the only change is in the From.
+				ok = True
+				for a,b,c in map(None, *([iter(tempdiff[2:])] * 3)):
+					if not (a.startswith('@@ ') and b.startswith('-From ') and c.startswith('+>From ')):
+						ok=False
+						break
+				if ok:
+					fromonlyf.write("%s\n" % self.msgid)
+					return
+
+
+			# Generate a nicer diff
+			d = list(difflib.unified_diff(bodytxt.decode('utf8').splitlines(),
+												   self.bodytxt.splitlines(),
+												   fromfile='old',
+												   tofile='new',
+												   n=0,
+												   lineterm=''))
+			if len(d) > 0:
+				f.write("---- %s ----\n" % self.msgid)
+				f.write("\n".join(d))
+				f.write("\n\n")
+		else:
+			log.status("Message %s unchanged." % self.msgid)
