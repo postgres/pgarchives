@@ -91,7 +91,14 @@ if __name__ == "__main__":
 		num += 1
 		ap = ArchivesParserStorage()
 		ap.parse(StringIO(rawtxt))
-		ap.analyze(date_override=opt.force_date)
+		try:
+			ap.analyze(date_override=opt.force_date)
+		except IgnorableExcepion, e:
+			if opt.update:
+				raise e
+			f.write("Message %s lacks message-id?\n" % id)
+			continue
+
 		if opt.update:
 			ap.store(conn, listid=-9, overwrite=True)
 		else:
