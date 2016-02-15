@@ -14,7 +14,7 @@ import base64
 from datetime import datetime, timedelta
 import calendar
 
-import simplejson as json
+import json
 
 from models import *
 

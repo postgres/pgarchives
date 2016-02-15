@@ -5,7 +5,7 @@ from django.conf import settings
 from views import cache
 from models import Message, List
 
-import simplejson as json
+import json
 
 
 @cache(hours=4)
