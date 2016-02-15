@@ -93,7 +93,7 @@ if __name__ == "__main__":
 		ap.parse(StringIO(rawtxt))
 		try:
 			ap.analyze(date_override=opt.force_date)
-		except IgnorableExcepion, e:
+		except IgnorableException, e:
 			if opt.update:
 				raise e
 			f.write("Message %s lacks message-id?\n" % id)
