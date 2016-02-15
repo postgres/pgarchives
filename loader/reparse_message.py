@@ -70,9 +70,9 @@ if __name__ == "__main__":
 	# Get messages
 	curs = conn.cursor('msglist')
 	if opt.all:
-		curs.execute("SELECT id, rawtxt FROM messages ORDER BY id")
+		curs.execute("SELECT id, rawtxt FROM messages WHERE hiddenstatus IS NULL ORDER BY id")
 	elif opt.sample:
-		curs.execute("SELECT id, rawtxt FROM messages ORDER BY id DESC LIMIT %(num)s", {
+		curs.execute("SELECT id, rawtxt FROM messages WHERE hiddenstatus IS NULL ORDER BY id DESC LIMIT %(num)s", {
 			'num': int(opt.sample),
 		})
 	else:
