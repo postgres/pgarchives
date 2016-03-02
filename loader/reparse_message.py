@@ -96,7 +96,7 @@ if __name__ == "__main__":
 		except IgnorableException, e:
 			if opt.update:
 				raise e
-			f.write("Message %s lacks message-id?\n" % id)
+			f.write("Exception loading %s: %s" % (id, e))
 			continue
 
 		if opt.update:
