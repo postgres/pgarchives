@@ -161,6 +161,11 @@ class ArchivesParser(object):
 		m = self._re_footer.match(b)
 		if m:
 			b = m.group(1)
+
+		# Sometimes we end up with a trailing \0 when decoding long strings, so
+		# replace it if it's there.
+		b = b.rstrip('\0')
+
 		return b
 
 	def _get_body(self):
