@@ -76,11 +76,11 @@ if __name__ == "__main__":
 		while True:
 			a = raw_input('Save this to db?').lower()
 			if a == 'y' or a == 'yes':
-				curs.execute("INSERT INTO messages_edited SELECT * FROM messages WHERE messageid=%(msgid)s", {
-					'msgid': opt.msgid,
+				curs.execute("INSERT INTO messages_edited SELECT * FROM messages WHERE id=%(id)s", {
+					'id': id,
 					})
-				curs.execute("UPDATE messages SET rawtxt=%(raw)s WHERE messageid=%(msgid)s", {
-					'msgid': opt.msgid,
+				curs.execute("UPDATE messages SET rawtxt=%(raw)s WHERE id=%(id)s", {
+					'id': id,
 					'raw': bytearray(s2),
 				})
 				conn.commit()
