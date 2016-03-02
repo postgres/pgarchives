@@ -102,7 +102,7 @@ if __name__ == "__main__":
 		if opt.update:
 			ap.store(conn, listid=-9, overwrite=True)
 		else:
-			ap.diff(conn, f, fromonlyf)
+			ap.diff(conn, f, fromonlyf, id)
 		if datetime.now() - laststatus > timedelta(seconds=5):
 			sys.stdout.write("%s messages parsed (%s / second)\r" % (num, num / ((datetime.now()-firststatus).seconds)))
 			sys.stdout.flush()

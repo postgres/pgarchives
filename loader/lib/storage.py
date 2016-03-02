@@ -233,7 +233,7 @@ class ArchivesParserStorage(ArchivesParser):
 
 		opstatus.stored += 1
 
-	def diff(self, conn, f, fromonlyf):
+	def diff(self, conn, f, fromonlyf, oldid):
 		curs = conn.cursor()
 
 		# Fetch the old one so we have something to diff against
@@ -244,7 +244,7 @@ class ArchivesParserStorage(ArchivesParser):
 			id, _from, _to, cc, subject, date, has_attachment, bodytxt = curs.fetchone()
 		except TypeError, e:
 			f.write("---- %s ----\n" % self.msgid)
-			f.write("Could not re-find in archives: %s\n" % e)
+			f.write("Could not re-find in archives (old id was %s): %s\n" % (oldid, e))
 			f.write("\n-------------------------------\n\n")
 			return
 
