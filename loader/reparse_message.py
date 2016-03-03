@@ -119,6 +119,9 @@ if __name__ == "__main__":
 		f.close()
 		if os.path.getsize('reparse.diffs') == 0:
 			os.unlink('reparse.diffs')
+		if os.path.getsize('reparse.fromonly') == 0:
+			os.unlink('reparse.fromonly')
+
 		# Just in case
 		conn.rollback()
 	conn.close()
