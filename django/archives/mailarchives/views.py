@@ -239,7 +239,7 @@ def attachment(request, attid):
 	if len(r) != 1:
 		return HttpResponse("Attachment not found")
 
-	return HttpResponse(r[0][2], mimetype=r[0][1])
+	return HttpResponse(r[0][2], content_type=r[0][1])
 
 def _build_thread_structure(threadid):
 	# Yeah, this is *way* too complicated for the django ORM
@@ -447,7 +447,7 @@ def search(request):
 		a = curs.fetchall()
 		if len(a) == 1:
 			# Yup, this was a messageid
-			resp = HttpResponse(mimetype='application/json')
+			resp = HttpResponse(content_type='application/json')
 
 			json.dump({'messageidmatch': 1}, resp)
 			return resp
@@ -473,7 +473,7 @@ def search(request):
 
 	curs.execute(qstr, params)
 
-	resp = HttpResponse(mimetype='application/json')
+	resp = HttpResponse(content_type='application/json')
 
 	json.dump([{
 				'm': messageid,
@@ -490,7 +490,7 @@ def search(request):
 @cache(seconds=10)
 def web_sync_timestamp(request):
 	s = datetime.now().strftime("%Y-%m-%d %H:%M:%S\n")
-	r = HttpResponse(s, mimetype='text/plain')
+	r = HttpResponse(s, content_type='text/plain')
 	r['Content-Length'] = len(s)
 	return r
 
@@ -524,7 +524,7 @@ def base_css(request):
 @import url("/media/css/table.css");
 
 @import url("/media/css/iefixes.css");
-""", mimetype='text/css')
+""", content_type='text/css')
 
 # Redirect to the requested url, with a slash first. This is used to remove
 # trailing slashes on messageid links by doing a permanent redirect. This is
