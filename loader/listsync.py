@@ -67,7 +67,7 @@ if __name__=="__main__":
 	psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 	conn = psycopg2.connect(connstr)
 
-	u = urllib.urlopen("http://www.postgresql.org/community/lists/listinfo/")
+	u = urllib.urlopen("https://www.postgresql.org/community/lists/listinfo/")
 	obj = json.load(u)
 	u.close()
 

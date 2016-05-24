@@ -19,7 +19,7 @@ def hidemail(value):
 # The archived messages contain a lot of links to other messages in the
 # mailing list archives:
 #
-#  http://www.postgresql.org/message-id/1asd21das@mail.gmail.com
+#  https://www.postgresql.org/message-id/1asd21das@mail.gmail.com
 #
 # Those are not email addresses, so ignore them. The links won't work if they
 # are mangled.
