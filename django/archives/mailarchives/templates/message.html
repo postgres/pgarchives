@@ -45,13 +45,13 @@ $(function(){
  </tr>
  <tr>
   <th>Message-ID:</th>
-  <td><a href="/message-id/{{msg.messageid}}">{{msg.messageid}}</a> (view <a href="/message-id/raw/{{msg.messageid}}">raw</a> or <a href="/message-id/flat/{{msg.messageid}}">whole thread</a>)</td>
+  <td><a href="/message-id/{{msg.messageid|urlencode}}">{{msg.messageid}}</a> (view <a href="/message-id/raw/{{msg.messageid|urlencode}}">raw</a> or <a href="/message-id/flat/{{msg.messageid|urlencode}}">whole thread</a>)</td>
  </tr>
  <tr>
   <th>Thread:</th>
   <td>
    <select id="thread_select" onchange="onThreadSelect()">
-{%for m in threadstruct%}{%if m.id%}<option value="{{m.messageid}}"{%if m.id = msg.id%} selected="selected"{%endif%}{%if m.hasattachment%} class="hasatt"{%endif%}>{{m.indent|safe}}{{m.printdate}} from {{m.mailfrom|hidemail}}</option>{%endif%}
+{%for m in threadstruct%}{%if m.id%}<option value="{{m.messageid|urlencode}}"{%if m.id = msg.id%} selected="selected"{%endif%}{%if m.hasattachment%} class="hasatt"{%endif%}>{{m.indent|safe}}{{m.printdate}} from {{m.mailfrom|hidemail}}</option>{%endif%}
 {%endfor%}
    </select>
   </td>
@@ -83,14 +83,14 @@ Description: {{a.contenttype}} ({{a.len|filesizeformat}}) {%if a.inlineable%}(in
 {%if parent%}
 <h3>In response to</h3>
 <ul>
-<li><a href="/message-id/{{parent.messageid}}">{{parent.subject}}</a> at {{parent.printdate}} from {{parent.mailfrom|nameonly}}</li>
+<li><a href="/message-id/{{parent.messageid|urlencode}}">{{parent.subject}}</a> at {{parent.printdate}} from {{parent.mailfrom|nameonly}}</li>
 </ul>
 {%endif%}
 {%if responses %}
 <h3>Responses</h3>
 <ul>
 {%for m in responses%}
-<li><a href="/message-id/{{m.messageid}}">{{m.subject}}</a> at {{m.printdate}} from {{m.mailfrom|nameonly}}</li>
+<li><a href="/message-id/{{m.messageid|urlencode}}">{{m.subject}}</a> at {{m.printdate}} from {{m.mailfrom|nameonly}}</li>
 {%endfor%}
 </ul>
 {%endif%}
@@ -100,11 +100,11 @@ Description: {{a.contenttype}} ({{a.len|filesizeformat}}) {%if a.inlineable%}(in
 <blockquote>
  <table border="0">
   {%if info.next%}
-   <tr><td><a href="/message-id/{{info.next.msgid}}">Next</a>:</td><td><b>From:</b> {{info.next.from|nameonly}}</td><td><b>Date:</b> {{info.next.date}}</td></tr>
+   <tr><td><a href="/message-id/{{info.next.msgid|urlencode}}">Next</a>:</td><td><b>From:</b> {{info.next.from|nameonly}}</td><td><b>Date:</b> {{info.next.date}}</td></tr>
    <tr><td></td><td colspan="2"><b>Subject</b>: {{info.next.subject}}</td></tr>
   {%endif%}
   {%if info.prev%}
-   <tr><td><a href="/message-id/{{info.prev.msgid}}">Previous</a>:</td><td><b>From</b>: {{info.prev.from|nameonly}}</td><td><b>Date</b>: {{info.prev.date}}</td></tr>
+   <tr><td><a href="/message-id/{{info.prev.msgid|urlencode}}">Previous</a>:</td><td><b>From</b>: {{info.prev.from|nameonly}}</td><td><b>Date</b>: {{info.prev.date}}</td></tr>
    <tr><td></td><td colspan="2"><b>Subject</b>: {{info.prev.subject}}</td></tr>
   {%endif%}
  </table>
