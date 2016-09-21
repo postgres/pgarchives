@@ -24,9 +24,9 @@ urlpatterns = patterns('',
     (r'^(?P<prefix>message-id/(|flat/|raw/))<(?P<msgid>.*)>$', 'archives.mailarchives.views.re_redirect'),
 
     # Match regular messages
-    (r'^message-id/flat/(.+)$', 'archives.mailarchives.views.message_flat'),
-    (r'^message-id/raw/(.+)$', 'archives.mailarchives.views.message_raw'),
-    (r'^message-id/(.+)$', 'archives.mailarchives.views.message'),
+    (r'^message-id/([^/]+)$', 'archives.mailarchives.views.message'),
+    (r'^message-id/flat/([^/]+)$', 'archives.mailarchives.views.message_flat'),
+    (r'^message-id/raw/([^/]+)$', 'archives.mailarchives.views.message_raw'),
 
     # Search
     (r'^archives-search/', 'archives.mailarchives.views.search'),
