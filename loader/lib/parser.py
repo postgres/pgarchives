@@ -292,6 +292,8 @@ class ArchivesParser(object):
 			# Exclude specific contenttypes
 			if container.get_content_type() == 'application/pgp-signature':
 				return
+			if container.get_content_type() in ('application/pkcs7-signature', 'application/x-pkcs7-signature'):
+				return
 			# For now, accept anything not text/plain
 			if container.get_content_type() != 'text/plain':
 				self.attachments.append((self._extract_filename(container), container.get_content_type(), container.get_payload(decode=True)))
