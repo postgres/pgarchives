@@ -27,6 +27,7 @@ urlpatterns = patterns('',
     (r'^message-id/([^/]+)$', 'archives.mailarchives.views.message'),
     (r'^message-id/flat/([^/]+)$', 'archives.mailarchives.views.message_flat'),
     (r'^message-id/raw/([^/]+)$', 'archives.mailarchives.views.message_raw'),
+    (r'^message-id/mbox/([^/]+)$', 'archives.mailarchives.views.message_mbox'),
 
     # Search
     (r'^archives-search/', 'archives.mailarchives.views.search'),

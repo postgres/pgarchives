@@ -1,5 +1,6 @@
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseForbidden, Http404
+from django.http import StreamingHttpResponse
 from django.http import HttpResponsePermanentRedirect, HttpResponseNotModified
 from django.shortcuts import render_to_response, get_object_or_404
 from django.utils.http import http_date, parse_http_date_safe
@@ -13,6 +14,8 @@ import os
 import base64
 from datetime import datetime, timedelta
 import calendar
+import email.parser
+from StringIO import StringIO
 
 import json
 
@@ -397,6 +400,39 @@ def message_raw(request, msgid):
 		r = HttpResponse(row[0][2], content_type='text/plain')
 		r['X-pgthread'] = ":%s:" % row[0][0]
 		return r
+
+
+@nocache
+@antispam_auth
+def message_mbox(request, msgid):
+	msg = get_object_or_404(Message, messageid=msgid)
+
+	# Rawmsg is not in the django model, so we have to query it separately
+	curs = connection.cursor()
+	curs.execute("SELECT messageid, rawtxt FROM messages WHERE threadid=%(thread)s ORDER BY date", {
+		'thread': msg.threadid,
+	})
+
+	# XXX: maybe not load all at once? But usually threads are small...
+	allmsg = curs.fetchall()
+	if allmsg[0][0] != msgid:
+		# Always redirect to the first message in the thread when building
+		# the mbox, to not generate potentially multiple copies in
+		# the cache.
+		return HttpResponsePermanentRedirect(allmsg[0][0])
+
+	def _message_stream():
+		for mid, raw in allmsg:
+			# Parse as a message to generate headers
+			s = StringIO(raw)
+			parser = email.parser.Parser()
+			msg = parser.parse(s)
+
+			yield msg.as_string(unixfrom=True)
+
+	r = StreamingHttpResponse(_message_stream())
+	r['Content-type'] = 'application/mbox'
+	return r
 
 
 def search(request):
