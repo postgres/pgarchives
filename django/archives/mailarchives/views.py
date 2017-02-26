@@ -37,6 +37,28 @@ def nocache(fn):
 		return resp
 	return _nocache
 
+# Decorator to require http auth
+def antispam_auth(fn):
+	def _antispam_auth(request, *_args, **_kwargs):
+		if 'HTTP_AUTHORIZATION' in request.META:
+			auth = request.META['HTTP_AUTHORIZATION'].split()
+			if len(auth) != 2:
+				return HttpResponseForbidden("Invalid authentication")
+			if auth[0].lower() == "basic":
+				user, pwd = base64.b64decode(auth[1]).split(':')
+				if user == 'archives' and pwd == 'antispam':
+					# Actually run the function if auth is correct
+					resp = fn(request, *_args, **_kwargs)
+					return resp
+		# Require authentication
+		response = HttpResponse()
+		response.status_code = 401
+		response['WWW-Authenticate'] = 'Basic realm="Please authenticate with user archives and password antispam"'
+		return response
+
+	return _antispam_auth
+
+
 
 def get_all_groups_and_lists(listid=None):
 	# Django doesn't (yet) support traversing the reverse relationship,
@@ -359,36 +381,23 @@ def message_flat(request, msgid):
 	return r
 
 @nocache
+@antispam_auth
 def message_raw(request, msgid):
-	if 'HTTP_AUTHORIZATION' in request.META:
-		auth = request.META['HTTP_AUTHORIZATION'].split()
-		if len(auth) != 2:
-			return HttpResponseForbidden("Invalid authentication")
-		if auth[0].lower() == "basic":
-			user, pwd = base64.b64decode(auth[1]).split(':')
-			if user == 'archives' and pwd == 'antispam':
-				curs = connection.cursor()
-				curs.execute("SELECT threadid, hiddenstatus, rawtxt FROM messages WHERE messageid=%(messageid)s", {
-						'messageid': msgid,
-						})
-				row = curs.fetchall()
-				if len(row) != 1:
-					raise Http404('Message does not exist')
+	curs = connection.cursor()
+	curs.execute("SELECT threadid, hiddenstatus, rawtxt FROM messages WHERE messageid=%(messageid)s", {
+		'messageid': msgid,
+	})
+	row = curs.fetchall()
+	if len(row) != 1:
+		raise Http404('Message does not exist')
 
-				if row[0][1]:
-					r = HttpResponse('This message has been hidden.', content_type='text/plain')
-				else:
-					r = HttpResponse(row[0][2], content_type='text/plain')
-				r['X-pgthread'] = ":%s:" % row[0][0]
-				return r
-			# Invalid password falls through
-		# Other authentication types fall through
+	if row[0][1]:
+		r = HttpResponse('This message has been hidden.', content_type='text/plain')
+	else:
+		r = HttpResponse(row[0][2], content_type='text/plain')
+		r['X-pgthread'] = ":%s:" % row[0][0]
+		return r
 
-	# Require authentication
-	response = HttpResponse()
-	response.status_code = 401
-	response['WWW-Authenticate'] = 'Basic realm="Please authenticate with user archives and password antispam"'
-	return response
 
 def search(request):
 	# Only certain hosts are allowed to call the search API
