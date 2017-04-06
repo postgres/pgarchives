@@ -20,10 +20,11 @@ def hidemail(value):
 # mailing list archives:
 #
 #  https://www.postgresql.org/message-id/1asd21das@mail.gmail.com
+#  https://postgr.es/m/1asd21das@mail.gmail.com
 #
 # Those are not email addresses, so ignore them. The links won't work if they
 # are mangled.
-_re_mail = re.compile('(/message-id/)?[^()<>@,;:\/\s"\'&|]+@[^()<>@,;:\/\s"\'&|]+')
+_re_mail = re.compile('(/m(essage-id)?/)?[^()<>@,;:\/\s"\'&|]+@[^()<>@,;:\/\s"\'&|]+')
 def _rewrite_email_match(match):
 	if match.group(1):
 		return match.group(0)	# was preceded by /message-id/
