@@ -246,7 +246,7 @@ class ArchivesParser(object):
 	def _clean_filename_encoding(self, filename):
 		# If this is a header-encoded filename, start by decoding that
 		if filename.startswith('=?'):
-			decoded, encoding = email.header.decode_header(filename)[0]
+			decoded, encoding = decode_header(filename)[0]
 			return unicode(decoded, encoding, errors='ignore')
 
 		# If it's already unicode, just return it
