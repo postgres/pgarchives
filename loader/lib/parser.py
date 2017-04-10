@@ -242,8 +242,12 @@ class ArchivesParser(object):
 		self.attachments_found_first_plaintext = False
 		self.recursive_get_attachments(self.msg)
 
+	# Clean a filenames encoding and return it as a unicode string
 	def _clean_filename_encoding(self, filename):
-		# Clean a filenames encoding and return it as a unicode string
+		# If this is a header-encoded filename, start by decoding that
+		if filename.startswith('=?'):
+			decoded, encoding = email.header.decode_header(filename)[0]
+			return unicode(decoded, encoding, errors='ignore')
 
 		# If it's already unicode, just return it
 		if isinstance(filename, unicode):
