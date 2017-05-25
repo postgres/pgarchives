@@ -1,5 +1,5 @@
 {%extends "base.html"%}
-{%block title%}{{msg.subject}}{%endblock%}
+{%block title%}{%if not msg.hiddenstatus%}{{msg.subject}}{%endif%}{%endblock%}
 {%load pgfilters%}
 {%block extrahead%}
 <script type="text/javascript">
@@ -19,7 +19,7 @@ $(function(){
 </script>
 {%endblock%}
 {%block contents%}
-<h2>{{msg.subject}}</h2>
+<h2>{%if not msg.hiddenstatus%}{{msg.subject}}{%endif%}</h2>
 <table class="message">
  <tr>
   <th>From:</th>
@@ -37,7 +37,7 @@ $(function(){
 {%endif%}
  <tr>
   <th>Subject:</th>
-  <td>{{msg.subject}}</td>
+  <td>{%if not msg.hiddenstatus%}{{msg.subject}}{%endif%}</td>
  </tr>
  <tr>
   <th>Date:</th>
