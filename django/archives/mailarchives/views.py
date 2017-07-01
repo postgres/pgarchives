@@ -177,7 +177,7 @@ def render_datelist_from(request, l, d, title, to=None):
 	if to:
 		datefilter.add(Q(date__lt=to), Q.AND)
 
-	mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().filter(datefilter).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('date')[:200]
+	mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().filter(datefilter, hiddenstatus__isnull=True).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('date')[:200]
 
 	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
 	(yearmonth, daysinmonth) = get_monthday_info(mlist, l, d)
@@ -196,7 +196,7 @@ def render_datelist_to(request, l, d, title):
 	# Need to sort this backwards in the database to get the LIMIT applied
 	# properly, and then manually resort it in the correct order. We can do
 	# the second sort safely in python since it's not a lot of items..
-	mlist = sorted(Message.objects.defer('bodytxt', 'cc', 'to').select_related().filter(date__lte=d).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('-date')[:200], key=lambda m: m.date)
+	mlist = sorted(Message.objects.defer('bodytxt', 'cc', 'to').select_related().filter(date__lte=d, hiddenstatus__isnull=True).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('-date')[:200], key=lambda m: m.date)
 
 	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
 	(yearmonth, daysinmonth) = get_monthday_info(mlist, l, d)
@@ -409,7 +409,7 @@ def message_mbox(request, msgid):
 
 	# Rawmsg is not in the django model, so we have to query it separately
 	curs = connection.cursor()
-	curs.execute("SELECT messageid, rawtxt FROM messages WHERE threadid=%(thread)s ORDER BY date", {
+	curs.execute("SELECT messageid, rawtxt FROM messages WHERE threadid=%(thread)s AND hiddenstatus IS NULL ORDER BY date", {
 		'thread': msg.threadid,
 	})
 
