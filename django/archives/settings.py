@@ -151,7 +151,6 @@ LOGGING = {
 FORCE_SCRIPT_NAME=""
 
 # Always override!
-MBOX_ARCHIVES_ROOT="/dev/null"
 SEARCH_CLIENTS = ('127.0.0.1',)
 API_CLIENTS = ('127.0.0.1',)
 

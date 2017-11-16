@@ -4,7 +4,7 @@ from django.http import StreamingHttpResponse
 from django.http import HttpResponsePermanentRedirect, HttpResponseNotModified
 from django.shortcuts import render_to_response, get_object_or_404
 from django.utils.http import http_date, parse_http_date_safe
-from django.db import connection
+from django.db import connection, transaction
 from django.db.models import Q
 from django.conf import settings
 
@@ -12,7 +12,7 @@ import urllib
 import re
 import os
 import base64
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import calendar
 import email.parser
 from StringIO import StringIO
@@ -129,18 +129,12 @@ def groupindex(request, groupid):
 			'groups': mygroups,
 			}, NavContext(request, all_groups=groups, expand_groupid=groupid))
 
-def _has_mbox(listname, year, month):
-	return os.path.isfile("%s/%s/files/public/archive/%s.%04d%02d" % (
-			settings.MBOX_ARCHIVES_ROOT,
-			listname,
-			listname, year, month))
-
 @cache(hours=8)
 def monthlist(request, listname):
 	l = get_object_or_404(List, listname=listname)
 	curs = connection.cursor()
 	curs.execute("SELECT year, month FROM list_months WHERE listid=%(listid)s ORDER BY year DESC, month DESC", {'listid': l.listid})
-	months=[{'year':r[0],'month':r[1], 'date':datetime(r[0],r[1],1), 'hasmbox': _has_mbox(listname, r[0], r[1])} for r in curs.fetchall()]
+	months=[{'year':r[0],'month':r[1], 'date':datetime(r[0],r[1],1)} for r in curs.fetchall()]
 
 	return render_to_response('monthlist.html', {
 			'list': l,
@@ -402,38 +396,71 @@ def message_raw(request, msgid):
 		return r
 
 
+def _build_mbox(query, params, msgid=None):
+	connection.ensure_connection()
+
+	# Rawmsg is not in the django model, so we have to query it separately
+	curs = connection.connection.cursor(name='mbox', withhold=True)
+	curs.itersize = 50
+	curs.execute(query, params)
+
+	firstmsg = curs.fetchone()
+	if msgid and firstmsg[0] != msgid:
+		# Always redirect to the first message in the thread when building
+		# the mbox, to not generate potentially multiple copies in
+		# the cache.
+		return HttpResponsePermanentRedirect(firstmsg[0])
+
+	def _one_message(raw):
+		# Parse as a message to generate headers
+		s = StringIO(raw)
+		parser = email.parser.Parser()
+		msg = parser.parse(s)
+		return msg.as_string(unixfrom=True)
+
+
+	def _message_stream(first):
+		yield _one_message(first[1])
+
+		for mid, raw in curs:
+			yield _one_message(raw)
+
+		# Close must be done inside this function. If we close it in the
+		# main function, it won't let the iterator run to completion.
+		curs.close()
+
+	r = StreamingHttpResponse(_message_stream(firstmsg))
+	r['Content-type'] = 'application/mbox'
+	return r
+
 @nocache
 @antispam_auth
 def message_mbox(request, msgid):
 	msg = get_object_or_404(Message, messageid=msgid)
 
-	# Rawmsg is not in the django model, so we have to query it separately
-	curs = connection.cursor()
-	curs.execute("SELECT messageid, rawtxt FROM messages WHERE threadid=%(thread)s AND hiddenstatus IS NULL ORDER BY date", {
-		'thread': msg.threadid,
-	})
+	return _build_mbox(
+		"SELECT messageid, rawtxt FROM messages WHERE threadid=%(thread)s AND hiddenstatus IS NULL ORDER BY date",
+		{
+			'thread': msg.threadid,
+		},
+		msgid)
 
-	# XXX: maybe not load all at once? But usually threads are small...
-	allmsg = curs.fetchall()
-	if allmsg[0][0] != msgid:
-		# Always redirect to the first message in the thread when building
-		# the mbox, to not generate potentially multiple copies in
-		# the cache.
-		return HttpResponsePermanentRedirect(allmsg[0][0])
+@nocache
+@antispam_auth
+def mbox(request, listname, listname2, mboxyear, mboxmonth):
+	if (listname != listname2):
+		raise Http404('List name mismatch')
 
-	def _message_stream():
-		for mid, raw in allmsg:
-			# Parse as a message to generate headers
-			s = StringIO(raw)
-			parser = email.parser.Parser()
-			msg = parser.parse(s)
-
-			yield msg.as_string(unixfrom=True)
-
-	r = StreamingHttpResponse(_message_stream())
-	r['Content-type'] = 'application/mbox'
-	return r
-
+	mboxyear = int(mboxyear)
+	mboxmonth = int(mboxmonth)
+	return _build_mbox(
+		"SELECT messageid, rawtxt FROM messages m INNER JOIN list_threads t ON t.threadid=m.threadid WHERE listid=(SELECT listid FROM lists WHERE listname=%(list)s) AND hiddenstatus IS NULL AND date >= %(startdate)s AND date <= %(enddate)s ORDER BY date",
+		{
+			'list': listname,
+			'startdate': date(mboxyear, mboxmonth, 1),
+			'enddate': datetime(mboxyear, mboxmonth, calendar.monthrange(mboxyear, mboxmonth)[1], 23, 59, 59),
+		},
+	)
 
 def search(request):
 	# Only certain hosts are allowed to call the search API
@@ -552,10 +579,6 @@ def legacy(request, listname, year, month, msgnum):
 	if len(r) != 1:
 		raise Http404('Message does not exist')
 	return HttpResponsePermanentRedirect('/message-id/%s' % r[0][0])
-
-@cache(hours=8)
-def mbox(request, listname, mboxname):
-	return HttpResponse('This needs to be handled by the webserver. This view should never be called.', content_type='text/plain')
 
 @cache(hours=8)
 def base_css(request):

@@ -28,6 +28,7 @@ urlpatterns = patterns('',
     (r'^message-id/flat/([^/]+)$', 'archives.mailarchives.views.message_flat'),
     (r'^message-id/raw/([^/]+)$', 'archives.mailarchives.views.message_raw'),
     (r'^message-id/mbox/([^/]+)$', 'archives.mailarchives.views.message_mbox'),
+    (r'^list/([\w-]+)/mbox/([\w-]+)\.(\d{4})(\d{2})', 'archives.mailarchives.views.mbox'),
 
     # Search
     (r'^archives-search/', 'archives.mailarchives.views.search'),
@@ -63,5 +64,4 @@ urlpatterns = patterns('',
     (r'^media-archives/(.*)$', 'django.views.static.serve', {
 			'document_root': '../media',
     }),
-    (r'^list/([\w-]+)/mbox/(\d{4})', 'archives.mailarchives.views.mbox'),
 )
