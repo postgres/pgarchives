@@ -40,7 +40,7 @@ if __name__=="__main__":
 
 	# Add any missing lists.
 	for l in obj:
-		curs.execute("INSERT INTO lists (listid, listname, shortdesc, description, active, groupid) VALUES (%(id)s, %(name)s, %(desc)s, %(desc)s, 't', %(groupid)s) ON CONFLICT (listid) DO UPDATE SET listname=excluded.listname,shortdesc=excluded.shortdesc,groupid=excluded.groupid RETURNING listid", {
+		curs.execute("INSERT INTO lists (listid, listname, shortdesc, description, active, groupid) VALUES (%(id)s, %(name)s, %(name)s, %(desc)s, 't', %(groupid)s) ON CONFLICT (listid) DO UPDATE SET listname=excluded.listname,shortdesc=excluded.shortdesc,groupid=excluded.groupid RETURNING listid", {
 			'id': l['listid'],
 			'name': l['listname'],
 			'desc': l['shortdesc'],
