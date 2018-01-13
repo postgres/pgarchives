@@ -42,26 +42,42 @@ if __name__=="__main__":
 			})
 			print "Added group %s" % name
 
-	# Add any missing lists.
+	# Add any missing lists, and synchronize their contents.
 	for l in obj:
-		curs.execute("SELECT EXISTS (SELECT 1 FROM lists WHERE listname=%(name)s)", {
+		curs.execute("SELECT listid,listname FROM lists WHERE listname=%(name)s", {
 			'name': l['listname'],
 		})
-		if not curs.fetchone()[0]:
-			curs.execute("INSERT INTO lists (listname, shortdesc, description, active, groupid) SELECT %(name)s, %(name)s, %(desc)s, 't', id FROM listgroups WHERE groupname=%(groupname)s RETURNING listname", {
+		if curs.rowcount == 0:
+			curs.execute("INSERT INTO lists (listname, shortdesc, description, active, groupid) SELECT %(name)s, %(name)s, %(desc)s, 't', id FROM listgroups WHERE groupname=%(groupname)s RETURNING listid, name", {
 				'name': l['listname'],
 				'desc': l['shortdesc'],
 				'groupname': l['group']['groupname'],
 			})
-			print "Added list %s" % l['listname']
+			listid, name = curs.fetchall()
+			print "Added list %s" % name
 		else:
-			curs.execute("UPDATE lists SET shortdesc=%(name)s, description=%(desc)s, groupid=(SELECT groupid FROM listgroups WHERE groupname=%(groupname)s) WHERE listname=%(name)s AND NOT (shortdesc=%(name)s AND groupid=(SELECT groupid FROM listgroups WHERE groupname=%(groupname)s)) RETURNING listname", {
+			listid, name = curs.fetchone()
+			curs.execute("UPDATE lists SET shortdesc=%(name)s, description=%(desc)s, groupid=(SELECT groupid FROM listgroups WHERE groupname=%(groupname)s) WHERE listid=%(id)s AND NOT (shortdesc=%(name)s AND groupid=(SELECT groupid FROM listgroups WHERE groupname=%(groupname)s)) RETURNING listname", {
+				'id': listid,
 				'name': l['listname'],
 				'desc': l['shortdesc'],
 				'groupname': l['group']['groupname'],
 			})
 			for n, in curs.fetchall():
 				print "Updated list %s " % n
+
+		if cfg.has_option('pglister', 'subscribers') and cfg.getint('pglister', 'subscribers'):
+			# If we synchronize subscribers, we do so on all lists for now.
+			curs.execute("WITH t(u) AS (SELECT UNNEST(%(usernames)s)), ins(un) AS (INSERT INTO listsubscribers (username, list_id) SELECT u, %(listid)s FROM t WHERE NOT EXISTS (SELECT 1 FROM listsubscribers WHERE username=u AND list_id=%(listid)s) RETURNING username), del(un) AS (DELETE FROM listsubscribers WHERE list_id=%(listid)s AND NOT EXISTS (SELECT 1 FROM t WHERE u=username) RETURNING username) SELECT 'ins',un FROM ins UNION ALL SELECT 'del',un FROM del ORDER BY 1,2", {
+				'usernames': l['subscribers'],
+				'listid': listid,
+			})
+			for what, who in curs.fetchall():
+				if what == 'ins':
+					print "Added subscriber %s to list %s" % (who, name)
+				else:
+					print "Removed subscriber %s from list %s" % (who, name)
+
 
 	# We don't remove lists ever, because we probably want to keep archives around.
 	# But for now, we alert on them.
