@@ -33,23 +33,43 @@ if __name__=="__main__":
 	groups = {g['group']['id']:g['group']['groupname'] for g in obj}
 
 	for id,name in groups.items():
-		curs.execute("INSERT INTO listgroups (groupid, groupname, sortkey) VALUES (%(id)s, %(group)s, 100) ON CONFLICT (groupid) DO UPDATE SET groupname=excluded.groupname RETURNING groupname", {
-			'id': id,
+		curs.execute("SELECT EXISTS (SELECT 1 FROM listgroups WHERE groupname=%(group)s)", {
 			'group': name,
 		})
+		if not curs.fetchone()[0]:
+			curs.execute("INSERT INTO listgroups (groupname, sortkey) VALUES (%(group)s, 100) RETURNING groupname", {
+				'group': name,
+			})
+			print "Added group %s" % name
 
 	# Add any missing lists.
 	for l in obj:
-		curs.execute("INSERT INTO lists (listid, listname, shortdesc, description, active, groupid) VALUES (%(id)s, %(name)s, %(name)s, %(desc)s, 't', %(groupid)s) ON CONFLICT (listid) DO UPDATE SET listname=excluded.listname,shortdesc=excluded.shortdesc,groupid=excluded.groupid RETURNING listid", {
-			'id': l['listid'],
+		curs.execute("SELECT EXISTS (SELECT 1 FROM lists WHERE listname=%(name)s)", {
 			'name': l['listname'],
-			'desc': l['shortdesc'],
-			'groupid': l['group']['id'],
 		})
+		if not curs.fetchone()[0]:
+			curs.execute("INSERT INTO lists (listname, shortdesc, description, active, groupid) SELECT %(name)s, %(name)s, %(desc)s, 't', id FROM listgroups WHERE groupname=%(groupname)s RETURNING listname", {
+				'name': l['listname'],
+				'desc': l['shortdesc'],
+				'groupname': l['group']['groupname'],
+			})
+			print "Added list %s" % l['listname']
+		else:
+			curs.execute("UPDATE lists SET shortdesc=%(name)s, description=%(desc)s, groupid=(SELECT groupid FROM listgroups WHERE groupname=%(groupname)s) WHERE listname=%(name)s AND NOT (shortdesc=%(name)s AND groupid=(SELECT groupid FROM listgroups WHERE groupname=%(groupname)s)) RETURNING listname", {
+				'name': l['listname'],
+				'desc': l['shortdesc'],
+				'groupname': l['group']['groupname'],
+			})
+			for n, in curs.fetchall():
+				print "Updated list %s " % n
 
 	# We don't remove lists ever, because we probably want to keep archives around.
-	# We also don't currently support updating them, but that might be interesting in the future. For now,
-	# claim it's a feature that the description can be different :)
+	# But for now, we alert on them.
+	curs.execute("SELECT listname FROM lists WHERE active AND NOT listname=ANY(%(lists)s)", {
+		'lists': [l['listname'] for l in obj],
+	})
+	for n, in curs.fetchall():
+		print "List %s exists in archives, but not in upstream! Should it be marked inactive?"
 
 	conn.commit()
 	conn.close()
