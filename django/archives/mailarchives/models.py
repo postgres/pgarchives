@@ -72,6 +72,8 @@ class List(models.Model):
 	description = models.TextField(null=False, blank=False)
 	active = models.BooleanField(null=False, blank=False)
 	group = models.ForeignKey(ListGroup, db_column='groupid')
+	subscriber_access = models.BooleanField(null=False, blank=False, default=False, help_text="Subscribers can access contents (default is admins only)")
+
 
 	@property
 	def maybe_shortdesc(self):
@@ -100,3 +102,15 @@ class Attachment(models.Model):
 			if self.len < 75000:
 				return True
 		return False
+
+
+class ListSubscriber(models.Model):
+	# Only used when public access is not allowed.
+	# We set the username of the community account instead of a
+	# foreign key, because the user might not exist.
+	list = models.ForeignKey(List, null=False, blank=False)
+	username = models.CharField(max_length=30, null=False, blank=False)
+
+	class Meta:
+		unique_together = (('list', 'username'), )
+		db_table = 'listsubscribers'
