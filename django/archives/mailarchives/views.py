@@ -2,6 +2,7 @@ from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseForbidden, Http404
 from django.http import StreamingHttpResponse
 from django.http import HttpResponsePermanentRedirect, HttpResponseNotModified
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render_to_response, get_object_or_404
 from django.utils.http import http_date, parse_http_date_safe
 from django.db import connection, transaction
@@ -19,7 +20,67 @@ from StringIO import StringIO
 
 import json
 
+from redirecthandler import ERedirect
+
 from models import *
+
+# Ensure the user is logged in (if it's not public lists)
+def ensure_logged_in(request):
+	if settings.PUBLIC_ARCHIVES:
+		return
+	if hasattr(request, 'user') and request.user.is_authenticated():
+		return
+	raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
+
+# Ensure the user has permissions to access a list. If not, raise
+# a permissions exception.
+def ensure_list_permissions(request, l):
+	if settings.PUBLIC_ARCHIVES:
+		return
+	if hasattr(request, 'user') and request.user.is_authenticated():
+		if request.user.is_superuser:
+			return
+		if l.subscriber_access and ListSubscriber.objects.filter(list=l, username=request.user.username).exists():
+			return
+		# Logged in but no access
+		raise PermissionDenied("Access denied.")
+
+	# Redirect to a login page
+	raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
+
+# Ensure the user has permissions to access a message. In order to view
+# a message, the user must have permissions on *all* lists the thread
+# appears on.
+def ensure_message_permissions(request, msgid):
+	if settings.PUBLIC_ARCHIVES:
+		return
+	if hasattr(request, 'user') and request.user.is_authenticated():
+		if request.user.is_superuser:
+			return
+
+		curs = connection.cursor()
+		curs.execute("""SELECT EXISTS (
+ SELECT 1 FROM list_threads
+ INNER JOIN messages ON messages.threadid=list_threads.threadid
+ WHERE messages.messageid=%(msgid)s
+ AND NOT EXISTS (
+  SELECT 1 FROM listsubscribers
+  WHERE listsubscribers.list_id=list_threads.listid
+  AND listsubscribers.username=%(username)s
+ )
+)""", {
+			'msgid': msgid,
+			'username': request.user.username,
+		})
+		if not curs.fetchone()[0]:
+			# This thread is not on any list that the user does not have permissions on.
+			return
+
+		# Logged in but no access
+		raise PermissionDenied("Access denied.")
+
+	# Redirect to a login page
+	raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
 
 # Decorator to set cache age
 def cache(days=0, hours=0, minutes=0, seconds=0):
@@ -27,8 +88,10 @@ def cache(days=0, hours=0, minutes=0, seconds=0):
 	def _cache(fn):
 		def __cache(request, *_args, **_kwargs):
 			resp = fn(request, *_args, **_kwargs)
-			td = timedelta(hours=hours, minutes=minutes, seconds=seconds)
-			resp['Cache-Control'] = 's-maxage=%s' % (td.days*3600*24 + td.seconds)
+			if settings.PUBLIC_ARCHIVES:
+				# Only set cache headers on public archives
+				td = timedelta(hours=hours, minutes=minutes, seconds=seconds)
+				resp['Cache-Control'] = 's-maxage=%s' % (td.days*3600*24 + td.seconds)
 			return resp
 		return __cache
 	return _cache
@@ -36,7 +99,9 @@ def cache(days=0, hours=0, minutes=0, seconds=0):
 def nocache(fn):
 	def _nocache(request, *_args, **_kwargs):
 		resp = fn(request, *_args, **_kwargs)
-		resp['Cache-Control'] = 's-maxage=0'
+		if settings.PUBLIC_ARCHIVES:
+			# Only set cache headers on public archives
+			resp['Cache-Control'] = 's-maxage=0'
 		return resp
 	return _nocache
 
@@ -63,10 +128,13 @@ def antispam_auth(fn):
 
 
 
-def get_all_groups_and_lists(listid=None):
+def get_all_groups_and_lists(request, listid=None):
 	# Django doesn't (yet) support traversing the reverse relationship,
 	# so we'll get all the lists and rebuild it backwards.
-	lists = List.objects.select_related('group').all().order_by('listname')
+	if settings.PUBLIC_ARCHIVES or request.user.is_superuser:
+		lists = List.objects.select_related('group').all().order_by('listname')
+	else:
+		lists = List.objects.select_related('group').filter(listsubscriber__username=request.user.username).order_by('listname')
 	listgroupid = None
 	groups = {}
 	for l in lists:
@@ -96,7 +164,7 @@ class NavContext(RequestContext):
 			if expand_groupid:
 				listgroupid = int(expand_groupid)
 		else:
-			(groups, listgroupid) = get_all_groups_and_lists(listid)
+			(groups, listgroupid) = get_all_groups_and_lists(request, listid)
 
 		for g in groups:
 			# On the root page, remove *all* entries
@@ -113,7 +181,9 @@ class NavContext(RequestContext):
 
 @cache(hours=4)
 def index(request):
-	(groups, listgroupid) = get_all_groups_and_lists()
+	ensure_logged_in(request)
+
+	(groups, listgroupid) = get_all_groups_and_lists(request)
 	return render_to_response('index.html', {
 			'groups': [{'groupname': g['groupname'], 'lists': g['lists']} for g in groups],
 			}, NavContext(request, all_groups=groups))
@@ -132,6 +202,8 @@ def groupindex(request, groupid):
 @cache(hours=8)
 def monthlist(request, listname):
 	l = get_object_or_404(List, listname=listname)
+	ensure_list_permissions(request, l)
+
 	curs = connection.cursor()
 	curs.execute("SELECT year, month FROM list_months WHERE listid=%(listid)s ORDER BY year DESC, month DESC", {'listid': l.listid})
 	months=[{'year':r[0],'month':r[1], 'date':datetime(r[0],r[1],1)} for r in curs.fetchall()]
@@ -166,48 +238,57 @@ def get_monthday_info(mlist, l, d):
 		yearmonth = "%s%02d" % (monthdate.year, monthdate.month)
 	return (yearmonth, daysinmonth)
 
+
+def _render_datelist(request, l, d, datefilter, title, queryproc):
+	# NOTE! Basic permissions checks must be done before calling this function!
+
+	if not settings.PUBLIC_ARCHIVES and not request.user.is_superuser:
+		mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().filter(datefilter, hiddenstatus__isnull=True).extra(
+			where=["threadid IN (SELECT threadid FROM list_threads t WHERE listid=%s AND NOT EXISTS (SELECT 1 FROM list_threads t2 WHERE t2.threadid=t.threadid AND listid NOT IN (SELECT list_id FROM listsubscribers WHERE username=%s)))"],
+			params=(l.listid, request.user.username),
+		)
+	else:
+		# Else we return everything
+		mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().filter(datefilter, hiddenstatus__isnull=True).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid])
+	mlist = queryproc(mlist)
+
+	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
+	(yearmonth, daysinmonth) = get_monthday_info(mlist, l, d)
+
+	r = render_to_response('datelist.html', {
+			'list': l,
+			'messages': mlist,
+			'title': title,
+			'daysinmonth': daysinmonth,
+			'yearmonth': yearmonth,
+			}, NavContext(request, l.listid))
+	r['X-pglm'] = ':%s:' % (':'.join(['%s/%s/%s' % (l.listid, year, month) for year,month in allyearmonths]))
+	return r
+
 def render_datelist_from(request, l, d, title, to=None):
+	# NOTE! Basic permissions checks must be done before calling this function!
 	datefilter = Q(date__gte=d)
 	if to:
 		datefilter.add(Q(date__lt=to), Q.AND)
 
-	mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().filter(datefilter, hiddenstatus__isnull=True).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('date')[:200]
-
-	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
-	(yearmonth, daysinmonth) = get_monthday_info(mlist, l, d)
-
-	r = render_to_response('datelist.html', {
-			'list': l,
-			'messages': list(mlist),
-			'title': title,
-			'daysinmonth': daysinmonth,
-			'yearmonth': yearmonth,
-			}, NavContext(request, l.listid))
-	r['X-pglm'] = ':%s:' % (':'.join(['%s/%s/%s' % (l.listid, year, month) for year,month in allyearmonths]))
-	return r
+	return _render_datelist(request, l, d, datefilter, title,
+							lambda x: list(x.order_by('date')[:200]))
 
 def render_datelist_to(request, l, d, title):
+	# NOTE! Basic permissions checks must be done before calling this function!
+
 	# Need to sort this backwards in the database to get the LIMIT applied
 	# properly, and then manually resort it in the correct order. We can do
 	# the second sort safely in python since it's not a lot of items..
-	mlist = sorted(Message.objects.defer('bodytxt', 'cc', 'to').select_related().filter(date__lte=d, hiddenstatus__isnull=True).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid]).order_by('-date')[:200], key=lambda m: m.date)
 
-	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
-	(yearmonth, daysinmonth) = get_monthday_info(mlist, l, d)
-
-	r = render_to_response('datelist.html', {
-			'list': l,
-			'messages': list(mlist),
-			'title': title,
-			'daysinmonth': daysinmonth,
-			'yearmonth': yearmonth,
-			}, NavContext(request, l.listid))
-	r['X-pglm'] = ':%s:' % (':'.join(['%s/%s/%s' % (l.listid, year, month) for year,month in allyearmonths]))
-	return r
+	return _render_datelist(request, l, d, Q(date__lte=d), title,
+							lambda x: sorted(x.order_by('-date')[:200], key=lambda m: m.date))
 
 @cache(hours=2)
 def datelistsince(request, listname, msgid):
 	l = get_object_or_404(List, listname=listname)
+	ensure_list_permissions(request, l)
+
 	msg = get_object_or_404(Message, messageid=msgid)
 	return render_datelist_from(request, l, msg.date, "%s since %s" % (l.listname, msg.date.strftime("%Y-%m-%d %H:%M:%S")))
 
@@ -215,6 +296,8 @@ def datelistsince(request, listname, msgid):
 @cache(hours=4)
 def datelistsincetime(request, listname, year, month, day, hour, minute):
 	l = get_object_or_404(List, listname=listname)
+	ensure_list_permissions(request, l)
+
 	try:
 		d = datetime(int(year), int(month), int(day), int(hour), int(minute))
 	except ValueError:
@@ -224,12 +307,16 @@ def datelistsincetime(request, listname, year, month, day, hour, minute):
 @cache(hours=2)
 def datelistbefore(request, listname, msgid):
 	l = get_object_or_404(List, listname=listname)
+	ensure_list_permissions(request, l)
+
 	msg = get_object_or_404(Message, messageid=msgid)
 	return render_datelist_to(request, l, msg.date, "%s before %s" % (l.listname, msg.date.strftime("%Y-%m-%d %H:%M:%S")))
 
 @cache(hours=2)
 def datelistbeforetime(request, listname, year, month, day, hour, minute):
 	l = get_object_or_404(List, listname=listname)
+	ensure_list_permissions(request, l)
+
 	try:
 		d = datetime(int(year), int(month), int(day), int(hour), int(minute))
 	except ValueError:
@@ -239,6 +326,8 @@ def datelistbeforetime(request, listname, year, month, day, hour, minute):
 @cache(hours=4)
 def datelist(request, listname, year, month):
 	l = get_object_or_404(List, listname=listname)
+	ensure_list_permissions(request, l)
+
 	try:
 		d = datetime(int(year), int(month), 1)
 	except ValueError:
@@ -252,13 +341,17 @@ def datelist(request, listname, year, month):
 def attachment(request, attid):
 	# Use a direct query instead of django, since it has bad support for
 	# bytea
+	# XXX: minor information leak, because we load the whole attachment before we check
+	# the thread permissions. Is that OK?
 	curs = connection.cursor()
-	curs.execute("SELECT filename, contenttype, attachment FROM attachments WHERE id=%(id)s AND EXISTS (SELECT 1 FROM messages WHERE messages.id=attachments.message AND messages.hiddenstatus IS NULL)", { 'id': int(attid)})
+	curs.execute("SELECT filename, contenttype, messageid, attachment FROM attachments WHERE id=%(id)s AND EXISTS (SELECT 1 FROM messages WHERE messages.id=attachments.message AND messages.hiddenstatus IS NULL)", { 'id': int(attid)})
 	r = curs.fetchall()
 	if len(r) != 1:
 		return HttpResponse("Attachment not found")
 
-	return HttpResponse(r[0][2], content_type=r[0][1])
+	ensure_message_permissions(request, r[0][2])
+
+	return HttpResponse(r[0][3], content_type=r[0][1])
 
 def _build_thread_structure(threadid):
 	# Yeah, this is *way* too complicated for the django ORM
@@ -317,6 +410,8 @@ SELECT l.listid,0,
 
 @cache(hours=4)
 def message(request, msgid):
+	ensure_message_permissions(request, msgid)
+
 	try:
 		m = Message.objects.get(messageid=msgid)
 	except Message.DoesNotExist:
@@ -356,6 +451,8 @@ def message(request, msgid):
 
 @cache(hours=4)
 def message_flat(request, msgid):
+	ensure_message_permissions(request, msgid)
+
 	try:
 		msg = Message.objects.get(messageid=msgid)
 	except Message.DoesNotExist:
@@ -380,6 +477,8 @@ def message_flat(request, msgid):
 @nocache
 @antispam_auth
 def message_raw(request, msgid):
+	ensure_message_permissions(request, msgid)
+
 	curs = connection.cursor()
 	curs.execute("SELECT threadid, hiddenstatus, rawtxt FROM messages WHERE messageid=%(messageid)s", {
 		'messageid': msgid,
@@ -436,6 +535,8 @@ def _build_mbox(query, params, msgid=None):
 @nocache
 @antispam_auth
 def message_mbox(request, msgid):
+	ensure_message_permissions(request, msgid)
+
 	msg = get_object_or_404(Message, messageid=msgid)
 
 	return _build_mbox(
@@ -450,19 +551,34 @@ def message_mbox(request, msgid):
 def mbox(request, listname, listname2, mboxyear, mboxmonth):
 	if (listname != listname2):
 		raise Http404('List name mismatch')
+	l = get_object_or_404(List, listname=listname)
+	ensure_list_permissions(request, l)
 
 	mboxyear = int(mboxyear)
 	mboxmonth = int(mboxmonth)
-	return _build_mbox(
-		"SELECT messageid, rawtxt FROM messages m INNER JOIN list_threads t ON t.threadid=m.threadid WHERE listid=(SELECT listid FROM lists WHERE listname=%(list)s) AND hiddenstatus IS NULL AND date >= %(startdate)s AND date <= %(enddate)s ORDER BY date",
-		{
-			'list': listname,
-			'startdate': date(mboxyear, mboxmonth, 1),
-			'enddate': datetime(mboxyear, mboxmonth, calendar.monthrange(mboxyear, mboxmonth)[1], 23, 59, 59),
-		},
-	)
+
+	query = "SELECT messageid, rawtxt FROM messages m INNER JOIN list_threads t ON t.threadid=m.threadid WHERE listid=%(listid)s AND hiddenstatus IS NULL AND date >= %(startdate)s AND date <= %(enddate)s %%% ORDER BY date"
+	params = {
+				'listid': l.listid,
+				'startdate': date(mboxyear, mboxmonth, 1),
+				'enddate': datetime(mboxyear, mboxmonth, calendar.monthrange(mboxyear, mboxmonth)[1], 23, 59, 59),
+	}
+
+	if not settings.PUBLIC_ARCHIVES and not request.user.is_superuser:
+		# Restrict to only view messages that the user has permissions on all threads they're on
+		query = query.replace('%%%', 'AND NOT EXISTS (SELECT 1 FROM list_threads t2 WHERE t2.threadid=t.threadid AND listid NOT IN (SELECT list_id FROM listsubscribers WHERE username=%(username)s))')
+		params['username'] = request.user.username
+	else:
+		# Just return the whole thing
+		query = query.replace('%%%', '')
+	return _build_mbox(query, params)
 
 def search(request):
+	if not settings.PUBLIC_ARCHIVES:
+		# We don't support searching of non-public archives at all at this point.
+		# XXX: room for future improvement
+		return HttpResponseForbidden('Not public archives')
+
 	# Only certain hosts are allowed to call the search API
 	if not request.META['REMOTE_ADDR'] in settings.SEARCH_CLIENTS:
 		return HttpResponseForbidden('Invalid host')

@@ -10,6 +10,9 @@ import json
 
 @cache(hours=4)
 def latest(request, listname):
+	if not settings.PUBLIC_ARCHIVES:
+		return HttpResponseForbidden('No API access on private archives for now')
+
 	if not request.META['REMOTE_ADDR'] in settings.API_CLIENTS:
 		return HttpResponseForbidden('Invalid host')
 
@@ -59,6 +62,9 @@ def latest(request, listname):
 
 @cache(hours=4)
 def thread(request, msgid):
+	if not settings.PUBLIC_ARCHIVES:
+		return HttpResponseForbidden('No API access on private archives for now')
+
 	if not request.META['REMOTE_ADDR'] in settings.API_CLIENTS:
 		return HttpResponseForbidden('Invalid host')
 

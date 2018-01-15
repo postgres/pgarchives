@@ -92,13 +92,13 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
 #    'django.contrib.sessions.middleware.SessionMiddleware',
 #    'django.middleware.csrf.CsrfViewMiddleware',
 #    'django.contrib.auth.middleware.AuthenticationMiddleware',
 #    'django.contrib.messages.middleware.MessageMiddleware',
-)
+]
 
 ROOT_URLCONF = 'archives.urls'
 
@@ -108,7 +108,7 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
 #    'django.contrib.auth',
 #    'django.contrib.contenttypes',
 #    'django.contrib.sessions',
@@ -120,7 +120,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 	'archives.mailarchives',
-)
+]
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -153,8 +153,26 @@ FORCE_SCRIPT_NAME=""
 # Always override!
 SEARCH_CLIENTS = ('127.0.0.1',)
 API_CLIENTS = ('127.0.0.1',)
+PUBLIC_ARCHIVES = False
 
 try:
 	from settings_local import *
 except ImportError:
 	pass
+
+# If this is a non-public site, enable middleware for handling logins etc
+if not PUBLIC_ARCHIVES:
+	MIDDLEWARE_CLASSES = [
+		'django.contrib.sessions.middleware.SessionMiddleware',
+		'django.contrib.auth.middleware.AuthenticationMiddleware',
+	] + MIDDLEWARE_CLASSES
+	MIDDLEWARE_CLASSES.append('archives.mailarchives.redirecthandler.RedirectMiddleware')
+
+	INSTALLED_APPS = [
+		'django.contrib.auth',
+		'django.contrib.contenttypes',
+		'django.contrib.sessions',
+	] + INSTALLED_APPS
+
+	from archives.util import validate_new_user
+	PGAUTH_CREATEUSER_CALLBACK=validate_new_user

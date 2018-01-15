@@ -57,6 +57,12 @@ urlpatterns = patterns('',
     # development installs.
     (r'^dyncss/base.css', 'archives.mailarchives.views.base_css'),
 
+	# For non-public archives, support login
+    (r'^accounts/login/?$', 'archives.auth.login'),
+    (r'^accounts/logout/?$', 'archives.auth.logout'),
+    (r'^auth_receive/$', 'archives.auth.auth_receive'),
+
+
     # Normally served by the webserver, but needed for development installs
     (r'^media/(.*)$', 'django.views.static.serve', {
 			'document_root': '../media',
