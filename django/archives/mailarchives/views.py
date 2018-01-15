@@ -190,7 +190,7 @@ def index(request):
 
 @cache(hours=8)
 def groupindex(request, groupid):
-	(groups, listgroupid) = get_all_groups_and_lists()
+	(groups, listgroupid) = get_all_groups_and_lists(request)
 	mygroups = [{'groupname': g['groupname'], 'lists': g['lists']} for g in groups if g['groupid']==int(groupid)]
 	if len(mygroups) == 0:
 		raise Http404('List group does not exist')
