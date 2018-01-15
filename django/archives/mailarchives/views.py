@@ -134,7 +134,7 @@ def get_all_groups_and_lists(request, listid=None):
 	if settings.PUBLIC_ARCHIVES or request.user.is_superuser:
 		lists = List.objects.select_related('group').all().order_by('listname')
 	else:
-		lists = List.objects.select_related('group').filter(listsubscriber__username=request.user.username).order_by('listname')
+		lists = List.objects.select_related('group').filter(subscriber_access=True, listsubscriber__username=request.user.username).order_by('listname')
 	listgroupid = None
 	groups = {}
 	for l in lists:
