@@ -53,7 +53,7 @@ if __name__=="__main__":
 				'desc': l['shortdesc'],
 				'groupname': l['group']['groupname'],
 			})
-			listid, name = curs.fetchall()
+			listid, name = curs.fetchone()
 			print "Added list %s" % name
 		else:
 			listid, name = curs.fetchone()
