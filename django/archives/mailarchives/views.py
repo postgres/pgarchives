@@ -344,7 +344,7 @@ def attachment(request, attid):
 	# XXX: minor information leak, because we load the whole attachment before we check
 	# the thread permissions. Is that OK?
 	curs = connection.cursor()
-	curs.execute("SELECT filename, contenttype, messageid, attachment FROM attachments WHERE id=%(id)s AND EXISTS (SELECT 1 FROM messages WHERE messages.id=attachments.message AND messages.hiddenstatus IS NULL)", { 'id': int(attid)})
+        curs.execute("SELECT filename, contenttype, messageid, attachment FROM attachments INNER JOIN messages ON messages.id=attachments.message AND attachments.id=%(id)s AND messages.hiddenstatus IS NULL", {'id': int(attid)})
 	r = curs.fetchall()
 	if len(r) != 1:
 		return HttpResponse("Attachment not found")
