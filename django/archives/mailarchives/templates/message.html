@@ -51,7 +51,7 @@ $(function(){
   <th>Thread:</th>
   <td>
    <select id="thread_select" onchange="onThreadSelect()">
-{%for m in threadstruct%}{%if m.id%}<option value="{{m.messageid|urlencode}}"{%if m.id = msg.id%} selected="selected"{%endif%}{%if m.hasattachment%} class="hasatt"{%endif%}>{{m.indent|safe}}{{m.printdate}} from {{m.mailfrom|hidemail}}</option>{%endif%}
+{%for m in threadstruct%}{%if m.id%}<option value="{{m.messageid|urlencode}}"{%if m.id == msg.id%} selected="selected"{%endif%}{%if m.hasattachment%} class="hasatt"{%endif%}>{{m.indent|safe}}{{m.printdate}} from {{m.mailfrom|hidemail}}</option>{%endif%}
 {%endfor%}
    </select>
   </td>
