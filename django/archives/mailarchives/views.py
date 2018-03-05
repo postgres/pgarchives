@@ -3,12 +3,13 @@ from django.http import HttpResponse, HttpResponseForbidden, Http404
 from django.http import StreamingHttpResponse
 from django.http import HttpResponsePermanentRedirect, HttpResponseNotModified
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.utils.http import http_date, parse_http_date_safe
 from django.db import connection, transaction
 from django.db.models import Q
 from django.conf import settings
 
+import copy
 import urllib
 import re
 import os
@@ -155,12 +156,13 @@ def get_all_groups_and_lists(request, listid=None):
 	return (sorted(groups.values(), key=lambda g: g['sortkey']), listgroupid)
 
 
-class NavContext(RequestContext):
+class NavContext(object):
 	def __init__(self, request, listid=None, all_groups=None, expand_groupid=None):
-		RequestContext.__init__(self, request)
+		self.request = request
+		self.ctx = {}
 
 		if all_groups:
-			groups = all_groups
+			groups = copy.deepcopy(all_groups)
 			if expand_groupid:
 				listgroupid = int(expand_groupid)
 		else:
@@ -174,19 +176,23 @@ class NavContext(RequestContext):
 				# Root page, so remove *all* entries
 				g['lists'] = []
 
-		self.update({'listgroups': groups})
+		self.ctx.update({'listgroups': groups})
 		if listid:
-			self.update({'searchform_list': listid})
+			self.ctx.update({'searchform_list': listid})
 
+def render_nav(navcontext, template, ctx):
+	ctx.update(navcontext.ctx)
+	return render(navcontext.request, template, ctx)
 
 @cache(hours=4)
 def index(request):
 	ensure_logged_in(request)
 
 	(groups, listgroupid) = get_all_groups_and_lists(request)
-	return render_to_response('index.html', {
+	return render_nav(NavContext(request, all_groups=groups), 'index.html', {
 			'groups': [{'groupname': g['groupname'], 'lists': g['lists']} for g in groups],
-			}, NavContext(request, all_groups=groups))
+			})
+
 
 @cache(hours=8)
 def groupindex(request, groupid):
@@ -195,9 +201,9 @@ def groupindex(request, groupid):
 	if len(mygroups) == 0:
 		raise Http404('List group does not exist')
 
-	return render_to_response('index.html', {
+	return render_nav(NavContext(request, all_groups=groups, expand_groupid=groupid), 'index.html', {
 			'groups': mygroups,
-			}, NavContext(request, all_groups=groups, expand_groupid=groupid))
+			})
 
 @cache(hours=8)
 def monthlist(request, listname):
@@ -208,10 +214,10 @@ def monthlist(request, listname):
 	curs.execute("SELECT year, month FROM list_months WHERE listid=%(listid)s ORDER BY year DESC, month DESC", {'listid': l.listid})
 	months=[{'year':r[0],'month':r[1], 'date':datetime(r[0],r[1],1)} for r in curs.fetchall()]
 
-	return render_to_response('monthlist.html', {
+	return render_nav(NavContext(request, l.listid), 'monthlist.html', {
 			'list': l,
 			'months': months,
-			}, NavContext(request, l.listid))
+			})
 
 def get_monthday_info(mlist, l, d):
 	allmonths = set([m.date.month for m in mlist])
@@ -255,13 +261,13 @@ def _render_datelist(request, l, d, datefilter, title, queryproc):
 	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
 	(yearmonth, daysinmonth) = get_monthday_info(mlist, l, d)
 
-	r = render_to_response('datelist.html', {
+	r = render_nav(NavContext(request, l.listid), 'datelist.html', {
 			'list': l,
 			'messages': mlist,
 			'title': title,
 			'daysinmonth': daysinmonth,
 			'yearmonth': yearmonth,
-			}, NavContext(request, l.listid))
+			})
 	r['X-pglm'] = ':%s:' % (':'.join(['%s/%s/%s' % (l.listid, year, month) for year,month in allyearmonths]))
 	return r
 
@@ -437,14 +443,14 @@ def message(request, msgid):
 		parent = None
 	nextprev = _get_nextprevious(listmap, m.date)
 
-	r = render_to_response('message.html', {
+	r = render_nav(NavContext(request, lists[0].listid), 'message.html', {
 			'msg': m,
 			'threadstruct': threadstruct,
 			'responses': responses,
 			'parent': parent,
 			'lists': lists,
 			'nextprev': nextprev,
-			}, NavContext(request, lists[0].listid))
+			})
 	r['X-pgthread'] = ":%s:" % m.threadid
 	r['Last-Modified'] = http_date(newest)
 	return r
@@ -466,10 +472,10 @@ def message_flat(request, msgid):
 		if ims >= newest:
 			return HttpResponseNotModified()
 
-	r = render_to_response('message_flat.html', {
+	r = render_nav(NavContext(request), 'message_flat.html', {
 			'msg': msg,
 			'allmsg': allmsg,
-			}, NavContext(request))
+			})
 	r['X-pgthread'] = ":%s:" % msg.threadid
 	r['Last-Modified'] = http_date(newest)
 	return r
