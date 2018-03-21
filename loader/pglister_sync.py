@@ -23,13 +23,19 @@ if __name__=="__main__":
 	except:
 		connstr = 'need_connstr'
 
+	if cfg.has_option('pglister', 'subscribers') and cfg.getint('pglister', 'subscribers'):
+		do_subscribers=1
+	else:
+		do_subscribers=0
+
 	psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 	conn = psycopg2.connect(connstr)
 	curs = conn.cursor()
 
-	r = requests.get('{0}/api/archive/{1}/lists/'.format(
+	r = requests.get('{0}/api/archive/{1}/lists/?subscribers={2}'.format(
 		cfg.get('pglister', 'root'),
 		cfg.get('pglister', 'myname'),
+		do_subscribers and 1 or 0,
 		), headers={
 			'X-Api-Key': cfg.get('pglister', 'apikey'),
 		})
@@ -72,7 +78,7 @@ if __name__=="__main__":
 			for n, in curs.fetchall():
 				print "Updated list %s " % n
 
-		if cfg.has_option('pglister', 'subscribers') and cfg.getint('pglister', 'subscribers'):
+		if do_subscribers:
 			# If we synchronize subscribers, we do so on all lists for now.
 			curs.execute("WITH t(u) AS (SELECT UNNEST(%(usernames)s)), ins(un) AS (INSERT INTO listsubscribers (username, list_id) SELECT u, %(listid)s FROM t WHERE NOT EXISTS (SELECT 1 FROM listsubscribers WHERE username=u AND list_id=%(listid)s) RETURNING username), del(un) AS (DELETE FROM listsubscribers WHERE list_id=%(listid)s AND NOT EXISTS (SELECT 1 FROM t WHERE u=username) RETURNING username) SELECT 'ins',un FROM ins UNION ALL SELECT 'del',un FROM del ORDER BY 1,2", {
 				'usernames': l['subscribers'],
