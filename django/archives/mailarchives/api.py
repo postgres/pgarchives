@@ -9,6 +9,25 @@ import json
 
 
 @cache(hours=4)
+def listinfo(request):
+	if not settings.PUBLIC_ARCHIVES:
+		return HttpResponseForbidden('No API access on private archives for now')
+
+	if not request.META['REMOTE_ADDR'] in settings.API_CLIENTS:
+		return HttpResponseForbidden('Invalid host')
+
+	resp = HttpResponse(content_type='application/json')
+	json.dump([{
+		'name': l.listname,
+		'shortdesc': l.shortdesc,
+		'description': l.description,
+		'active': l.active,
+		'group': l.group.groupname,
+		} for l in List.objects.select_related('group').all()], resp)
+
+	return resp
+
+@cache(hours=4)
 def latest(request, listname):
 	if not settings.PUBLIC_ARCHIVES:
 		return HttpResponseForbidden('No API access on private archives for now')
