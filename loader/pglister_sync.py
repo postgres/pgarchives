@@ -5,11 +5,17 @@
 
 import os
 import sys
+import argparse
 from ConfigParser import ConfigParser
 import psycopg2
 import requests
 
 if __name__=="__main__":
+	parser = argparse.ArgumentParser(description="Synchronize lists from pglister")
+	parser.add_argument('--dryrun', action='store_true', help="Don't commit changes to database")
+
+	args = parser.parse_args()
+
 	cfg = ConfigParser()
 	cfg.read('%s/archives.ini' % os.path.realpath(os.path.dirname(sys.argv[0])))
 	try:
@@ -87,5 +93,9 @@ if __name__=="__main__":
 	for n, in curs.fetchall():
 		print "List %s exists in archives, but not in upstream! Should it be marked inactive?"
 
-	conn.commit()
+	if args.dryrun:
+		print "Dry-run, rolling back"
+		conn.rollback()
+	else:
+		conn.commit()
 	conn.close()
