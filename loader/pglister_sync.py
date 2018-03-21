@@ -97,7 +97,7 @@ if __name__=="__main__":
 		'lists': [l['listname'] for l in obj],
 	})
 	for n, in curs.fetchall():
-		print "List %s exists in archives, but not in upstream! Should it be marked inactive?"
+		print "List %s exists in archives, but not in upstream! Should it be marked inactive?" % n
 
 	if args.dryrun:
 		print "Dry-run, rolling back"
