@@ -62,7 +62,7 @@ if __name__=="__main__":
 		if curs.rowcount == 0:
 			curs.execute("INSERT INTO lists (listname, shortdesc, description, active, groupid) SELECT %(name)s, %(name)s, %(desc)s, 't', groupid FROM listgroups WHERE groupname=%(groupname)s RETURNING listid, listname", {
 				'name': l['listname'],
-				'desc': l['shortdesc'],
+				'desc': l['longdesc'],
 				'groupname': l['group']['groupname'],
 			})
 			listid, name = curs.fetchone()
@@ -72,7 +72,7 @@ if __name__=="__main__":
 			curs.execute("UPDATE lists SET shortdesc=%(name)s, description=%(desc)s, groupid=(SELECT groupid FROM listgroups WHERE groupname=%(groupname)s) WHERE listid=%(id)s AND NOT (shortdesc=%(name)s AND groupid=(SELECT groupid FROM listgroups WHERE groupname=%(groupname)s)) RETURNING listname", {
 				'id': listid,
 				'name': l['listname'],
-				'desc': l['shortdesc'],
+				'desc': l['longdesc'],
 				'groupname': l['group']['groupname'],
 			})
 			for n, in curs.fetchall():
