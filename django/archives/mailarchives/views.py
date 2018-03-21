@@ -589,10 +589,13 @@ def search(request):
 	if not request.META['REMOTE_ADDR'] in settings.SEARCH_CLIENTS:
 		return HttpResponseForbidden('Invalid host')
 
+	curs = connection.cursor()
+
 	# Perform a search of the archives and return a JSON document.
 	# Expects the following (optional) POST parameters:
 	# q = query to search for
-	# l = comma separated list of lists to search for
+	# l = comma separated list of lists to search for (DEPRECATED)
+	# ln = comma separate list of listnames to search in
 	# d = number of days back to search for, or -1 (or not specified)
 	#     to search the full archives
 	# s = sort results by ['r'=rank, 'd'=date, 'i'=inverse date]
@@ -603,7 +606,16 @@ def search(request):
 		raise Http404('No search query specified')
 	query = request.POST['q']
 
-	if request.POST.has_key('l'):
+	if request.POST.has_key('ln'):
+		try:
+			curs.execute("SELECT listid FROM lists WHERE listname=ANY(%(names)s)", {
+				'names': request.POST['ln'].split(','),
+			})
+			lists = [x for x, in curs.fetchall()]
+		except:
+			# If failing to parse list of lists, just search all
+			lists = None
+	elif request.POST.has_key('l'):
 		try:
 			lists = [int(x) for x in request.POST['l'].split(',')]
 		except:
