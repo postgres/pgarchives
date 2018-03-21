@@ -69,7 +69,7 @@ if __name__=="__main__":
 			print "Added list %s" % name
 		else:
 			listid, name = curs.fetchone()
-			curs.execute("UPDATE lists SET shortdesc=%(name)s, description=%(desc)s, groupid=(SELECT groupid FROM listgroups WHERE groupname=%(groupname)s) WHERE listid=%(id)s AND NOT (shortdesc=%(name)s AND groupid=(SELECT groupid FROM listgroups WHERE groupname=%(groupname)s)) RETURNING listname", {
+			curs.execute("UPDATE lists SET shortdesc=%(name)s, description=%(desc)s, groupid=(SELECT groupid FROM listgroups WHERE groupname=%(groupname)s) WHERE listid=%(id)s AND NOT (shortdesc=%(name)s AND description=%(desc)s AND groupid=(SELECT groupid FROM listgroups WHERE groupname=%(groupname)s)) RETURNING listname", {
 				'id': listid,
 				'name': l['listname'],
 				'desc': l['longdesc'],
