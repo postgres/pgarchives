@@ -594,7 +594,6 @@ def search(request):
 	# Perform a search of the archives and return a JSON document.
 	# Expects the following (optional) POST parameters:
 	# q = query to search for
-	# l = comma separated list of lists to search for (DEPRECATED)
 	# ln = comma separate list of listnames to search in
 	# d = number of days back to search for, or -1 (or not specified)
 	#     to search the full archives
@@ -612,12 +611,6 @@ def search(request):
 				'names': request.POST['ln'].split(','),
 			})
 			lists = [x for x, in curs.fetchall()]
-		except:
-			# If failing to parse list of lists, just search all
-			lists = None
-	elif request.POST.has_key('l'):
-		try:
-			lists = [int(x) for x in request.POST['l'].split(',')]
 		except:
 			# If failing to parse list of lists, just search all
 			lists = None
@@ -641,7 +634,6 @@ def search(request):
 		list_sort = 'r'
 
 	# Ok, we have all we need to do the search
-	curs = connection.cursor()
 
 	if query.find('@') > 0:
 		# This could be a messageid. So try to get that one specifically first.
