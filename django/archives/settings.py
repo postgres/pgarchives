@@ -97,11 +97,14 @@ ROOT_URLCONF = 'archives.urls'
 
 TEMPLATES = [{
 	'BACKEND': 'django.template.backends.django.DjangoTemplates',
-	'APP_DIRS': True,
 	'OPTIONS': {
 		'context_processors': [
 			'django.template.context_processors.request',
 			'django.contrib.messages.context_processors.messages',
+		],
+		'loaders': [
+			'django.template.loaders.filesystem.Loader',
+			'django.template.loaders.app_directories.Loader',
 		],
 	},
 }]

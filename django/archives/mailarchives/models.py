@@ -114,3 +114,18 @@ class ListSubscriber(models.Model):
 	class Meta:
 		unique_together = (('list', 'username'), )
 		db_table = 'listsubscribers'
+
+class ApiClient(models.Model):
+	apikey = models.CharField(max_length=100, null=False, blank=False)
+	postback = models.URLField(max_length=500, null=False, blank=False)
+
+	class Meta:
+		db_table = 'apiclients'
+
+class ThreadSubscription(models.Model):
+	apiclient = models.ForeignKey(ApiClient, null=False, blank=False)
+	threadid = models.IntegerField(null=False, blank=False)
+
+	class Meta:
+		db_table = 'threadsubscriptions'
+		unique_together = (('apiclient', 'threadid'),)

@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.conf import settings
 
 from views import cache
-from models import Message, List
+from models import Message, List, ApiClient, ThreadSubscription
 
 import json
 
@@ -103,3 +103,26 @@ def thread(request, msgid):
 		for m in mlist], resp)
 	resp['X-pgthread'] = m.threadid
 	return resp
+
+def thread_subscribe(request, msgid):
+	if not settings.PUBLIC_ARCHIVES:
+		return HttpResponseForbidden('No API access on private archives for now')
+
+	if not request.META['REMOTE_ADDR'] in settings.API_CLIENTS:
+		return HttpResponseForbidden('Invalid host')
+
+	if not request.META.has_key('HTTP_X_APIKEY'):
+		return HttpResponseForbidden('No API key')
+
+	if request.method != 'PUT':
+		return HttpResponseForbidden('Invalid HTTP verb')
+
+	apiclient = get_object_or_404(ApiClient, apikey=request.META['HTTP_X_APIKEY'])
+	msg = get_object_or_404(Message, messageid=msgid)
+
+	(obj, created) = ThreadSubscription.objects.get_or_create(apiclient=apiclient,
+															  threadid=msg.threadid)
+	if created:
+		return HttpResponse(status=201)
+	else:
+		return HttpResponse(status=200)

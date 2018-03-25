@@ -79,6 +79,24 @@ CREATE TABLE attachments(
 );
 CREATE INDEX idx_attachments_msg ON attachments(message);
 
+CREATE TABLE apiclients(
+   id SERIAL NOT NULL PRIMARY KEY,
+   apikey varchar(100) NOT NULL,
+   postback varchar(500) NOT NULL
+);
+
+CREATE TABLE threadsubscriptions(
+   id SERIAL NOT NULL PRIMARY KEY,
+   apiclient_id integer NOT NULL REFERENCES apiclients(id),
+   threadid integer NOT NULL
+);
+
+CREATE TABLE threadnotifications(
+   apiclient_id integer NOT NULL REFERENCES apiclients(id),
+   threadid integer NOT NULL,
+   CONSTRAINT threadnotifications_pkey PRIMARY KEY (apiclient_id, threadid)
+);
+
 CREATE TABLE loaderrors(
    id SERIAL NOT NULL PRIMARY KEY,
    listid int NOT NULL,
@@ -125,6 +143,23 @@ CREATE TRIGGER messages_fti_trigger
  BEFORE INSERT OR UPDATE OF subject, bodytxt ON  messages
  FOR EACH ROW EXECUTE PROCEDURE messages_fti_trigger_func();
 CREATE INDEX messages_fti_idx ON messages USING gin(fti);
+
+CREATE OR REPLACE FUNCTION messages_notify_threads_trg_func() RETURNS trigger AS $$
+BEGIN
+   INSERT INTO threadnotifications (apiclient_id, threadid)
+     SELECT apiclient_id, threadid
+      FROM threadsubscriptions
+      WHERE threadsubscriptions.threadid=NEW.threadid
+     ON CONFLICT DO NOTHING;
+   IF FOUND THEN
+      NOTIFY thread_updated;
+   END IF;
+   RETURN NEW;
+END
+$$ LANGUAGE 'plpgsql';
+CREATE TRIGGER messages_notify_trigger
+ AFTER INSERT ON messages
+ FOR EACH ROW EXECUTE PROCEDURE messages_notify_threads_trg_func();
 
 CREATE TABLE legacymap(
        listid int not null,
