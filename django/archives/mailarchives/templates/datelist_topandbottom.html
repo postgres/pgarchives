@@ -1,4 +1,5 @@
 {%if messages%}
+<h3>Browse Archives</h3>
 {%with messages|first as firstmsg%}
 <a href="/list/{{list.listname}}/before/{{firstmsg.shortdate}}">Prev</a>
 {%endwith%}

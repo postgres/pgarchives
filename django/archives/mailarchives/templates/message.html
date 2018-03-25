@@ -1,6 +1,7 @@
-{%extends "base.html"%}
+{%extends "page.html"%}
 {%block title%}{%if not msg.hiddenstatus%}{{msg.subject}}{%endif%}{%endblock%}
 {%load pgfilters%}
+
 {%block extrahead%}
 <script type="text/javascript">
 function onThreadSelect() {
@@ -18,100 +19,146 @@ $(function(){
 });
 </script>
 {%endblock%}
+
 {%block contents%}
-<h2>{%if not msg.hiddenstatus%}{{msg.subject}}{%endif%}</h2>
-<table class="message">
+{%if not msg.hiddenstatus%}
+<h1 class="subject">{{msg.subject}}</h1>
+{%endif%}
+<table class="table table-sm table-responsive">
  <tr>
-  <th>From:</th>
+  <th scope="row">From:</th>
   <td>{{msg.mailfrom|hidemail}}</td>
  </tr>
  <tr>
-  <th>To:</th>
+  <th scope="row">To:</th>
   <td>{{msg.to|hidemail}}</td>
  </tr>
 {%if msg.cc%}
  <tr>
-  <th>Cc:</th>
+  <th scope="row">Cc:</th>
   <td>{{msg.cc|hidemail}}</td>
  </tr>
 {%endif%}
  <tr>
-  <th>Subject:</th>
+  <th scope="row">Subject:</th>
   <td>{%if not msg.hiddenstatus%}{{msg.subject}}{%endif%}</td>
  </tr>
  <tr>
-  <th>Date:</th>
+  <th scope="row">Date:</th>
   <td>{{msg.printdate}}</td>
  </tr>
  <tr>
-  <th>Message-ID:</th>
-  <td><a href="/message-id/{{msg.messageid|urlencode}}">{{msg.messageid}}</a> (view <a href="/message-id/raw/{{msg.messageid|urlencode}}">raw</a>, <a href="/message-id/flat/{{msg.messageid|urlencode}}">whole thread</a> or download <a href="/message-id/mbox/{{msg.messageid|urlencode}}">thread mbox</a>)</td>
+  <th scope="row">Message-ID:</th>
+  <td><a href="/message-id/{{msg.messageid|urlencode}}">{{msg.messageid}}</a></td>
  </tr>
  <tr>
-  <th>Thread:</th>
+   <th class="align-middle" scope="row">Views:</th>
+   <td>
+     <a class="btn btn-sm btn-secondary" href="/message-id/raw/{{msg.messageid|urlencode}}">Raw Message</a>
+     <a class="btn btn-sm btn-secondary" href="/message-id/flat/{{msg.messageid|urlencode}}">Whole Thread</a>
+     <a class="btn btn-sm btn-secondary" href="/message-id/mbox/{{msg.messageid|urlencode}}">Download mbox</a>
+   </td>
+ </tr>
+ <tr>
+  <th class="align-middle" scope="row">Thread:</th>
   <td>
-   <select id="thread_select" onchange="onThreadSelect()">
+   <select id="thread_select" class="custom-select" onchange="onThreadSelect()">
 {%for m in threadstruct%}{%if m.id%}<option value="{{m.messageid|urlencode}}"{%if m.id == msg.id%} selected="selected"{%endif%}{%if m.hasattachment%} class="hasatt"{%endif%}>{{m.indent|safe}}{{m.printdate}} from {{m.mailfrom|hidemail}}</option>{%endif%}
 {%endfor%}
    </select>
   </td>
  </tr>
  <tr>
-  <th>Lists:</th>
+  <th scope="row">Lists:</th>
   <td>{%for l in lists %}<span class="listname"><a href="/list/{{l.listname}}/since/{{msg.shortdate}}">{{l.listname}}</a></span>{%endfor%}</td>
  </tr>
 </table>
-<div class="bodywrapper">
 {%if msg.hiddenstatus%}
-<pre>{{msg.hiddenreason}}</pre>
+<pre style="font-size: 0.85rem; line-height: 1.1rem;">{{msg.hiddenreason}}</pre>
 {%else%}
-<pre>{{msg.bodytxt|hideallemail|urlize}}</pre>
+<pre style="font-size: 0.85rem; line-height: 1.1rem;">{{msg.bodytxt|hideallemail|urlize}}</pre>
 
 {%if msg.has_attachment%}
-{%for a in msg.attachments%}
-{%if a.inlineable%}<a href="/message-id/attachment/{{a.id}}/{{a.filename}}"><img class="attachedimage" src="/message-id/attachment/{{a.id}}/{{a.filename}}" /></a>{%endif%}
-{%if forloop.last%}<hr/>{%endif%}
-{%endfor%}
+  <h5>Attachments</h5>
+  <table class="table table-sm table-responsive">
+    <thead>
+      <tr>
+        <th scope="col">Attachment</th>
+        <th scope="col">Content-Type</th>
+        <th scope="col">Size</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%for a in msg.attachments%}
+        <tr>
+          <th scope="row">
+            {% if a.inlineable %}
+              <a href="/message-id/attachment/{{a.id}}/{{a.filename}}">
+                <img class="attachedimage" src="/message-id/attachment/{{a.id}}/{{a.filename}}" />
+              </a>
+            {% else %}
+              <a href="/message-id/attachment/{{a.id}}/{{a.filename}}">{{a.filename}}</a>
+            {% endif %}
+          </th>
+          <td>{{ a.contenttype }}</td>
+          <td>{{a.len|filesizeformat}}</td>
+        </tr>
+      {%endfor%}
+    </tbody>
+  </table>
+{%endif%}
 
-{%for a in msg.attachments%}
-<div>
-<b>Attachment: <a href="/message-id/attachment/{{a.id}}/{{a.filename}}">{{a.filename}}</a></b><br/>
-Description: {{a.contenttype}} ({{a.len|filesizeformat}}) {%if a.inlineable%}(inlined above){%endif%}
-</div>
-{%endfor%}
-{%endif%}
 {%if parent%}
-<h3>In response to</h3>
-<ul>
-<li><a href="/message-id/{{parent.messageid|urlencode}}">{{parent.subject}}</a> at {{parent.printdate}} from {{parent.mailfrom|nameonly}}</li>
-</ul>
+  <h3>In response to</h3>
+  <ul>
+    <li><a href="/message-id/{{parent.messageid|urlencode}}">{{parent.subject}}</a> at {{parent.printdate}} from {{parent.mailfrom|nameonly}}</li>
+  </ul>
 {%endif%}
-{%if responses %}
-<h3>Responses</h3>
-<ul>
-{%for m in responses%}
-<li><a href="/message-id/{{m.messageid|urlencode}}">{{m.subject}}</a> at {{m.printdate}} from {{m.mailfrom|nameonly}}</li>
-{%endfor%}
-</ul>
+
+{%if responses%}
+  <h3>Responses</h3>
+  <ul>
+    {%for m in responses%}
+      <li>
+        <a href="/message-id/{{m.messageid|urlencode}}">{{m.subject}}</a> at {{m.printdate}} from {{m.mailfrom|nameonly}}
+      </li>
+    {%endfor%}
+  </ul>
 {%endif%}
+
 {%if nextprev%}
-{%for list, info in nextprev.items %}
-<h3>{{list}} by date</h3>
-<blockquote>
- <table border="0">
-  {%if info.next%}
-   <tr><td><a href="/message-id/{{info.next.msgid|urlencode}}">Next</a>:</td><td><b>From:</b> {{info.next.from|nameonly}}</td><td><b>Date:</b> {{info.next.date}}</td></tr>
-   <tr><td></td><td colspan="2"><b>Subject</b>: {{info.next.subject}}</td></tr>
-  {%endif%}
-  {%if info.prev%}
-   <tr><td><a href="/message-id/{{info.prev.msgid|urlencode}}">Previous</a>:</td><td><b>From</b>: {{info.prev.from|nameonly}}</td><td><b>Date</b>: {{info.prev.date}}</td></tr>
-   <tr><td></td><td colspan="2"><b>Subject</b>: {{info.prev.subject}}</td></tr>
-  {%endif%}
- </table>
-</blockquote>
-{%endfor%}
+  {%for list, info in nextprev.items %}
+    <h3>Browse {{list}} by date</h3>
+    <table class="table table-sm table-responsive">
+      <thead>
+        <tr>
+          <th scope="col">&nbsp;</th>
+          <th scope="col">From</th>
+          <th scope="col">Date</th>
+          <th scope="col">Subject</th>
+        </tr>
+      </thead>
+      <tbody>
+        {%if info.next%}
+          <tr>
+            <th scope="row"><a href="/message-id/{{info.next.msgid|urlencode}}">Next Message</a></th>
+            <td>{{info.next.from|nameonly}}</td>
+            <td>{{info.next.date}}</td>
+            <td><a href="/message-id/{{info.next.msgid|urlencode}}">{{info.next.subject}}</a></td>
+          </tr>
+        {%endif%}
+        {%if info.prev%}
+          <tr>
+            <th scope="row"><a href="/message-id/{{info.prev.msgid|urlencode}}">Previous Message</a></th>
+            <td>{{info.prev.from|nameonly}}</td>
+            <td>{{info.prev.date}}</td>
+            <td><a href="/message-id/{{info.prev.msgid|urlencode}}">{{info.prev.subject}}</a></td>
+          </tr>
+        {%endif%}
+      </tbody>
+    </table>
+  {%endfor%}
 {%endif%}
 
 {%endif%}{%comment%}hidden{%endcomment%}
-</div>
 {%endblock%}

@@ -1,0 +1,28 @@
+{%extends "base.html" %}
+{%block layoutblock%}
+<div class="container-fluid margin">
+  <div class="row">
+    <div class="col-lg-2">
+      <div id="pgSideWrap">
+       <div id="pgSideNav">
+         <h2>Quick Links</h2>
+         <ul>
+            <li><a href="/community/">Community</a></li>
+            <li><a href="/community/contributors/">Contributors</a></li>
+            <li><a href="/list/">Mailing Lists</a></li>
+            <li><a href="/community/irc/">IRC</a></li>
+            <li><a href="https://postgres-slack.herokuapp.com/">Slack</a></li>
+            <li><a href="/community/user-groups/">Local User Groups</a></li>
+            <li class="last-child"><a href="/community/international/">International Sites</a></li>
+         </ul>
+       </div>
+      </div> <!-- pgSideWrap -->
+    </div>
+    <div class="col-lg-10">
+      <div id="pgContentWrap">
+        {%block contents%}{%endblock%}
+      </div> <!-- pgContentWrap -->
+    </div>
+  </div>
+</div>
+{%endblock%}

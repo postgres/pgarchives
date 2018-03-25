@@ -1,21 +1,24 @@
-<p>
-</p>
-<form name="searchform" method="get" action="https://www.postgresql.org/search/">
- <input type="hidden" name="m" value="1" />
-{%if searchform_listname%} <input type="hidden" name="ln" value="{{searchform_listname}}"/>{%endif%}
- <div class="tblBasic">
-  <table border="0" cellpadding="0" cellspacing="0" class="tblBasicGrey">
-   <tr>
-      <th class="colFirst" style="vertical-align: middle">Search archives</th>
-      <th class="colLast" colspan="2">
-	<input type="text" name="q" size="25" value=""/> <input type="submit" value="Search" />
-      </th>
-   </tr>
-   <tr class="lastrow">
-    <td class="colFirst"></td>
-    <td>(enter a message-id to go directly to that message)</td>
-    <td class="colLast" align="right"><a href="https://www.postgresql.org/search/?m=1{%if searchform_listname%}&amp;ln={{searchform_listname}}{%endif%}">Advanced Search</a></td>
-   </tr>
-  </table>
- </div>
+<h3>Search the Archives</h3>
+
+<form method="get" action="/search/">
+  <input type="hidden" name="m" value="1">
+  {%if searchform_listname%} <input type="hidden" name="ln" value="{{searchform_listname}}"/>{%endif%}
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="input-group">
+        <input type="text" name="q" value="{{query}}" class="form-control" placeholder="Search the archives for for...">
+        <span class="input-group-btn">
+          <button class="btn btn-default" type="submit">
+            <i class="fas fa-search"></i>
+          </button>
+        </span>
+      </div><!-- /input-group -->
+      <div class="input-group">
+        <small class="form-text text-muted">(enter a message-id to go directly to that message)</small>
+      </div>
+      <div class="input-group">
+        <a href="https://www.postgresql.org/search/?m=1{%if searchform_listname%}&amp;ln={{searchform_listname}}{%endif%}">Advanced Search</a>
+      </div>
+    </div><!-- /.col-lg-6 -->
+  </div><!-- /.row -->
 </form>

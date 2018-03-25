@@ -1,24 +1,45 @@
-{%extends "base.html"%}
+{%extends "page.html"%}
 {%block title%}PostgreSQL Mailing Lists: {{title}}{%endblock%}
 {%block extrahead%}<meta name="robots" content="noindex" />{%endblock%}
 {%load pgfilters%}
+
 {%block contents%}
-<h1>{{title}}</h1>
+<h1>{{title}} <i class="far fa-envelope"></i></h1>
+<p>{{list.description}}</p>
+
 {%include "searchform.html"%}
+
 {%include "datelist_topandbottom.html"%}
+
 {%for m in messages%}
-{%ifchanged m.date.date%}
-{%if not forloop.first%}
-</ul>
-{%endif%}
-<h3>{{m.date.date}}</h3>
-<ul>
-{%endifchanged%}
-  <li><a href="/message-id/{{m.messageid|urlencode}}">{{m.subject|default:"[No subject]"}}</a> {{m.mailfrom|nameonly}} ({{m.date.time|time:"H:i"}})</li>
-{%if forloop.last%}
-</ul>
-<p></p>
-{%endif%}
+  {%ifchanged m.date.date%}
+    {%if not forloop.first%}
+        </tbody>
+      </table>
+    {%endif%}
+    <h2>{{m.date.date}}</h2>
+    <table class="table table-striped table-sm">
+      <thead>
+        <tr>
+          <th scope="col">Thread</th>
+          <th scope="col">Author</th>
+          <th scope="col">Time</th>
+        </tr>
+      </thead>
+      <tbody>
+  {%endifchanged%}
+  <tr>
+    <th scope="row">
+      <a href="/message-id/{{m.messageid|urlencode}}">{{m.subject|default:"[No subject]"}}</a>
+    </th>
+    <td>{{m.mailfrom|nameonly}}</td>
+    <td>{{m.date.time|time:"H:i"}}</td>
+  </tr>
+  {%if forloop.last%}
+      </tbody>
+    </table>
+  {%endif%}
 {%endfor%}
+
 {%include "datelist_topandbottom.html"%}
 {%endblock%}

@@ -1,52 +1,72 @@
-{%extends "base.html"%}
+{%extends "page.html"%}
 {%block title%}PostgreSQL Mailing List Archives{%endblock%}
 {%load pgfilters%}
 {%block contents%}
-<h1>PostgreSQL Mailing Lists</h1>
+<h1>PostgreSQL Mailing Lists <i class="far fa-envelope"></i></h1>
 
-<h3>How to Subscribe or Unsubscribe</h3>
+<h2>What are the PostgreSQL Mailing Lists?</h2>
 
-<p><b>Note 1:</b> Please ensure you read the <a 
-href="https://wiki.postgresql.org/wiki/Archives_Policy">Archive Policy</a>
-before posting to the lists.</p>
+The <a href="https://lists.postgresql.org/" target="_blank">PostgreSQL mailing lists</a> are one of the primary ways to interact with the PostgreSQL community. The mailing lists are an effective way to communicate and contribute to PostgreSQL and there are a lists that cover a variety of topics, including:
 
-<p><b>Note 2:</b> Please do not subscribe to mailing lists using e-mail 
-accounts protected by mail-back anti-spam systems. These are extremely annoying 
-to the list maintainers and other members, and you may be automatically unsubscribed.
+<ul>
+  <li>Ongoing PostgreSQL development</li>
+  <li>General support</li>
+  <li>Product release &amp; event announcements</li>
+  <li>Coordinate community outreach</li>
+</ul>
+
+and many more.
+
+<h2>How to Subscribe or Unsubscribe</h2>
+
+<p>To help ensure you have a productive experience on the PostgreSQL experience, we have a few tips to get you started on your journey:</p>
+
+<h3>Tip #1: Read The Archives Policy</h3>
+
+<p>The PostgreSQL mailing lists are available in a public archive and are independently syndicated across the web. We want you to feel comfortable posting to our public mailing lists, so please ensure you read our <a
+ href="https://wiki.postgresql.org/wiki/Archives_Policy" target="_blank">Archive Policy</a> prior to your initial post.</p>
+
+<h3>Tip #2: Avoid Mail-Back Anti-Spam Systems</h3>
+
+<p>If your email address is protected by a mail-back anti-spam system, this could cause some issues with our mailing list system. If it is discovered that your email address has implemented one of these systems, we mave have to automatically unsubscribe your account.
 </p>
+
+<h3>Subscribing to a PostgreSQL Mailing List</h3>
 
 <p>
-To subscribe to one of the PostgreSQL mailinglist, please use the system at
-<a href="https://lists.postgresql.org/">lists.postgresql.org</a>.
+Ready to join the PostgreSQL community? You can subscribe to one of our mailing lists at <a href="https://lists.postgresql.org/" target="_blank">lists.postgresql.org</a>.
 </p>
-<h3>Archives</h3>
-<p>Before posting to a list, you may wish to search the archives to see if
-your question has already been answered.</p>
+
+<h2>Mailing List Archives</h2>
+
+<p>The PostgreSQL Mailing list public archives provide a rich history of the PostgreSQL project, all the way back to 1997! We keep a public record of the mailing list to help provide a searchable resource to help answer your questions, as well as in the spirit of building an open community.</p>
+
+<p>Need a question answered? The archive are fully searchable.  Can't find the answer you are looking for? If it is a general usage question, we recommended subscribing to the <strong>pgsql-general@postgresql.org</strong> mailing list. If it is a more technical question about how PostgreSQL internals work, we recommended subscribing to the <strong>pgsql-hackers@postgresql.org</strong> mailing list.</p>
 
 {%include "searchform.html" %}
 
+<h3>View All Archives</h3>
 
 {%for g in groups%}
-{%if not forloop.first%}
- </table>
-</div>
-{%endif%}
-<h2>{{g.groupname}}</h2>
-<div class="tblBasic">
-<table border="0" cellpadding="0" cellspacing="0" class="tblBasicGrey">
-<tr>
-	<th class="colFirst">List</th>
-	<th class="colLast">Description</th>
-</tr>
-
-{%for l in g.lists%}
-<tr>
-    <td class="colFirst"><a href="/list/{{l.listname}}/">{{l.maybe_shortdesc}}</a></td>
-    <td class="colLast">{{l.description|safe}}</td>
-</tr>
+  {%if not forloop.first%}
+      </tbody>
+    </table>
+  {%endif%}
+  <h5>{{g.groupname}}</h5>
+  <table class="table table-striped">
+    <thead class="thead-light">
+      <tr>
+        <th>List</th>
+        <th>Description</th>
+      </tr>
+      <tbody>
+        {%for l in g.lists%}
+          <tr>
+            <th scope="row"><a href="/list/{{l.listname}}/">{{l.maybe_shortdesc}}</a></th>
+            <td>{{l.description|safe}}</td>
+          </tr>
+        {%endfor%}
 {%endfor%}
-{%endfor%}
- </table>
-</div>
+</table>
 
 {%endblock%}

@@ -706,19 +706,55 @@ def legacy(request, listname, year, month, msgnum):
 		raise Http404('Message does not exist')
 	return HttpResponsePermanentRedirect('/message-id/%s' % r[0][0])
 
-@cache(hours=8)
-def base_css(request):
-	# Generate a hardcoded list of CSS imports. This will only be used
-	# in development installs - in production, it will use the CSS from
-	# the main website.
-	return HttpResponse("""@import url("/media/css/global.css");
-@import url("/media/css/layout.css");
-@import url("/media/css/text.css");
-@import url("/media/css/navigation.css");
-@import url("/media/css/table.css");
+# dynamic CSS serving, meaning we merge a number of different CSS into a
+# single one, making sure it turns into a single http response. We do this
+# dynamically, since the output will be cached.
+_dynamic_cssmap = {
+	'base': ['media/css/main.css',
+			 'media/css/normalize.css',],
+	'docs': ['media/css/global.css',
+			 'media/css/table.css',
+			 'media/css/text.css',
+		     'media/css/docs.css'],
+	}
 
-@import url("/media/css/iefixes.css");
-""", content_type='text/css')
+@cache(hours=8)
+def dynamic_css(request, css):
+	if not _dynamic_cssmap.has_key(css):
+		raise Http404('CSS not found')
+	files = _dynamic_cssmap[css]
+	resp = HttpResponse(content_type='text/css')
+
+	# We honor if-modified-since headers by looking at the most recently
+	# touched CSS file.
+	latestmod = 0
+	for fn in files:
+		try:
+			stime = os.stat(fn).st_mtime
+			if latestmod < stime:
+				latestmod = stime
+		except OSError:
+			# If we somehow referred to a file that didn't exist, or
+			# one that we couldn't access.
+			raise Http404('CSS (sub) not found')
+	if request.META.has_key('HTTP_IF_MODIFIED_SINCE'):
+		# This code is mostly stolen from django :)
+		matches = re.match(r"^([^;]+)(; length=([0-9]+))?$",
+						   request.META.get('HTTP_IF_MODIFIED_SINCE'),
+						   re.IGNORECASE)
+		header_mtime = parse_http_date(matches.group(1))
+		# We don't do length checking, just the date
+		if int(latestmod) <= header_mtime:
+			return HttpResponseNotModified(content_type='text/css')
+	resp['Last-Modified'] = http_date(latestmod)
+
+	for fn in files:
+		with open(fn) as f:
+			resp.write("/* %s */\n" % fn)
+			resp.write(f.read())
+			resp.write("\n")
+
+	return resp
 
 # Redirect to the requested url, with a slash first. This is used to remove
 # trailing slashes on messageid links by doing a permanent redirect. This is
@@ -727,7 +763,6 @@ def base_css(request):
 @cache(hours=8)
 def slash_redirect(request, url):
 	return HttpResponsePermanentRedirect("/%s" % url)
-
 
 # Redirect the requested URL to whatever happens to be in the regexp capture.
 # This is used for user agents that generate broken URLs that are easily

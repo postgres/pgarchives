@@ -61,7 +61,7 @@ urlpatterns = [
 
     # Normally served off www.postgresql.org, but manually handled here for
     # development installs.
-    url(r'^dyncss/base.css', archives.mailarchives.views.base_css),
+    url(r'^dyncss/(?P<css>base|docs).css$', archives.mailarchives.views.dynamic_css),
 ]
 
 if not settings.PUBLIC_ARCHIVES:
@@ -73,4 +73,3 @@ if not settings.PUBLIC_ARCHIVES:
 		url(r'^accounts/logout/?$', archives.auth.logout),
 		url(r'^auth_receive/$', archives.auth.auth_receive),
 	]
-

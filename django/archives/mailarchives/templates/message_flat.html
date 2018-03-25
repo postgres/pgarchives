@@ -1,4 +1,4 @@
-{%extends "base.html"%}
+{%extends "page.html"%}
 {%block title%}{%if not msg.hiddenstatus%}{{msg.subject}}{%endif%}{%endblock%}
 {%load pgfilters%}
 {%block extrahead%}
@@ -13,55 +13,84 @@ window.onload = load;
 </script>
 {%endblock%}
 {%block contents%}
-<h2>{%if not msg.hiddenstatus%}{{msg.subject}}{%endif%}</h2>
+{%if not msg.hiddenstatus%}
+<h1 class="subject">{{msg.subject}}</h1>
+{%endif%}
 {%for m in allmsg %}
-<div class="msgwrap">
 <a name="{{m.messageid|urlencode}}"></a>
-<table class="message">
+<table class="table table-sm table-responsive">
  <tr>
-  <th>From:</th>
+  <th scope="row">From:</th>
   <td>{{m.mailfrom|hidemail}}</td>
  </tr>
  <tr>
-  <th>To:</th>
+  <th scope="row">To:</th>
   <td>{{m.to|hidemail}}</td>
  </tr>
 {%if m.cc%}
  <tr>
-  <th>Cc:</th>
+  <th scope="row">Cc:</th>
   <td>{{m.cc|hidemail}}</td>
  </tr>
 {%endif%}
  <tr>
-  <th>Subject:</th>
-  <td>{%if not msg.hiddenstatus%}{{m.subject}}{%endif%}</td>
+  <th scope="row">Subject:</th>
+  <td>{%if not m.hiddenstatus%}{{m.subject}}{%endif%}</td>
  </tr>
  <tr>
-  <th>Date:</th>
+  <th scope="row">Date:</th>
   <td>{{m.printdate}}</td>
  </tr>
  <tr>
-  <th>Message-ID:</th>
-  <td><a href="/message-id/{{m.messageid|urlencode}}">{{m.messageid}}</a> (view <a href="/message-id/raw/{{m.messageid|urlencode}}">raw</a> or download <a href="/message-id/mbox/{{allmsg.0.messageid|urlencode}}">thread mbox</a>)</td>
+  <th scope="row">Message-ID:</th>
+  <td><a href="/message-id/{{m.messageid|urlencode}}">{{m.messageid}}</a></td>
+ </tr>
+ <tr>
+   <th class="align-middle" scope="row">Views:</th>
+   <td>
+     <a class="btn btn-sm btn-secondary" href="/message-id/raw/{{m.messageid|urlencode}}">Raw Message</a>
+     <a class="btn btn-sm btn-secondary" href="/message-id/{{m.messageid|urlencode}}">Original Message</a>
+     <a class="btn btn-sm btn-secondary" href="/message-id/mbox/{{m.messageid|urlencode}}">Download mbox</a>
+   </td>
  </tr>
 </table>
-<div class="bodywrapper">
+
 {%if m.hiddenstatus%}
-<pre>{{m.hiddenreason}}</pre>
+<pre style="font-size: 0.85rem; line-height: 1.1rem;">{{m.hiddenreason}}</pre>
 {%else%}
-<pre>{{m.bodytxt|hideallemail|urlize}}</pre>
+<pre style="font-size: 0.85rem; line-height: 1.1rem;">{{m.bodytxt|hideallemail|urlize}}</pre>
 
 {%if m.has_attachment%}
-{%for a in m.attachments.all%}
-<div>
-<b>Attachment: <a href="/message-id/attachment/{{a.id}}/{{a.filename}}">{{a.filename}}</a></b><br/>
-Description: {{a.contenttype}} ({{a.len|filesizeformat}})
-</div>
-{%endfor%}
+  <h5>Attachments</h5>
+  <table class="table table-sm table-responsive">
+    <thead>
+      <tr>
+        <th scope="col">Attachment</th>
+        <th scope="col">Content-Type</th>
+        <th scope="col">Size</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%for a in m.attachments%}
+        <tr>
+          <th scope="row">
+            {% if a.inlineable %}
+              <a href="/message-id/attachment/{{a.id}}/{{a.filename}}">
+                <img class="attachedimage" src="/message-id/attachment/{{a.id}}/{{a.filename}}" />
+              </a>
+            {% else %}
+              <a href="/message-id/attachment/{{a.id}}/{{a.filename}}">{{a.filename}}</a>
+            {% endif %}
+          </th>
+          <td>{{ a.contenttype }}</td>
+          <td>{{a.len|filesizeformat}}</td>
+        </tr>
+      {%endfor%}
+    </tbody>
+  </table>
 {%endif%}
-</div>
 
 {%endif%}{%comment%}hidden{%endcomment%}
-</div>
+<hr />
 {%endfor%}
 {%endblock%}

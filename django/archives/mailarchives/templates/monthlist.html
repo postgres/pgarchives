@@ -1,20 +1,33 @@
-{%extends "base.html"%}
+{%extends "page.html"%}
 {%block title%}PostgreSQL Mailing Lists: {{list.listname}}{%endblock%}
 {%block extrahead%}<meta name="robots" content="noindex" />{%endblock%}
 {%load pgfilters%}
+
 {%block contents%}
-<h1>{{list.listname}}</h1>
+<h1>{{list.listname}} <i class="far fa-envelope"></i></h1>
+<p>{{list.description}}</p>
+
 {%include "searchform.html" %}
+
+<h2>View Archives</h2>
+
 {%regroup months by year as yearmonth %}
-<ul>
-{%for year in yearmonth%}
- <li>{{year.grouper}}
-  <ul>
-   {%for month in year.list%}
-    <li><a href="/list/{{list.listname}}/{{month.year}}-{{month.month|stringformat:"02d"}}/">{{month.date|date:"F"}}</a> (<a href="/list/{{list.listname}}/mbox/{{list.listname}}.{{month.year}}{{month.month|stringformat:"02d"}}">mbox</a>)</li>
-   {%endfor%}
-  </ul>
- </li>
-{%endfor%}
-</ul>
+<table class="table table-striped">
+  <tbody>
+    {% for year in yearmonth %}
+      <tr>
+        <th colspan="3">{{ year.grouper }}</th>
+      </tr>
+      {% for month in year.list %}
+        <tr>
+          <th scope="row">
+            <a href="/list/{{list.listname}}/{{month.year}}-{{month.month|stringformat:"02d"}}/">{{month.date|date:"F Y"}}</a>
+          </th>
+          <td><a href="/list/{{list.listname}}/{{month.year}}-{{month.month|stringformat:"02d"}}/">View Archives</a></td>
+          <td><a href="/list/{{list.listname}}/mbox/{{list.listname}}.{{month.year}}{{month.month|stringformat:"02d"}}">Download mbox</a></td>
+        </tr>
+      {% endfor %}
+    {% endfor %}
+  </tbody>
+</table>
 {%endblock%}
