@@ -2,7 +2,7 @@
 </p>
 <form name="searchform" method="get" action="https://www.postgresql.org/search/">
  <input type="hidden" name="m" value="1" />
-{%if searchform_list%} <input type="hidden" name="l" value="{{searchform_list}}"/>{%endif%}
+{%if searchform_listname%} <input type="hidden" name="ln" value="{{searchform_listname}}"/>{%endif%}
  <div class="tblBasic">
   <table border="0" cellpadding="0" cellspacing="0" class="tblBasicGrey">
    <tr>
@@ -14,7 +14,7 @@
    <tr class="lastrow">
     <td class="colFirst"></td>
     <td>(enter a message-id to go directly to that message)</td>
-    <td class="colLast" align="right"><a href="https://www.postgresql.org/search/?m=1{%if searchform_list%}&amp;l={{searchform_list}}{%endif%}">Advanced Search</a></td>
+    <td class="colLast" align="right"><a href="https://www.postgresql.org/search/?m=1{%if searchform_list%}&amp;ln={{searchform_listname}}{%endif%}">Advanced Search</a></td>
    </tr>
   </table>
  </div>

@@ -157,7 +157,7 @@ def get_all_groups_and_lists(request, listid=None):
 
 
 class NavContext(object):
-	def __init__(self, request, listid=None, all_groups=None, expand_groupid=None):
+	def __init__(self, request, listid=None, listname=None, all_groups=None, expand_groupid=None):
 		self.request = request
 		self.ctx = {}
 
@@ -177,8 +177,8 @@ class NavContext(object):
 				g['lists'] = []
 
 		self.ctx.update({'listgroups': groups})
-		if listid:
-			self.ctx.update({'searchform_list': listid})
+		if listname:
+			self.ctx.update({'searchform_listname': listname})
 
 def render_nav(navcontext, template, ctx):
 	ctx.update(navcontext.ctx)
@@ -214,7 +214,7 @@ def monthlist(request, listname):
 	curs.execute("SELECT year, month FROM list_months WHERE listid=%(listid)s ORDER BY year DESC, month DESC", {'listid': l.listid})
 	months=[{'year':r[0],'month':r[1], 'date':datetime(r[0],r[1],1)} for r in curs.fetchall()]
 
-	return render_nav(NavContext(request, l.listid), 'monthlist.html', {
+	return render_nav(NavContext(request, l.listid, l.listname), 'monthlist.html', {
 			'list': l,
 			'months': months,
 			})
@@ -261,7 +261,7 @@ def _render_datelist(request, l, d, datefilter, title, queryproc):
 	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
 	(yearmonth, daysinmonth) = get_monthday_info(mlist, l, d)
 
-	r = render_nav(NavContext(request, l.listid), 'datelist.html', {
+	r = render_nav(NavContext(request, l.listid, l.listname), 'datelist.html', {
 			'list': l,
 			'messages': mlist,
 			'title': title,
@@ -443,7 +443,7 @@ def message(request, msgid):
 		parent = None
 	nextprev = _get_nextprevious(listmap, m.date)
 
-	r = render_nav(NavContext(request, lists[0].listid), 'message.html', {
+	r = render_nav(NavContext(request, lists[0].listid, lists[0].listname), 'message.html', {
 			'msg': m,
 			'threadstruct': threadstruct,
 			'responses': responses,
