@@ -101,6 +101,7 @@ TEMPLATES = [{
 		'context_processors': [
 			'django.template.context_processors.request',
 			'django.contrib.messages.context_processors.messages',
+			'archives.util.PGWebContextProcessor',
 		],
 		'loaders': [
 			'django.template.loaders.filesystem.Loader',
