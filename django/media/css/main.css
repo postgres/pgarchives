@@ -36,10 +36,6 @@ dl, ol, ul {
   margin-bottom: 0.5rem;
 }
 
-.table td, .table th {
-  padding: 0.5rem;
-}
-
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Maven Pro', sans-serif;
     font-weight: 700;
@@ -724,9 +720,43 @@ th.formfieldnamecontainer {
     height: 3.5em;
 }
 
+/** Thread Lists */
+.thread-list {
+    font-size: 0.8em;
+}
+
+/** Messages */
+
+h3.messages {
+    text-transform: none;
+    font-size 1.2em;
+}
+
+.message-header {
+    font-size: 0.7em;
+    line-height: 1.2em;
+}
+
+.message-header select {
+    height: auto;
+    padding: 0;
+}
+
+.message-content {
+    font-size: 0.8em;
+    line-height: 1.2em;
+    margin: 0 auto;
+}
+
+.message-responses {
+    font-size: 1.2em;
+    font-size: 0.7em;
+}
+
 /* Message Subjects */
 h1.subject {
     text-transform: none;
+    font-size: 1.2em;
 }
 
 /** ALL RESPONSIVE QUERIES HERE */

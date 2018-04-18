@@ -19,6 +19,5 @@ window.onload = load;
 {%for m in allmsg %}
 <a name="{{m.messageid|urlencode}}"></a>
 {% include '_message.html' with msg=m show_all=True %}
-<hr />
 {%endfor%}
 {%endblock%}

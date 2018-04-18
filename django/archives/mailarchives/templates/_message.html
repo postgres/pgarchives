@@ -1,8 +1,8 @@
 {%load pgfilters%}
 
-<table class="table table-sm table-responsive">
+<table class="table-sm table-responsive message-header" style="border-bottom: 0.2em solid grey; margin-bottom: 1em;">
  <tr>
-  <th scope="row">From:</th>
+  <th scope="row" style="width: 10%">From:</th>
   <td>{{msg.mailfrom|hidemail}}</td>
  </tr>
  <tr>
@@ -30,9 +30,9 @@
  <tr>
    <th class="align-middle" scope="row">Views:</th>
    <td>
-     <a class="btn btn-sm btn-secondary" href="/message-id/raw/{{msg.messageid|urlencode}}">Raw Message</a>
-     <a class="btn btn-sm btn-secondary" href="/message-id/flat/{{msg.messageid|urlencode}}">Whole Thread</a>
-     <a class="btn btn-sm btn-secondary" href="/message-id/mbox/{{msg.messageid|urlencode}}">Download mbox</a>
+     <a href="/message-id/raw/{{msg.messageid|urlencode}}">Raw Message</a> |
+     <a href="/message-id/flat/{{msg.messageid|urlencode}}">Whole Thread</a> |
+     <a href="/message-id/mbox/{{msg.messageid|urlencode}}">Download mbox</a>
    </td>
  </tr>
  {% if not show_all %}
@@ -54,13 +54,13 @@
   {% endif %}
 </table>
 {%if msg.hiddenstatus%}
-<pre style="font-size: 0.85rem; line-height: 1.1rem;">{{msg.hiddenreason}}</pre>
+<pre class="message-content">{{msg.hiddenreason}}</pre>
 {%else%}
-<pre style="font-size: 0.85rem; line-height: 1.1rem;">{{msg.bodytxt|hideallemail|urlize}}</pre>
+<pre class="message-content">{{msg.bodytxt|hideallemail|urlize}}</pre>
 
 {%if msg.has_attachment%}
-  <h5>Attachments</h5>
-  <table class="table table-sm table-responsive">
+  <h3 class="messages">Attachments</h3>
+  <table class="table table-sm table-responsive message-header">
     <thead>
       <tr>
         <th scope="col">Attachment</th>
@@ -89,17 +89,17 @@
 {%endif%}
 
 {%if parent%}
-  <h3>In response to</h3>
-  <ul>
+  <h3 class="messages" style="margin: 0.5em 0;">In response to</h3>
+  <ul class="message-responses">
     <li><a href="/message-id/{{parent.messageid|urlencode}}">{{parent.subject}}</a> at {{parent.printdate}} from {{parent.mailfrom|nameonly}}</li>
   </ul>
 {%endif%}
 
 {%if responses%}
-  <h3>Responses</h3>
+  <h3 class="messages" style="margin: 0.5em 0;">Responses</h3>
   <ul>
     {%for m in responses%}
-      <li>
+      <li class="message-responses">
         <a href="/message-id/{{m.messageid|urlencode}}">{{m.subject}}</a> at {{m.printdate}} from {{m.mailfrom|nameonly}}
       </li>
     {%endfor%}
@@ -108,8 +108,8 @@
 
 {%if nextprev%}
   {%for list, info in nextprev.items %}
-    <h3>Browse {{list}} by date</h3>
-    <table class="table table-sm table-responsive">
+    <h3 class="messages" style="margin: 0.5em 0;">Browse {{list}} by date</h3>
+    <table class="table table-sm table-responsive message-header">
       <thead>
         <tr>
           <th scope="col">&nbsp;</th>
