@@ -5,7 +5,7 @@
 
 {%block contents%}
 <h1>{{title}} <i class="far fa-envelope"></i></h1>
-<p>{{list.description}}</p>
+<p>{{list.description|safe}}</p>
 
 {%include "searchform.html"%}
 
