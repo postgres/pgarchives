@@ -73,3 +73,7 @@ if not settings.PUBLIC_ARCHIVES:
 		url(r'^accounts/logout/?$', archives.auth.logout),
 		url(r'^auth_receive/$', archives.auth.auth_receive),
 	]
+
+from django.conf.urls.static import static
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static('/media/', document_root=settings.MEDIA_ROOT)
