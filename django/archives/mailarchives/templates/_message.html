@@ -59,7 +59,7 @@
 <pre class="message-content">{{msg.bodytxt|hideallemail|urlize}}</pre>
 
 {%if msg.has_attachment%}
-  <table class="table table-sm table-responsive message-header" style="margin-top: 1.5em;">
+  <table class="table table-sm table-responsive message-attachments">
     <thead>
       <tr>
         <th scope="col">Attachment</th>
@@ -108,7 +108,7 @@
 {%if nextprev%}
   {%for list, info in nextprev.items %}
     <h3 class="messages" style="margin: 0.5em 0;">Browse {{list}} by date</h3>
-    <table class="table table-sm table-responsive message-header">
+    <table class="table table-sm table-responsive message-nav">
       <thead>
         <tr>
           <th scope="col">&nbsp;</th>
