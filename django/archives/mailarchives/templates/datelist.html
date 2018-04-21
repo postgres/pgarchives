@@ -30,7 +30,7 @@
   {%endifchanged%}
   <tr>
     <th scope="row">
-      <a href="/message-id/{{m.messageid|urlencode}}">{{m.subject|default:"[No subject]"}}</a>
+      <a href="/message-id/{{m.messageid|urlencode}}">{{m.subject|default:"[No subject]"}}{% if m.has_attachment %} &#x1f4ce;{% endif %}</a>
     </th>
     <td>{{m.mailfrom|nameonly}}</td>
     <td>{{m.date.time|time:"H:i"}}</td>
