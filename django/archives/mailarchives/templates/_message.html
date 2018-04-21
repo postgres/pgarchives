@@ -54,9 +54,9 @@
   {% endif %}
 </table>
 {%if msg.hiddenstatus%}
-<pre class="message-content">{{msg.hiddenreason}}</pre>
+<div class="message-content">{{msg.hiddenreason}}</div>
 {%else%}
-<pre class="message-content">{{msg.bodytxt|hideallemail|urlize}}</pre>
+<div class="message-content">{{msg.bodytxt|hideallemail|urlize|linebreaks}}</div>
 
 {%if msg.has_attachment%}
   <table class="table table-sm table-responsive message-attachments">
