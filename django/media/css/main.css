@@ -24,7 +24,6 @@ body {
     font-weight: 400;
     color: #515151;
     font-size: 11.5pt;
-    padding-top: 54px; /** this is to account for the fixed navbar blocking content */
 }
 
 p {
@@ -33,6 +32,10 @@ p {
 
 dl, ol, ul {
   margin-bottom: 0.5rem;
+}
+
+.table td, .table th {
+  padding: 0.5rem;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -179,8 +182,8 @@ p, ul, ol, dl, table {
 }
 
 .pgFrontFeature {
-    background: #F5F5F5 url(/media-archives/img/feature/feature_elephant.png) right bottom no-repeat;
-    /* background: #F5F5F5 url(/media-archives/img/feature/feature_gears.png) right bottom no-repeat; */
+    background: #F5F5F5 url(/media/img/feature/feature_elephant.png) right bottom no-repeat;
+    /* background: #F5F5F5 url(/media/img/feature/feature_gears.png) right bottom no-repeat; */
 }
 
 .pgFrontContainer {
@@ -338,7 +341,7 @@ blockquote {
 .feature button.btn.btn-center.btn-primary {
     position: relative;
     bottom: 0;
-    margin: 0 auto;
+    margin: 0.25rem auto;
 }
 
 .text {
@@ -567,6 +570,7 @@ ul.actions {
 
 .navbar {
   box-shadow: 0px 3px 15px rgba(0,0,0,0.2);
+  transition: all 0.3s;
 }
 
 /* #SIDEBAR UL STYLING */
@@ -720,6 +724,7 @@ th.formfieldnamecontainer {
     height: 3.5em;
 }
 
+/** This code is for pgarchives */
 /** Thread Lists */
 .thread-list {
     font-size: 0.8em;
@@ -744,7 +749,7 @@ h3.messages {
 
 .message-header th, .message-header td {
     padding: 0;
-}
+ }
 
 .message-header select {
     height: auto;
@@ -777,32 +782,39 @@ h1.subject {
 
 /** ALL RESPONSIVE QUERIES HERE */
 /* Small devices (landscape phones, 576px and up)*/
-@media (min-width: 576px) {
-    /** NAVBAR */
-    .nav-item > a {
-        font-size: 0.95rem;
-        font-weight: 600;
-    }
-}
-@media (max-width: 575px) {
-    /** HOMEPAGE JUMBOTRON */
-    .pg-jumbotron-header {
-        font-size: 1.5rem;
+
+@media (max-width: 1280px) {
+    input#q {
+      display: none;
     }
 }
 
-@media (max-width: 1200px) {
+@media (min-width: 992px) {
+    .navbar.compressed {
+      padding: 0 10px;
+    }
+
+    .pg-shout-box {
+      padding-top: 3.7rem;
+    }
 }
 
 @media (max-width: 992px) {
+    .navbar {
+      padding: 5px 10px;
+    }
 
+    .navbar-toggler-icon {
+      width: 1rem;
+      height: 1.5rem;
+    }
+
+    .pg-shout-box {
+      padding-top: 2.8rem;
+    }
 }
 
 @media (max-width: 768px) {
-
-  body {
-    padding-top: 55px;
-  }
 
   .jumbotron.jumbotron-fluid.pg-jumbotron {
     padding: 4em;
@@ -858,4 +870,18 @@ h1.subject {
     padding-left: 1em;
   }
 
+}
+
+@media (min-width: 576px) {
+    /** NAVBAR */
+    .nav-item > a {
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+}
+@media (max-width: 575px) {
+    /** HOMEPAGE JUMBOTRON */
+    .pg-jumbotron-header {
+        font-size: 1.5rem;
+    }
 }
