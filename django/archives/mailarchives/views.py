@@ -742,7 +742,7 @@ def dynamic_css(request, css):
 		matches = re.match(r"^([^;]+)(; length=([0-9]+))?$",
 						   request.META.get('HTTP_IF_MODIFIED_SINCE'),
 						   re.IGNORECASE)
-		header_mtime = parse_http_date(matches.group(1))
+		header_mtime = parse_http_date_safe(matches.group(1))
 		# We don't do length checking, just the date
 		if int(latestmod) <= header_mtime:
 			return HttpResponseNotModified(content_type='text/css')
