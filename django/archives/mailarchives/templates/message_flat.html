@@ -20,7 +20,7 @@ window.onload = load;
 <a name="{{m.messageid}}"></a>
 {% include '_message.html' with msg=m show_all=True %}
 {% if not forloop.last %}
-  <hr style="margin-top: 0.5rem; margin-bottom: 0.5rem;" />
+  <hr style="margin-bottom: 0.5rem;" />
 {% endif %}
 {%endfor%}
 {%endblock%}
