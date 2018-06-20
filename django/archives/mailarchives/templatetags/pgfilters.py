@@ -3,6 +3,7 @@ from django import template
 from email.utils import parseaddr
 
 import re
+import hashlib
 
 register = template.Library()
 
@@ -43,3 +44,8 @@ def nameonly(value):
 	if name:
 		return name
 	return email.split('@')[0]
+
+@register.filter(name='md5')
+@stringfilter
+def md5(value):
+	return hashlib.md5(value).hexdigest()

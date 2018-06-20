@@ -1,4 +1,5 @@
 {%extends "page.html"%}
+{%load pgfilters%}
 {%block title%}{%if not msg.hiddenstatus%}{{msg.subject}}{%endif%}{%endblock%}
 {%load pgfilters%}
 {%block extrahead%}
@@ -7,7 +8,7 @@
 <script type="text/javascript">
 function load() {
    if (document.location.href.indexOf('#') < 0) {
-      document.location.href = document.location.href + '#' + '{{msg.messageid}}';
+      document.location.href = document.location.href + '#' + '{{msg.messageid|md5}}';
    }
 }
 window.onload = load;
@@ -26,6 +27,7 @@ window.onload = load;
 {%endif%}
 {%for m in allmsg %}
 <a name="{{m.messageid}}"></a>
+<a name="{{m.messageid|md5}}"></a>
 {% include '_message.html' with msg=m show_all=True %}
 {% if not forloop.last %}
   <hr style="margin-bottom: 0.5rem;" />
