@@ -109,6 +109,9 @@ def nocache(fn):
 # Decorator to require http auth
 def antispam_auth(fn):
 	def _antispam_auth(request, *_args, **_kwargs):
+		if not settings.PUBLIC_ARCHIVES:
+			return fn(request, *_args, **_kwargs)
+
 		if 'HTTP_AUTHORIZATION' in request.META:
 			auth = request.META['HTTP_AUTHORIZATION'].split()
 			if len(auth) != 2:
