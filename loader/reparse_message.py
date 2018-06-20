@@ -70,12 +70,17 @@ if __name__ == "__main__":
 	# Get messages
 	curs = conn.cursor('msglist')
 	if opt.all:
+		curs2 = conn.cursor()
+		curs2.execute("SELECT count(*) FROM messages WHERE hiddenstatus IS NULL")
+		totalcount, = curs2.fetchone()
 		curs.execute("SELECT id, rawtxt FROM messages WHERE hiddenstatus IS NULL ORDER BY id")
 	elif opt.sample:
+		totalcount = int(opt.sample)
 		curs.execute("SELECT id, rawtxt FROM messages WHERE hiddenstatus IS NULL ORDER BY id DESC LIMIT %(num)s", {
 			'num': int(opt.sample),
 		})
 	else:
+		totalcount = 1
 		curs.execute("SELECT id, rawtxt FROM messages WHERE messageid=%(msgid)s", {
 			'msgid': opt.msgid,
 		})
@@ -104,7 +109,9 @@ if __name__ == "__main__":
 		else:
 			ap.diff(conn, f, fromonlyf, id)
 		if datetime.now() - laststatus > timedelta(seconds=5):
-			sys.stdout.write("%s messages parsed (%s / second)\r" % (num, num / ((datetime.now()-firststatus).seconds)))
+			sys.stdout.write("%s messages parsed (%s%%, %s / second)\r" % (num,
+																		   num*100/totalcount,
+																		   num / ((datetime.now()-firststatus).seconds)))
 			sys.stdout.flush()
 			laststatus = datetime.now()
 
