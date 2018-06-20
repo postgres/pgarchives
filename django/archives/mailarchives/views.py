@@ -469,6 +469,8 @@ def message_flat(request, msgid):
 	allmsg = list(Message.objects.filter(threadid=msg.threadid).order_by('date'))
 	# XXX: need to get the complete list of lists!
 
+	isfirst = (msg == allmsg[0])
+
 	newest = calendar.timegm(max(allmsg, key=lambda x: x.date).date.utctimetuple())
 	if request.META.has_key('HTTP_IF_MODIFIED_SINCE') and not settings.DEBUG:
 		ims = parse_http_date_safe(request.META.get('HTTP_IF_MODIFIED_SINCE'))
@@ -478,6 +480,7 @@ def message_flat(request, msgid):
 	r = render_nav(NavContext(request), 'message_flat.html', {
 			'msg': msg,
 			'allmsg': allmsg,
+			'isfirst': isfirst,
 			})
 	r['X-pgthread'] = ":%s:" % msg.threadid
 	r['Last-Modified'] = http_date(newest)

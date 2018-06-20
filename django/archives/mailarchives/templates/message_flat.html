@@ -3,6 +3,7 @@
 {%load pgfilters%}
 {%block extrahead%}
 <meta name="robots" content="noindex" />
+{%if not isfirst%}
 <script type="text/javascript">
 function load() {
    if (document.location.href.indexOf('#') < 0) {
@@ -11,6 +12,7 @@ function load() {
 }
 window.onload = load;
 </script>
+{%endif%}
 {%endblock%}
 {%block contents%}
 {%if not msg.hiddenstatus%}
