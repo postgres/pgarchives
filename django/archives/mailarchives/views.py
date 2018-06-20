@@ -467,7 +467,7 @@ def message_flat(request, msgid):
 	except Message.DoesNotExist:
 		raise Http404('Message does not exist')
 	allmsg = list(Message.objects.filter(threadid=msg.threadid).order_by('date'))
-	# XXX: need to get the complete list of lists!
+	lists = List.objects.extra(where=["listid IN (SELECT listid FROM list_threads WHERE threadid=%s)" % msg.threadid]).order_by('listname')
 
 	isfirst = (msg == allmsg[0])
 
@@ -480,6 +480,7 @@ def message_flat(request, msgid):
 	r = render_nav(NavContext(request), 'message_flat.html', {
 			'msg': msg,
 			'allmsg': allmsg,
+			'lists': lists,
 			'isfirst': isfirst,
 			})
 	r['X-pgthread'] = ":%s:" % msg.threadid

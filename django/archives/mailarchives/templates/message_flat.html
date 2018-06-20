@@ -17,6 +17,12 @@ window.onload = load;
 {%block contents%}
 {%if not msg.hiddenstatus%}
 <h1 class="subject">{{msg.subject}}</h1>
+<table class="table-sm table-responsive message-header" style="border-bottom: 0.05em solid #E7EAE8; margin-bottom: 1em;">
+ <tr>
+  <th scope="row" style="width: 10%">Lists:</th>
+  <td>{%for l in lists %}<span class="listname"><a href="/list/{{l.listname}}/since/{{msg.shortdate}}">{{l.listname}}</a></span>{%endfor%}</td>
+</table>
+
 {%endif%}
 {%for m in allmsg %}
 <a name="{{m.messageid}}"></a>
