@@ -40,6 +40,7 @@ if __name__ == "__main__":
 	optparser.add_option('-v', '--verbose', dest='verbose', action='store_true', help='Verbose output')
 	optparser.add_option('--force-date', dest='force_date', help='Override date (used for dates that can\'t be parsed)')
 	optparser.add_option('--update', dest='update', action='store_true', help='Actually update, not just diff (default is diff)')
+	optparser.add_option('--commit', dest='commit', action='store_true', help='Commit the transaction without asking')
 
 	(opt, args) = optparser.parse_args()
 
@@ -121,9 +122,20 @@ if __name__ == "__main__":
 	print ""
 
 	if opt.update:
+		opstatus.print_status()
+		if not opt.commit:
+			while True:
+				print("OK to commit transaction? ")
+				a = raw_input().lower().strip()
+				if a == 'y' or a == 'yes':
+					print("Ok, committing.")
+					break
+				elif a == 'n' or a == 'no':
+					print("Aborting and rolling back")
+					conn.rollback()
+					sys.exit(1)
 		conn.commit()
 		VarnishPurger(cfg).purge(ap.purges)
-		opstatus.print_status()
 	else:
 		fromonlyf.close()
 		f.close()
