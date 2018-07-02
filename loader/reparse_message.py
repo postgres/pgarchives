@@ -92,6 +92,7 @@ if __name__ == "__main__":
 	firststatus = datetime.now()
 	laststatus = datetime.now()
 	num = 0
+	updated = 0
 	for id, rawtxt in ResultIter(curs):
 		num += 1
 		ap = ArchivesParserStorage()
@@ -105,13 +106,15 @@ if __name__ == "__main__":
 			continue
 
 		if opt.update:
-			ap.store(conn, listid=-9, overwrite=True)
+			if ap.store(conn, listid=-9, overwrite=True):
+				updated += 1
 		else:
 			ap.diff(conn, f, fromonlyf, id)
 		if datetime.now() - laststatus > timedelta(seconds=5):
-			sys.stdout.write("%s messages parsed (%s%%, %s / second)\r" % (num,
-																		   num*100/totalcount,
-																		   num / ((datetime.now()-firststatus).seconds)))
+			sys.stdout.write("%s messages parsed (%s%%, %s / second), %s updated\r" % (num,
+																					   num*100/totalcount,
+																					   num / ((datetime.now()-firststatus).seconds),
+																					   updated))
 			sys.stdout.flush()
 			laststatus = datetime.now()
 

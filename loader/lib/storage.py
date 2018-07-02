@@ -57,7 +57,7 @@ class ArchivesParserStorage(ArchivesParser):
 				# identifyer), and we don't update the raw text of the message.
 				# (since we are expected to have used that raw text to do
 				# the re-parsing initially)
-				curs.execute("UPDATE messages SET _from=%(from)s, _to=%(to)s, cc=%(cc)s, subject=%(subject)s, date=%(date)s, has_attachment=%(has_attachment)s, bodytxt=%(bodytxt)s WHERE id=%(id)s", {
+				curs.execute("UPDATE messages SET _from=%(from)s, _to=%(to)s, cc=%(cc)s, subject=%(subject)s, date=%(date)s, has_attachment=%(has_attachment)s, bodytxt=%(bodytxt)s WHERE id=%(id)s AND NOT (bodytxt=%(bodytxt)s) RETURNING id", {
 						'id': pk,
 						'from': self._from,
 						'to': self.to or '',
@@ -67,6 +67,10 @@ class ArchivesParserStorage(ArchivesParser):
 						'has_attachment': len(self.attachments) > 0,
 						'bodytxt': self.bodytxt,
 						})
+				if curs.rowcount == 0:
+					log.status("Message %s unchanged" % self.msgid)
+					return False
+
 				curs.execute("DELETE FROM attachments WHERE message=%(message)s", {
 						'message': pk,
 						})
@@ -81,7 +85,7 @@ class ArchivesParserStorage(ArchivesParser):
 				log.status("Message %s overwritten" % self.msgid)
 			else:
 				log.status("Message %s already stored" % self.msgid)
-			return
+			return True
 
 		if overwrite:
 			raise Exception("Attempt to overwrite message that doesn't exist!")
@@ -232,6 +236,7 @@ class ArchivesParserStorage(ArchivesParser):
 							 [{'id': id, 'priority': i, 'msgid': self.parents[i]} for i in range(0, len(self.parents))])
 
 		opstatus.stored += 1
+		return True
 
 	def diff(self, conn, f, fromonlyf, oldid):
 		curs = conn.cursor()
