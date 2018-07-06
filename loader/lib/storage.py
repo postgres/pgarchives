@@ -88,7 +88,7 @@ class ArchivesParserStorage(ArchivesParser):
 			return True
 
 		if overwrite:
-			raise Exception("Attempt to overwrite message that doesn't exist!")
+			raise Exception("Attempt to overwrite message (%s) that doesn't exist on list %s!" % (self.msgid, listid))
 		# Always purge the primary list for this thread
 		self.purge_list(listid, self.date.year, self.date.month)
 
