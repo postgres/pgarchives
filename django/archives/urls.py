@@ -51,7 +51,7 @@ urlpatterns = [
     url(r'^message-id/attachment/(\d+)/.*$', archives.mailarchives.views.attachment),
 
     # API calls
-    url(r'^list/([\w-]+)/latest.json$', archives.mailarchives.api.latest),
+    url(r'^list/([\w-]+|\*)/latest.json$', archives.mailarchives.api.latest),
     url(r'^message-id.json/(.+)$', archives.mailarchives.api.thread),
     url(r'^listinfo/$', archives.mailarchives.api.listinfo),
 #    url(r'^thread/(.+)/subscribe/$', archives.mailarchives.api.thread_subscribe),

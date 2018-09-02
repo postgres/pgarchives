@@ -60,8 +60,13 @@ def latest(request, listname):
 		extrawhere.append("fti @@ plainto_tsquery('public.pg', %s)")
 		extraparams.append(request.GET['s'])
 
-	list = get_object_or_404(List, listname=listname)
-	extrawhere.append("threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % list.listid)
+	if listname != '*':
+		list = get_object_or_404(List, listname=listname)
+		extrawhere.append("threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % list.listid)
+	else:
+		list = None
+		extrawhere=''
+
 	mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().extra(where=extrawhere, params=extraparams).order_by('-date')[:limit]
 	allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
 
@@ -75,7 +80,9 @@ def latest(request, listname):
 
 	# Make sure this expires from the varnish cache when new entries show
 	# up in this month.
-	resp['X-pglm'] = ':%s:' % (':'.join(['%s/%s/%s' % (list.listid, year, month) for year, month in allyearmonths]))
+	# XXX: need to deal with the global view, but for now API callers come in directly
+	if list:
+		resp['X-pglm'] = ':%s:' % (':'.join(['%s/%s/%s' % (list.listid, year, month) for year, month in allyearmonths]))
 	return resp
 
 
