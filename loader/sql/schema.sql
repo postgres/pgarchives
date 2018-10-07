@@ -108,7 +108,7 @@ CREATE TABLE loaderrors(
 );
 
 /* textsearch configs */
-CREATE TEXT SEARCH CONFIGURATION pg (COPY = pg_catalog.english );
+CREATE TEXT SEARCH CONFIGURATION pg (PARSER=tsparser);
 
 CREATE TEXT SEARCH DICTIONARY english_ispell (
    TEMPLATE = ispell,
