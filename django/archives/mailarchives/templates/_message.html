@@ -49,7 +49,11 @@
   {% if lists %}
     <tr>
       <th scope="row">Lists:</th>
-      <td>{%for l in lists %}<span class="listname"><a href="/list/{{l.listname}}/since/{{msg.shortdate}}">{{l.listname}}</a></span>{%endfor%}</td>
+      <td>
+        {%for l in lists %}
+          <span class="listname"><a href="/list/{{l.listname}}/since/{{msg.shortdate}}">{{l.listname}}</a></span>
+        {%endfor%}
+      </td>
     </tr>
   {% endif %}
 </table>
