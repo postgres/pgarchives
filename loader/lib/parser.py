@@ -348,6 +348,7 @@ class ArchivesParser(object):
 	_date_multi_re = re.compile(' \(([^\s]+\s[^\s]+(\s+[^\s]+)*|)\)$')
 	_date_multi_re2 = re.compile(' ([\+-]\d{4}) \([^)]+\)$')
 	_date_multiminus_re = re.compile(' -(-\d+)$')
+	_date_offsetnoplus_re = re.compile(' (\d{4})$')
 	def forgiving_date_decode(self, d):
 		if d.strip() == '':
 			raise IgnorableException("Failed to parse empty date")
@@ -389,6 +390,9 @@ class ArchivesParser(object):
 
 		if self._date_multiminus_re.search(d):
 			d = self._date_multiminus_re.sub(' \\1', d)
+
+		if self._date_offsetnoplus_re.search(d):
+			d = self._date_offsetnoplus_re.sub('+\\1', d)
 
 
 		# We have a number of dates in the format
