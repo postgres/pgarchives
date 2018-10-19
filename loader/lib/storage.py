@@ -246,7 +246,7 @@ class ArchivesParserStorage(ArchivesParser):
 			'msgid': self.msgid,
 			})
 		try:
-			id, _from, _to, cc, subject, date, has_attachment, bodytxt = curs.fetchone()
+			id, _from, to, cc, subject, date, has_attachment, bodytxt = curs.fetchone()
 		except TypeError, e:
 			f.write("---- %s ----\n" % self.msgid)
 			f.write("Could not re-find in archives (old id was %s): %s\n" % (oldid, e))
@@ -254,8 +254,23 @@ class ArchivesParserStorage(ArchivesParser):
 			return
 
 
+		_from = _from.decode('utf8')
+		to = to.decode('utf8')
+		cc = cc.decode('utf8')
+		subject = subject.decode('utf8')
+		if (_from, to, cc, subject) != (self._from, self.to, self.cc, self.subject):
+			log.status("Message %s has header changes " % self.msgid)
+			f.write("==== %s ====\n" % self.msgid)
+			for fn in ['_from', 'to', 'cc', 'subject']:
+				if getattr(self, fn) != eval(fn):
+					d = u"- {0}: {1}\n".format(fn, eval(fn))
+					s = u"+ {0}: {1}\n".format(fn, getattr(self, fn))
+					f.write(s)
+					f.write(d)
+			f.write("\n\n")
+
 		if bodytxt.decode('utf8') != self.bodytxt:
-			log.status("Message %s has changes " % self.msgid)
+			log.status("Message %s has body changes " % self.msgid)
 			tempdiff = list(difflib.unified_diff(bodytxt.decode('utf8').splitlines(),
 												 self.bodytxt.splitlines(),
 												 fromfile='old',
