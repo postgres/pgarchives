@@ -57,7 +57,7 @@ class ArchivesParserStorage(ArchivesParser):
 				# identifyer), and we don't update the raw text of the message.
 				# (since we are expected to have used that raw text to do
 				# the re-parsing initially)
-				curs.execute("UPDATE messages SET _from=%(from)s, _to=%(to)s, cc=%(cc)s, subject=%(subject)s, date=%(date)s, has_attachment=%(has_attachment)s, bodytxt=%(bodytxt)s WHERE id=%(id)s AND NOT (bodytxt=%(bodytxt)s) RETURNING id", {
+				curs.execute("UPDATE messages SET bodytxt=%(bodytxt)s WHERE id=%(id)s AND NOT (bodytxt=%(bodytxt)s) RETURNING id", {
 						'id': pk,
 						'from': self._from,
 						'to': self.to or '',
