@@ -505,7 +505,7 @@ def message_raw(request, msgid):
 	else:
 		r = HttpResponse(row[0][2], content_type='text/plain')
 		r['X-pgthread'] = ":%s:" % row[0][0]
-		return r
+	return r
 
 
 def _build_mbox(query, params, msgid=None):
