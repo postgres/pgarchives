@@ -57,7 +57,14 @@ class ArchivesParserStorage(ArchivesParser):
 				# identifyer), and we don't update the raw text of the message.
 				# (since we are expected to have used that raw text to do
 				# the re-parsing initially)
-				curs.execute("UPDATE messages SET _from=%(from)s, _to=%(to)s, cc=%(cc)s, subject=%(subject)s, date=%(date)s, has_attachment=%(has_attachment)s, bodytxt=%(bodytxt)s WHERE id=%(id)s AND NOT (bodytxt=%(bodytxt)s) RETURNING id", {
+				# We update bodytext as a separate step so as not to rewrite
+				# the TOAST table unnecessarily...
+				curs.execute("UPDATE messages SET bodytxt=%(bodytxt)s WHERE id=%(id)s AND NOT (bodytxt=%(bodytxt)s) RETURNING id", {
+						'id': pk,
+						'bodytxt': self.bodytxt,
+						})
+				rc = curs.rowcount
+				curs.execute("UPDATE messages SET _from=%(from)s, _to=%(to)s, cc=%(cc)s, subject=%(subject)s, date=%(date)s, has_attachment=%(has_attachment)s WHERE id=%(id)s AND NOT (_from=%(from)s AND _to=%(to)s AND cc=%(cc)s AND subject=%(subject)s AND date=%(date)s AND has_attachment=%(has_attachment)s) RETURNING id", {
 						'id': pk,
 						'from': self._from,
 						'to': self.to or '',
@@ -65,9 +72,9 @@ class ArchivesParserStorage(ArchivesParser):
 						'subject': self.subject or '',
 						'date': self.date,
 						'has_attachment': len(self.attachments) > 0,
-						'bodytxt': self.bodytxt,
 						})
-				if curs.rowcount == 0:
+				rc += curs.rowcount
+				if rc == 0:
 					log.status("Message %s unchanged" % self.msgid)
 					return False
 
