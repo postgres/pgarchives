@@ -164,7 +164,9 @@ class ArchivesParser(object):
 
 		# Sometimes we end up with a trailing \0 when decoding long strings, so
 		# replace it if it's there.
-		b = b.rstrip('\0')
+		# In fact, replace it everywhere, since it can also turn up in the middle
+		# of a text when it's a really broken decoding.
+		b = b.replace('\0', '')
 
 		return b
 
@@ -435,7 +437,7 @@ class ArchivesParser(object):
 		# do this *before* doing any MIME decoding, we should be safe against
 		# anybody *actually* putting that sequence in the header (since we
 		# won't match the encoded contents)
-		hdr = hdr.replace("\n\t","")
+		hdr = hdr.replace("\n\t"," ")
 
 		# In at least some cases, at least gmail (and possibly other MUAs)
 		# incorrectly put double quotes in the name/email field even when
@@ -456,7 +458,10 @@ class ArchivesParser(object):
 
 	def decode_mime_header(self, hdr, email_workaround=False):
 		try:
-			return self._decode_mime_header(hdr, email_workaround)
+			h = self._decode_mime_header(hdr, email_workaround)
+			if h:
+				return h.replace("\0", "")
+			return ''
 		except LookupError, e:
 			raise IgnorableException("Failed to decode header value '%s': %s" % (hdr, e))
 		except ValueError, ve:
@@ -474,7 +479,7 @@ class ArchivesParser(object):
 		try:
 			return self.msg[fieldname]
 		except:
-			return None
+			return ''
 
 	def html_clean(self, html):
 		# First we pass it through tidy
