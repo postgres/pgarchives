@@ -263,8 +263,8 @@ class ArchivesParserStorage(ArchivesParser):
 			f.write("==== %s ====\n" % self.msgid)
 			for fn in ['_from', 'to', 'cc', 'subject']:
 				if getattr(self, fn) != eval(fn):
-					d = u"- {0}: {1}\n".format(fn, eval(fn))
-					s = u"+ {0}: {1}\n".format(fn, getattr(self, fn))
+					s = u"- {0}: {1}\n".format(fn, eval(fn))
+					d = u"+ {0}: {1}\n".format(fn, getattr(self, fn))
 					f.write(s)
 					f.write(d)
 			f.write("\n\n")
