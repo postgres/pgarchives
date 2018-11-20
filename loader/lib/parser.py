@@ -343,7 +343,7 @@ class ArchivesParser(object):
 				log.status("Could not parse messageid '%s', ignoring it" % messageid)
 				return None
 			raise IgnorableException("Could not parse message id '%s'" % messageid)
-		return m.groups(1)[0]
+		return m.groups(1)[0].replace(' ','')
 
 #	_date_multi_re = re.compile(' \((\w+\s\w+(\s+\w+)*|)\)$')
 	# Now using [^\s] instead of \w, to work with japanese chars
