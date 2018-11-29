@@ -85,9 +85,19 @@ if __name__ == "__main__":
 		connstr = 'need_connstr'
 
 	conn = psycopg2.connect(connstr)
+	curs = conn.cursor()
+
+	# Take an advisory lock to force serialization.
+	# We could do this "properly" by reordering operations and using ON CONFLICT,
+	# but concurrency is not that important and this is easier...
+	try:
+		curs.execute("SET statement_timeout='30s'")
+		curs.execute("SELECT pg_advisory_xact_lock(8059944559669076)")
+	except Exception, e:
+		print("Failed to wait on advisory lock: %s" % e)
+		sys.exit(1)
 
 	# Get the listid we're working on
-	curs = conn.cursor()
 	curs.execute("SELECT listid FROM lists WHERE listname=%(list)s", {
 			'list': opt.list
 			})
