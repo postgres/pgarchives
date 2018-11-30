@@ -6,7 +6,7 @@ from email.parser import Parser
 from email.header import decode_header
 from email.errors import HeaderParseError
 from HTMLParser import HTMLParser, HTMLParseError
-import tidy
+import tidylib
 import StringIO
 
 from lib.exception import IgnorableException
@@ -204,7 +204,7 @@ class ArchivesParser(object):
 		if b:
 			b = self.html_clean(b)
 			if b: return b
-		if b == '':
+		if b == '' or b is None:
 			hasempty = True
 
 		if hasempty:
@@ -483,7 +483,24 @@ class ArchivesParser(object):
 
 	def html_clean(self, html):
 		# First we pass it through tidy
-		html = unicode(str(tidy.parseString(html.encode('utf8'), drop_proprietary_attributes=1, alt_text='',hide_comments=1,output_xhtml=1,show_body_only=1,clean=1,char_encoding='utf8')), 'utf8')
+		(html, errors) = tidylib.tidy_document(html,
+											   options={
+												   'drop-proprietary-attributes': 1,
+												   'alt-text': '',
+												   'hide-comments': 1,
+												   'output-xhtml': 1,
+												   'show-body-only': 1,
+												   'clean': 1,
+												   'char-encoding': 'utf8',
+												   'show-warnings': 0,
+												   'show-info': 0,
+												   })
+		if errors:
+			print("HTML tidy failed for %s!" % self.msgid)
+			print(errors)
+			return None
+		if type(html) == str:
+			html = unicode(html, 'utf8')
 
 		try:
 			cleaner = HTMLCleaner()
