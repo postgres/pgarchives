@@ -11,6 +11,7 @@ CREATE TABLE messages (
    cc text NOT NULL,
    subject text NOT NULL,
    date timestamptz NOT NULL,
+   loaddate timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
    has_attachment boolean NOT NULL,
    hiddenstatus int NULL,
    messageid text NOT NULL,
