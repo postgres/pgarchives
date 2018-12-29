@@ -65,11 +65,11 @@ urlpatterns = [
 ]
 
 if not settings.PUBLIC_ARCHIVES:
-	import archives.auth
+    import archives.auth
 
-	urlpatterns += [
-		# For non-public archives, support login
-		url(r'^accounts/login/?$', archives.auth.login),
-		url(r'^accounts/logout/?$', archives.auth.logout),
-		url(r'^auth_receive/$', archives.auth.auth_receive),
-	]
+    urlpatterns += [
+        # For non-public archives, support login
+        url(r'^accounts/login/?$', archives.auth.login),
+        url(r'^accounts/logout/?$', archives.auth.logout),
+        url(r'^auth_receive/$', archives.auth.auth_receive),
+    ]

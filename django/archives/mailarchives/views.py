@@ -353,7 +353,7 @@ def attachment(request, attid):
 	# XXX: minor information leak, because we load the whole attachment before we check
 	# the thread permissions. Is that OK?
 	curs = connection.cursor()
-        curs.execute("SELECT filename, contenttype, messageid, attachment FROM attachments INNER JOIN messages ON messages.id=attachments.message AND attachments.id=%(id)s AND messages.hiddenstatus IS NULL", {'id': int(attid)})
+	curs.execute("SELECT filename, contenttype, messageid, attachment FROM attachments INNER JOIN messages ON messages.id=attachments.message AND attachments.id=%(id)s AND messages.hiddenstatus IS NULL", {'id': int(attid)})
 	r = curs.fetchall()
 	if len(r) != 1:
 		return HttpResponse("Attachment not found")
@@ -384,16 +384,16 @@ def _get_nextprevious(listmap, dt):
 )
 SELECT l.listid,1,
  (SELECT ARRAY[messageid,to_char(date, 'yyyy-mm-dd hh24:mi:ss'),subject,_from] FROM messages m
-     INNER JOIN list_threads lt ON lt.threadid=m.threadid
-     WHERE m.date>%(time)s AND lt.listid=l.listid
-     ORDER BY m.date LIMIT 1
+	 INNER JOIN list_threads lt ON lt.threadid=m.threadid
+	 WHERE m.date>%(time)s AND lt.listid=l.listid
+	 ORDER BY m.date LIMIT 1
   ) FROM l
 UNION ALL
 SELECT l.listid,0,
  (SELECT ARRAY[messageid,to_char(date, 'yyyy-mm-dd hh24:mi:ss'),subject,_from] FROM messages m
-     INNER JOIN list_threads lt ON lt.threadid=m.threadid
-     WHERE m.date<%(time)s AND lt.listid=l.listid
-     ORDER BY m.date DESC LIMIT 1
+	 INNER JOIN list_threads lt ON lt.threadid=m.threadid
+	 WHERE m.date<%(time)s AND lt.listid=l.listid
+	 ORDER BY m.date DESC LIMIT 1
  ) FROM l""", {
 			'lists': listmap.keys(),
 			'time': dt,
@@ -722,7 +722,7 @@ _dynamic_cssmap = {
 	'docs': ['media/css/global.css',
 			 'media/css/table.css',
 			 'media/css/text.css',
-		     'media/css/docs.css'],
+			 'media/css/docs.css'],
 	}
 
 @cache(hours=8)
