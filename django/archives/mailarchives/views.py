@@ -670,7 +670,7 @@ def search(request):
 
     if 's' in request.POST:
         list_sort = request.POST['s']
-        if not list_sort in ('d', 'r', 'i'):
+        if list_sort not in ('d', 'r', 'i'):
             list_stort = 'r'
     else:
         list_sort = 'r'

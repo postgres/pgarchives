@@ -62,7 +62,7 @@ class ArchivesParser(object):
             # mailers that add the same reference more than once. And we can't
             # use a set() to make it unique, because order is very important
             for m in cleaned_msgids:
-                if m and not m in self.parents:
+                if m and m not in self.parents:
                     self.parents.append(m)
 
     def clean_charset(self, charset):
@@ -230,7 +230,7 @@ class ArchivesParser(object):
             # This was not a multipart, but it leaked... Give up!
             return None
         for p in pl:
-            if p.get_params() == None:
+            if p.get_params() is None:
                 # MIME multipart/mixed, but no MIME type on the part
                 log.status("Found multipart/mixed in message '%s', but no MIME type on part. Trying text/plain." % self.msgid)
                 return self.get_payload_as_unicode(p)
@@ -296,7 +296,7 @@ class ArchivesParser(object):
                 # ignore it...
                 return
             for p in container.get_payload():
-                if p.get_params() == None:
+                if p.get_params() is None:
                     continue
                 self.recursive_get_attachments(p)
         elif container.get_content_type() == 'multipart/alternative':
@@ -480,7 +480,7 @@ class ArchivesParser(object):
     _re_mailworkaround = re.compile('"(=\?[^\?]+\?[QB]\?[^\?]+\?=)"', re.IGNORECASE)
 
     def _decode_mime_header(self, hdr, email_workaround):
-        if hdr == None:
+        if hdr is None:
             return None
 
         # Per http://bugs.python.org/issue504152 (and lots of testing), it seems
@@ -524,7 +524,7 @@ class ArchivesParser(object):
     def get_mandatory(self, fieldname):
         try:
             x = self.msg[fieldname]
-            if x == None:
+            if x is None:
                 raise Exception()
             return x
         except:
