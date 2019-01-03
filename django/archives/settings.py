@@ -11,7 +11,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',  # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'archives',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
@@ -74,14 +74,6 @@ STATICFILES_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-# List of finder classes that know how to find static files in
-# various locations.
-#STATICFILES_FINDERS = (
-#    'django.contrib.staticfiles.finders.FileSystemFinder',
-#    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
-#)
-
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '7j9q&&!g26rkh!=g%1zb@20b^k^gmzy4=!mhzu2wesxb9b%16m'
 
@@ -134,10 +126,8 @@ LOGGING = {
     }
 }
 
-
-
 # Required for lighttpd
-FORCE_SCRIPT_NAME=""
+FORCE_SCRIPT_NAME = ""
 
 # Always override!
 SEARCH_CLIENTS = ('127.0.0.1',)
@@ -164,4 +154,4 @@ if not PUBLIC_ARCHIVES:
     ] + INSTALLED_APPS
 
     from archives.util import validate_new_user
-    PGAUTH_CREATEUSER_CALLBACK=validate_new_user
+    PGAUTH_CREATEUSER_CALLBACK = validate_new_user

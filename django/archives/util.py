@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.db import connection
 from django.utils.functional import SimpleLazyObject
 
+
 def validate_new_user(username, email, firstname, lastname):
     # Only allow user creation if they are already a subscriber
     curs = connection.cursor()
@@ -13,6 +14,7 @@ def validate_new_user(username, email, firstname, lastname):
         return None
 
     return HttpResponse("You are not currently subscribed to any mailing list on this server. Account not created.")
+
 
 def _get_gitrev():
     # Return the current git revision, that is used for
@@ -32,6 +34,7 @@ def _get_gitrev():
         except IOError:
             # If packed-refs also can't be read, just give up
             return 'eeeeeeee'
+
 
 # Template context processor to add information about the root link and
 # the current git revision. git revision is returned as a lazy object so

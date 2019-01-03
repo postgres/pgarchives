@@ -10,7 +10,7 @@ from configparser import ConfigParser
 import psycopg2
 import requests
 
-if __name__=="__main__":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Synchronize lists from pglister")
     parser.add_argument('--dryrun', action='store_true', help="Don't commit changes to database")
 
@@ -19,14 +19,14 @@ if __name__=="__main__":
     cfg = ConfigParser()
     cfg.read('%s/archives.ini' % os.path.realpath(os.path.dirname(sys.argv[0])))
     try:
-        connstr = cfg.get('db','connstr')
+        connstr = cfg.get('db', 'connstr')
     except:
         connstr = 'need_connstr'
 
     if cfg.has_option('pglister', 'subscribers') and cfg.getint('pglister', 'subscribers'):
-        do_subscribers=1
+        do_subscribers = 1
     else:
-        do_subscribers=0
+        do_subscribers = 0
 
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     conn = psycopg2.connect(connstr)
@@ -42,9 +42,9 @@ if __name__=="__main__":
     obj = r.json()
 
     # For groups, just add them if they don't exist
-    groups = {g['group']['id']:g['group']['groupname'] for g in obj}
+    groups = {g['group']['id']: g['group']['groupname'] for g in obj}
 
-    for id,name in list(groups.items()):
+    for id, name in list(groups.items()):
         curs.execute("SELECT EXISTS (SELECT 1 FROM listgroups WHERE groupname=%(group)s)", {
             'group': name,
         })
@@ -89,7 +89,6 @@ if __name__=="__main__":
                     print("Added subscriber %s to list %s" % (who, name))
                 else:
                     print("Removed subscriber %s from list %s" % (who, name))
-
 
     # We don't remove lists ever, because we probably want to keep archives around.
     # But for now, we alert on them.

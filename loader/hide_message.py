@@ -15,7 +15,7 @@ import psycopg2
 from lib.varnish import VarnishPurger
 
 reasons = [
-    None, # Placeholder for 0
+    None,  # Placeholder for 0
     "virus",
     "violates policies",
     "privacy",
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     cfg = ConfigParser()
     cfg.read('%s/archives.ini' % os.path.realpath(os.path.dirname(sys.argv[0])))
     try:
-        connstr = cfg.get('db','connstr')
+        connstr = cfg.get('db', 'connstr')
     except:
         connstr = 'need_connstr'
 

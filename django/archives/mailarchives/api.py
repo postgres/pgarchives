@@ -27,6 +27,7 @@ def listinfo(request):
 
     return resp
 
+
 @cache(hours=4)
 def latest(request, listname):
     if not settings.PUBLIC_ARCHIVES:
@@ -47,8 +48,8 @@ def latest(request, listname):
     if limit <= 0 or limit > 100:
         limit = 50
 
-    extrawhere=[]
-    extraparams=[]
+    extrawhere = []
+    extraparams = []
 
     # Return only messages that have attachments?
     if 'a' in request.GET:
@@ -65,17 +66,19 @@ def latest(request, listname):
         extrawhere.append("threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % list.listid)
     else:
         list = None
-        extrawhere=''
+        extrawhere = ''
 
     mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().extra(where=extrawhere, params=extraparams).order_by('-date')[:limit]
     allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
 
     resp = HttpResponse(content_type='application/json')
     json.dump([
-        {'msgid': m.messageid,
-         'date': m.date.isoformat(),
-         'from': m.mailfrom,
-         'subj': m.subject,}
+        {
+            'msgid': m.messageid,
+            'date': m.date.isoformat(),
+            'from': m.mailfrom,
+            'subj': m.subject,
+        }
         for m in mlist], resp)
 
     # Make sure this expires from the varnish cache when new entries show
@@ -111,6 +114,7 @@ def thread(request, msgid):
         for m in mlist], resp)
     resp['X-pgthread'] = m.threadid
     return resp
+
 
 def thread_subscribe(request, msgid):
     if not settings.PUBLIC_ARCHIVES:

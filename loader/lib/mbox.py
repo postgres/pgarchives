@@ -10,6 +10,7 @@ from io import BytesIO
 SEPARATOR = "ABCARCHBREAK123" * 50
 bSEPARATOR = bytes(SEPARATOR, 'ascii')
 
+
 class MailboxBreakupParser(object):
     def __init__(self, fn):
         self.EOF = False
