@@ -96,18 +96,18 @@ MIDDLEWARE_CLASSES = [
 ROOT_URLCONF = 'archives.urls'
 
 TEMPLATES = [{
-	'BACKEND': 'django.template.backends.django.DjangoTemplates',
-	'OPTIONS': {
-		'context_processors': [
-			'django.template.context_processors.request',
-			'django.contrib.messages.context_processors.messages',
-			'archives.util.PGWebContextProcessor',
-		],
-		'loaders': [
-			'django.template.loaders.filesystem.Loader',
-			'django.template.loaders.app_directories.Loader',
-		],
-	},
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'OPTIONS': {
+        'context_processors': [
+            'django.template.context_processors.request',
+            'django.contrib.messages.context_processors.messages',
+            'archives.util.PGWebContextProcessor',
+        ],
+        'loaders': [
+            'django.template.loaders.filesystem.Loader',
+            'django.template.loaders.app_directories.Loader',
+        ],
+    },
 }]
 
 
@@ -122,7 +122,7 @@ INSTALLED_APPS = [
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-	'archives.mailarchives',
+    'archives.mailarchives',
 ]
 
 # A sample logging configuration. The only tangible logging
@@ -159,23 +159,23 @@ API_CLIENTS = ('127.0.0.1',)
 PUBLIC_ARCHIVES = False
 
 try:
-	from .settings_local import *
+    from .settings_local import *
 except ImportError:
-	pass
+    pass
 
 # If this is a non-public site, enable middleware for handling logins etc
 if not PUBLIC_ARCHIVES:
-	MIDDLEWARE_CLASSES = [
-		'django.contrib.sessions.middleware.SessionMiddleware',
-		'django.contrib.auth.middleware.AuthenticationMiddleware',
-	] + MIDDLEWARE_CLASSES
-	MIDDLEWARE_CLASSES.append('archives.mailarchives.redirecthandler.RedirectMiddleware')
+    MIDDLEWARE_CLASSES = [
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+    ] + MIDDLEWARE_CLASSES
+    MIDDLEWARE_CLASSES.append('archives.mailarchives.redirecthandler.RedirectMiddleware')
 
-	INSTALLED_APPS = [
-		'django.contrib.auth',
-		'django.contrib.contenttypes',
-		'django.contrib.sessions',
-	] + INSTALLED_APPS
+    INSTALLED_APPS = [
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+    ] + INSTALLED_APPS
 
-	from archives.util import validate_new_user
-	PGAUTH_CREATEUSER_CALLBACK=validate_new_user
+    from archives.util import validate_new_user
+    PGAUTH_CREATEUSER_CALLBACK=validate_new_user
