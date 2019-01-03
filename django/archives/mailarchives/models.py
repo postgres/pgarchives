@@ -51,7 +51,8 @@ class Message(models.Model):
 
     @property
     def hiddenreason(self):
-        if not self.hiddenstatus: return None
+        if not self.hiddenstatus:
+            return None
         try:
             return hide_reasons[self.hiddenstatus]
         except:
