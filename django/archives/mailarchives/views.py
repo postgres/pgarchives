@@ -145,7 +145,7 @@ def get_all_groups_and_lists(request, listid=None):
 		if l.listid == listid:
 			listgroupid = l.group.groupid
 
-		if groups.has_key(l.group.groupid):
+		if l.group.groupid in groups:
 			groups[l.group.groupid]['lists'].append(l)
 		else:
 			groups[l.group.groupid] = {
@@ -409,7 +409,7 @@ SELECT l.listid,0,
 				'subject': data[2],
 				'from': data[3],
 				}
-			if retval.has_key(listname):
+			if listname in retval:
 				retval[listname][isnext and 'next' or 'prev'] = d
 			else:
 				retval[listname] = {
@@ -430,7 +430,7 @@ def message(request, msgid):
 	listmap = dict([(l.listid, l.listname) for l in lists])
 	threadstruct = list(_build_thread_structure(m.threadid))
 	newest = calendar.timegm(max(threadstruct, key=lambda x: x['date'])['date'].utctimetuple())
-	if request.META.has_key('HTTP_IF_MODIFIED_SINCE') and not settings.DEBUG:
+	if 'HTTP_IF_MODIFIED_SINCE' in request.META and not settings.DEBUG:
 		ims = parse_http_date_safe(request.META.get("HTTP_IF_MODIFIED_SINCE"))
 		if ims >= newest:
 			return HttpResponseNotModified()
@@ -472,7 +472,7 @@ def message_flat(request, msgid):
 	isfirst = (msg == allmsg[0])
 
 	newest = calendar.timegm(max(allmsg, key=lambda x: x.date).date.utctimetuple())
-	if request.META.has_key('HTTP_IF_MODIFIED_SINCE') and not settings.DEBUG:
+	if 'HTTP_IF_MODIFIED_SINCE' in request.META and not settings.DEBUG:
 		ims = parse_http_date_safe(request.META.get('HTTP_IF_MODIFIED_SINCE'))
 		if ims >= newest:
 			return HttpResponseNotModified()
@@ -608,11 +608,11 @@ def search(request):
 	if not request.method == 'POST':
 		raise Http404('I only respond to POST')
 
-	if not request.POST.has_key('q'):
+	if 'q' not in request.POST:
 		raise Http404('No search query specified')
 	query = request.POST['q']
 
-	if request.POST.has_key('ln'):
+	if 'ln' in request.POST:
 		try:
 			curs.execute("SELECT listid FROM lists WHERE listname=ANY(%(names)s)", {
 				'names': request.POST['ln'].split(','),
@@ -624,7 +624,7 @@ def search(request):
 	else:
 		lists = None
 
-	if request.POST.has_key('d'):
+	if 'd' in request.POST:
 		days = int(request.POST['d'])
 		if days < 1 or days > 365:
 			firstdate = None
@@ -633,7 +633,7 @@ def search(request):
 	else:
 		firstdate = None
 
-	if request.POST.has_key('s'):
+	if 's' in request.POST:
 		list_sort = request.POST['s']
 		if not list_sort in ('d', 'r', 'i'):
 			list_stort = 'r'
@@ -727,7 +727,7 @@ _dynamic_cssmap = {
 
 @cache(hours=8)
 def dynamic_css(request, css):
-	if not _dynamic_cssmap.has_key(css):
+	if css not in _dynamic_cssmap:
 		raise Http404('CSS not found')
 	files = _dynamic_cssmap[css]
 	resp = HttpResponse(content_type='text/css')
@@ -744,7 +744,7 @@ def dynamic_css(request, css):
 			# If we somehow referred to a file that didn't exist, or
 			# one that we couldn't access.
 			raise Http404('CSS (sub) not found')
-	if request.META.has_key('HTTP_IF_MODIFIED_SINCE'):
+	if 'HTTP_IF_MODIFIED_SINCE' in request.META:
 		# This code is mostly stolen from django :)
 		matches = re.match(r"^([^;]+)(; length=([0-9]+))?$",
 						   request.META.get('HTTP_IF_MODIFIED_SINCE'),

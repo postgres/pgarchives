@@ -37,7 +37,7 @@ def latest(request, listname):
 
 	# Return the latest <n> messages on this list.
 	# If <n> is not specified, return 50. Max value for <n> is 100.
-	if request.GET.has_key('n'):
+	if 'n' in request.GET:
 		try:
 			limit = int(request.GET['n'])
 		except:
@@ -51,12 +51,12 @@ def latest(request, listname):
 	extraparams=[]
 
 	# Return only messages that have attachments?
-	if request.GET.has_key('a'):
+	if 'a' in request.GET:
 		if request.GET['a'] == '1':
 			extrawhere.append("has_attachment")
 
 	# Restrict by full text search
-	if request.GET.has_key('s') and request.GET['s']:
+	if 's' in request.GET and request.GET['s']:
 		extrawhere.append("fti @@ plainto_tsquery('public.pg', %s)")
 		extraparams.append(request.GET['s'])
 
@@ -118,7 +118,7 @@ def thread_subscribe(request, msgid):
 	if not request.META['REMOTE_ADDR'] in settings.API_CLIENTS:
 		return HttpResponseForbidden('Invalid host')
 
-	if not request.META.has_key('HTTP_X_APIKEY'):
+	if 'HTTP_X_APIKEY' not in request.META:
 		return HttpResponseForbidden('No API key')
 
 	if request.method != 'PUT':

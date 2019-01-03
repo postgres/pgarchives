@@ -224,12 +224,12 @@ class ArchivesParser(object):
 				return self.get_payload_as_unicode(p)
 			if p.get_params()[0][0].lower() == 'text/plain':
 				# Don't include it if it looks like an attachment
-				if p.has_key('Content-Disposition') and p['Content-Disposition'].startswith('attachment'):
+				if 'Content-Disposition' in p and p['Content-Disposition'].startswith('attachment'):
 					continue
 				return self.get_payload_as_unicode(p)
 			if html_instead and p.get_params()[0][0].lower() == 'text/html':
 				# Don't include it if it looks like an attachment
-				if p.has_key('Content-Disposition') and p['Content-Disposition'].startswith('attachment'):
+				if 'Content-Disposition' in p and p['Content-Disposition'].startswith('attachment'):
 					continue
 				return self.get_payload_as_unicode(p)
 			if p.is_multipart():
@@ -267,7 +267,7 @@ class ArchivesParser(object):
 
 		# Failing that, some mailers set Content-Description to the
 		# filename
-		if container.has_key('Content-Description'):
+		if 'Content-Description' in container:
 			return self._clean_filename_encoding(container['Content-Description'])
 		return None
 
@@ -314,7 +314,7 @@ class ArchivesParser(object):
 					self.attachments.append((self._extract_filename(container), container.get_content_type(), container.get_payload(decode=True)))
 					return
 			# If it's content-disposition=attachment, we also want to save it
-			if container.has_key('Content-Disposition') and container['Content-Disposition'].startswith('attachment'):
+			if 'Content-Disposition' in container and container['Content-Disposition'].startswith('attachment'):
 				self.attachments.append((self._extract_filename(container), container.get_content_type(), container.get_payload(decode=True)))
 				return
 			# If we have already found one text/plain part, make all
