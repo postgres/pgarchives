@@ -5,10 +5,10 @@ from django.db import models
 # we might need that flexibility in the future.
 hide_reasons = [
     None,                                # placeholder for 0
-    'This message has been hidden because a virus was found in the message.', # 1
-    'This message has been hidden because the message violated policies.',    # 2
-    'This message has been hidden because for privacy reasons.',              # 3
-    'This message was corrupt',                                               # 4
+    'This message has been hidden because a virus was found in the message.',  # 1
+    'This message has been hidden because the message violated policies.',     # 2
+    'This message has been hidden because for privacy reasons.',               # 3
+    'This message was corrupt',                                                # 4
 ]
 
 
@@ -42,6 +42,7 @@ class Message(models.Model):
     # multiple times from templates without generating multiple queries
     # to the database.
     _attachments = None
+
     @property
     def attachments(self):
         if not self._attachments:
@@ -57,6 +58,7 @@ class Message(models.Model):
             # Weird value
             return 'This message has been hidden.'
 
+
 class ListGroup(models.Model):
     groupid = models.IntegerField(null=False, primary_key=True)
     groupname = models.CharField(max_length=200, null=False, blank=False)
@@ -64,6 +66,7 @@ class ListGroup(models.Model):
 
     class Meta:
         db_table = 'listgroups'
+
 
 class List(models.Model):
     listid = models.IntegerField(null=False, primary_key=True)
@@ -74,7 +77,6 @@ class List(models.Model):
     group = models.ForeignKey(ListGroup, db_column='groupid')
     subscriber_access = models.BooleanField(null=False, blank=False, default=False, help_text="Subscribers can access contents (default is admins only)")
 
-
     @property
     def maybe_shortdesc(self):
         if self.shortdesc:
@@ -83,6 +85,7 @@ class List(models.Model):
 
     class Meta:
         db_table = 'lists'
+
 
 class Attachment(models.Model):
     message = models.ForeignKey(Message, null=False, blank=False, db_column='message')
@@ -115,12 +118,14 @@ class ListSubscriber(models.Model):
         unique_together = (('list', 'username'), )
         db_table = 'listsubscribers'
 
+
 class ApiClient(models.Model):
     apikey = models.CharField(max_length=100, null=False, blank=False)
     postback = models.URLField(max_length=500, null=False, blank=False)
 
     class Meta:
         db_table = 'apiclients'
+
 
 class ThreadSubscription(models.Model):
     apiclient = models.ForeignKey(ApiClient, null=False, blank=False)

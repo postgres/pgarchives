@@ -13,6 +13,7 @@ import io
 from lib.exception import IgnorableException
 from lib.log import log
 
+
 class ArchivesParser(object):
     def __init__(self):
         self.parser = BytesParser(policy=compat32)
@@ -63,7 +64,6 @@ class ArchivesParser(object):
             for m in cleaned_msgids:
                 if m and not m in self.parents:
                     self.parents.append(m)
-
 
     def clean_charset(self, charset):
         lcharset = charset.lower()
@@ -139,7 +139,7 @@ class ArchivesParser(object):
             if not params:
                 # No content-type, so we assume us-ascii
                 return str(b, 'us-ascii', errors='ignore')
-            for k,v in params:
+            for k, v in params:
                 if k.lower() == 'charset':
                     charset = v
                     break
@@ -157,6 +157,7 @@ class ArchivesParser(object):
     # Regular expression matching the PostgreSQL custom mail footer that
     # is appended to all emails.
     _re_footer = re.compile('(.*)--\s+\nSent via [^\s]+ mailing list \([^\)]+\)\nTo make changes to your subscription:\nhttp://www\.postgresql\.org/mailpref/[^\s]+\s*$', re.DOTALL)
+
     def get_body(self):
         b = self._get_body()
         if b:
@@ -323,8 +324,8 @@ class ArchivesParser(object):
             # If it has a name, we consider it an attachments
             if not container.get_params():
                 return
-            for k,v in container.get_params():
-                if k=='name' and v != '':
+            for k, v in container.get_params():
+                if k == 'name' and v != '':
                     # Yes, it has a name
                     try:
                         self.attachments.append((self._extract_filename(container), container.get_content_type(), container.get_payload(decode=True)))
@@ -374,6 +375,7 @@ class ArchivesParser(object):
             # No name, and text/plain, so ignore it
 
     re_msgid = re.compile('^\s*<(.*)>\s*')
+
     def clean_messageid(self, messageid, ignorebroken=False):
         m = self.re_msgid.match(messageid)
         if not m:
@@ -381,7 +383,7 @@ class ArchivesParser(object):
                 log.status("Could not parse messageid '%s', ignoring it" % messageid)
                 return None
             raise IgnorableException("Could not parse message id '%s'" % messageid)
-        return m.groups(1)[0].replace(' ','')
+        return m.groups(1)[0].replace(' ', '')
 
 #    _date_multi_re = re.compile(' \((\w+\s\w+(\s+\w+)*|)\)$')
     # Now using [^\s] instead of \w, to work with japanese chars
@@ -389,6 +391,7 @@ class ArchivesParser(object):
     _date_multi_re2 = re.compile(' ([\+-]\d{4}) \([^)]+\)$')
     _date_multiminus_re = re.compile(' -(-\d+)$')
     _date_offsetnoplus_re = re.compile(' (\d{4})$')
+
     def forgiving_date_decode(self, d):
         if d.strip() == '':
             raise IgnorableException("Failed to parse empty date")
@@ -416,24 +419,23 @@ class ArchivesParser(object):
         if d.endswith('+0-900'):
             d = d.replace('+0-900', '-0900')
         if d.endswith('Mexico/General'):
-            d = d.replace('Mexico/General','CDT')
+            d = d.replace('Mexico/General', 'CDT')
         if d.endswith('Pacific Daylight Time'):
             d = d.replace('Pacific Daylight Time', 'PDT')
         if d.endswith(' ZE2'):
-            d = d.replace(' ZE2',' +0200')
+            d = d.replace(' ZE2', ' +0200')
         if d.find('-Juin-') > 0:
-            d = d.replace('-Juin-','-Jun-')
+            d = d.replace('-Juin-', '-Jun-')
         if d.find('-Juil-') > 0:
-            d = d.replace('-Juil-','-Jul-')
+            d = d.replace('-Juil-', '-Jul-')
         if d.find(' 0 (GMT)'):
-            d = d.replace(' 0 (GMT)',' +0000')
+            d = d.replace(' 0 (GMT)', ' +0000')
 
         if self._date_multiminus_re.search(d):
             d = self._date_multiminus_re.sub(' \\1', d)
 
         if self._date_offsetnoplus_re.search(d):
             d = self._date_offsetnoplus_re.sub('+\\1', d)
-
 
         # We have a number of dates in the format
         # "<full datespace> +0200 (MET DST)"
@@ -455,7 +457,7 @@ class ArchivesParser(object):
 
             # Some offsets are >16 hours, which postgresql will not
             # (for good reasons) accept
-            if dp.utcoffset() and abs(dp.utcoffset().days * (24*60*60) + dp.utcoffset().seconds) > 60*60*16-1:
+            if dp.utcoffset() and abs(dp.utcoffset().days * (24 * 60 * 60) + dp.utcoffset().seconds) > 60 * 60 * 16 - 1:
                 # Convert it to a UTC timestamp using Python. It will give
                 # us the right time, but the wrong timezone. Should be
                 # enough...
@@ -471,6 +473,7 @@ class ArchivesParser(object):
 
     # Workaround for broken quoting in some MUAs (see below)
     _re_mailworkaround = re.compile('"(=\?[^\?]+\?[QB]\?[^\?]+\?=)"', re.IGNORECASE)
+
     def _decode_mime_header(self, hdr, email_workaround):
         if hdr == None:
             return None
@@ -480,7 +483,7 @@ class ArchivesParser(object):
         # do this *before* doing any MIME decoding, we should be safe against
         # anybody *actually* putting that sequence in the header (since we
         # won't match the encoded contents)
-        hdr = hdr.replace("\n\t"," ")
+        hdr = hdr.replace("\n\t", " ")
 
         # In at least some cases, at least gmail (and possibly other MUAs)
         # incorrectly put double quotes in the name/email field even when
@@ -516,7 +519,7 @@ class ArchivesParser(object):
     def get_mandatory(self, fieldname):
         try:
             x = self.msg[fieldname]
-            if x==None:
+            if x == None:
                 raise Exception()
             return x
         except:

@@ -20,6 +20,7 @@ from lib.exception import IgnorableException
 from lib.log import log, opstatus
 from lib.varnish import VarnishPurger
 
+
 def log_failed_message(listid, srctype, src, msg, err):
     try:
         msgid = msg.msgid
@@ -80,7 +81,7 @@ if __name__ == "__main__":
     cfg = ConfigParser()
     cfg.read('%s/archives.ini' % os.path.realpath(os.path.dirname(sys.argv[0])))
     try:
-        connstr = cfg.get('db','connstr')
+        connstr = cfg.get('db', 'connstr')
     except:
         connstr = 'need_connstr'
 
@@ -168,7 +169,7 @@ if __name__ == "__main__":
         try:
             ap.analyze(date_override=opt.force_date)
         except IgnorableException as e:
-            log_failed_message(listid, "stdin","", ap, e)
+            log_failed_message(listid, "stdin", "", ap, e)
             conn.close()
             sys.exit(1)
         ap.store(conn, listid)

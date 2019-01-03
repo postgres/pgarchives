@@ -15,6 +15,7 @@ import dateutil.parser
 
 import psycopg2
 
+
 def scan_message(messageid, olddate, curs):
     u = "http://archives.postgresql.org/msgtxt.php?id=%s" % messageid
     print("Scanning message at %s (date reported as %s)..." % (u, olddate))
@@ -26,7 +27,7 @@ def scan_message(messageid, olddate, curs):
 
     # Can be either one of them, but we really don't care...
     ds = None
-    for k,r in list(msg.items()):
+    for k, r in list(msg.items()):
         if k != 'Received': continue
 
         print("Trying on %s" % r)
@@ -61,10 +62,11 @@ def scan_message(messageid, olddate, curs):
         elif x.upper() == 'N':
             break
 
+
 if __name__ == "__main__":
     cfg = ConfigParser()
     cfg.read('%s/archives.ini' % os.path.realpath(os.path.dirname(sys.argv[0])))
-    connstr = cfg.get('db','connstr')
+    connstr = cfg.get('db', 'connstr')
 
     conn = psycopg2.connect(connstr)
 

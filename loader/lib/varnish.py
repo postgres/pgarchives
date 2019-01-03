@@ -2,6 +2,7 @@ import requests
 
 from lib.log import log
 
+
 class VarnishPurger(object):
     def __init__(self, cfg):
         self.cfg = cfg
@@ -30,4 +31,3 @@ class VarnishPurger(object):
         })
         if r.status_code != 200:
             log.error("Failed to send purge request!")
-

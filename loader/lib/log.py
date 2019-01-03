@@ -18,6 +18,7 @@ class Log(object):
     def print_status(self):
         opstatus.print_status()
 
+
 class OpStatus(object):
     def __init__(self):
         self.stored = 0
@@ -32,4 +33,3 @@ class OpStatus(object):
 
 log = Log()
 opstatus = OpStatus()
-

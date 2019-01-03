@@ -21,6 +21,7 @@ from lib.exception import IgnorableException
 from lib.log import log, opstatus
 from lib.varnish import VarnishPurger
 
+
 def ResultIter(cursor):
     # Fetch lots of data but keep memory usage down a bit, by feeding it out of
     # a generator, and use fetchmany()
@@ -62,7 +63,7 @@ if __name__ == "__main__":
     cfg = ConfigParser()
     cfg.read('%s/archives.ini' % os.path.realpath(os.path.dirname(sys.argv[0])))
     try:
-        connstr = cfg.get('db','connstr')
+        connstr = cfg.get('db', 'connstr')
     except:
         connstr = 'need_connstr'
 
@@ -88,7 +89,7 @@ if __name__ == "__main__":
 
     if not opt.update:
         f = codecs.open("reparse.diffs", "w", "utf-8")
-        fromonlyf = open("reparse.fromonly","w")
+        fromonlyf = open("reparse.fromonly", "w")
 
     firststatus = datetime.now()
     laststatus = datetime.now()
@@ -114,8 +115,8 @@ if __name__ == "__main__":
             ap.diff(conn, f, fromonlyf, id)
         if datetime.now() - laststatus > timedelta(seconds=5):
             sys.stdout.write("%s messages parsed (%s%%, %s / second), %s updated\r" % (num,
-                                                                                       num*100/totalcount,
-                                                                                       num / ((datetime.now()-firststatus).seconds),
+                                                                                       num * 100 / totalcount,
+                                                                                       num / ((datetime.now() - firststatus).seconds),
                                                                                        updated))
             sys.stdout.flush()
             laststatus = datetime.now()

@@ -4,6 +4,7 @@ from .parser import ArchivesParser
 
 from lib.log import log, opstatus
 
+
 class ArchivesParserStorage(ArchivesParser):
     def __init__(self):
         super(ArchivesParserStorage, self).__init__()
@@ -82,7 +83,7 @@ class ArchivesParserStorage(ArchivesParser):
                     'message': pk,
                 })
                 if len(self.attachments):
-                    curs.executemany("INSERT INTO attachments (message, filename, contenttype, attachment) VALUES (%(message)s, %(filename)s, %(contenttype)s, %(attachment)s)",[ {
+                    curs.executemany("INSERT INTO attachments (message, filename, contenttype, attachment) VALUES (%(message)s, %(filename)s, %(contenttype)s, %(attachment)s)", [{
                         'message': pk,
                         'filename': a[0] or 'unknown_filename',
                         'contenttype': a[1],
@@ -106,11 +107,11 @@ class ArchivesParserStorage(ArchivesParser):
         all_parents = curs.fetchall()
         if len(all_parents):
             # At least one of the parents exist. Now try to figure out which one
-            best_parent = len(self.parents)+1
+            best_parent = len(self.parents) + 1
             best_threadid = -1
             best_parentid = None
-            for i in range(0,len(all_parents)):
-                for j in range(0,len(self.parents)):
+            for i in range(0, len(all_parents)):
+                for j in range(0, len(self.parents)):
                     if self.parents[j] == all_parents[i][1]:
                         # This messageid found. Better than the last one?
                         if j < best_parent:
@@ -226,7 +227,7 @@ class ArchivesParserStorage(ArchivesParser):
             self.msgid, id, self.threadid, self.parentid))
         if len(self.attachments):
             # Insert attachments
-            curs.executemany("INSERT INTO attachments (message, filename, contenttype, attachment) VALUES (%(message)s, %(filename)s, %(contenttype)s, %(attachment)s)",[ {
+            curs.executemany("INSERT INTO attachments (message, filename, contenttype, attachment) VALUES (%(message)s, %(filename)s, %(contenttype)s, %(attachment)s)", [{
                 'message': id,
                 'filename': a[0] or 'unknown_filename',
                 'contenttype': a[1],
@@ -261,7 +262,6 @@ class ArchivesParserStorage(ArchivesParser):
             f.write("\n-------------------------------\n\n")
             return
 
-
         if (_from.rstrip(), to.rstrip(), cc.rstrip(), subject.rstrip()) != (self._from, self.to, self.cc, self.subject):
             log.status("Message %s has header changes " % self.msgid)
             f.write("==== %s ====\n" % self.msgid)
@@ -281,21 +281,20 @@ class ArchivesParserStorage(ArchivesParser):
                                                  tofile='new',
                                                  n=0,
                                                  lineterm=''))
-            if (len(tempdiff)-2) % 3 == 0:
+            if (len(tempdiff) - 2) % 3 == 0:
                 # 3 rows to a diff, two header rows.
                 # Then verify that each slice of 3 contains one @@ row (header), one -From and one +>From,
                 # which indicates the only change is in the From.
                 ok = True
                 tempdiff = tempdiff[2:]
                 while tempdiff:
-                    a,b,c = (tempdiff.pop(0), tempdiff.pop(0), tempdiff.pop(0))
+                    a, b, c = (tempdiff.pop(0), tempdiff.pop(0), tempdiff.pop(0))
                     if not (a.startswith('@@ ') and b.startswith('-From ') and c.startswith('+>From ')):
-                        ok=False
+                        ok = False
                         break
                 if ok:
                     fromonlyf.write("%s\n" % self.msgid)
                     return
-
 
             # Generate a nicer diff
             d = list(difflib.unified_diff(bodytxt.splitlines(),

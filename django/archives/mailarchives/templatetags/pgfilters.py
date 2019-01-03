@@ -7,13 +7,16 @@ import hashlib
 
 register = template.Library()
 
+
 def _rewrite_email(value):
-    return value.replace('@', '(at)').replace('.','(dot)')
+    return value.replace('@', '(at)').replace('.', '(dot)')
+
 
 @register.filter(name='hidemail')
 @stringfilter
 def hidemail(value):
     return _rewrite_email(value)
+
 
 # A regular expression and replacement function to mangle email addresses.
 #
@@ -26,16 +29,20 @@ def hidemail(value):
 # Those are not email addresses, so ignore them. The links won't work if they
 # are mangled.
 _re_mail = re.compile('(/m(essage-id)?/)?[^()<>@,;:\/\s"\'&|]+@[^()<>@,;:\/\s"\'&|]+')
+
+
 def _rewrite_email_match(match):
     if match.group(1):
         return match.group(0)    # was preceded by /message-id/
     else:
         return _rewrite_email(match.group(0))
 
+
 @register.filter(name='hideallemail')
 @stringfilter
 def hideallemail(value):
     return _re_mail.sub(lambda x: _rewrite_email_match(x), value)
+
 
 @register.filter(name='nameonly')
 @stringfilter
@@ -44,6 +51,7 @@ def nameonly(value):
     if name:
         return name
     return email.split('@')[0]
+
 
 @register.filter(name='md5')
 @stringfilter

@@ -25,6 +25,7 @@ from .redirecthandler import ERedirect
 
 from .models import *
 
+
 # Ensure the user is logged in (if it's not public lists)
 def ensure_logged_in(request):
     if settings.PUBLIC_ARCHIVES:
@@ -32,6 +33,7 @@ def ensure_logged_in(request):
     if hasattr(request, 'user') and request.user.is_authenticated():
         return
     raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
+
 
 # Ensure the user has permissions to access a list. If not, raise
 # a permissions exception.
@@ -48,6 +50,7 @@ def ensure_list_permissions(request, l):
 
     # Redirect to a login page
     raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
+
 
 # Ensure the user has permissions to access a message. In order to view
 # a message, the user must have permissions on *all* lists the thread
@@ -83,6 +86,7 @@ def ensure_message_permissions(request, msgid):
     # Redirect to a login page
     raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
 
+
 # Decorator to set cache age
 def cache(days=0, hours=0, minutes=0, seconds=0):
     "Set the server to cache object a specified time. td must be a timedelta object"
@@ -92,10 +96,11 @@ def cache(days=0, hours=0, minutes=0, seconds=0):
             if settings.PUBLIC_ARCHIVES:
                 # Only set cache headers on public archives
                 td = timedelta(hours=hours, minutes=minutes, seconds=seconds)
-                resp['Cache-Control'] = 's-maxage=%s' % (td.days*3600*24 + td.seconds)
+                resp['Cache-Control'] = 's-maxage=%s' % (td.days * 3600 * 24 + td.seconds)
             return resp
         return __cache
     return _cache
+
 
 def nocache(fn):
     def _nocache(request, *_args, **_kwargs):
@@ -105,6 +110,7 @@ def nocache(fn):
             resp['Cache-Control'] = 's-maxage=0'
         return resp
     return _nocache
+
 
 # Decorator to require http auth
 def antispam_auth(fn):
@@ -131,7 +137,6 @@ def antispam_auth(fn):
     return _antispam_auth
 
 
-
 def get_all_groups_and_lists(request, listid=None):
     # Django doesn't (yet) support traversing the reverse relationship,
     # so we'll get all the lists and rebuild it backwards.
@@ -152,7 +157,7 @@ def get_all_groups_and_lists(request, listid=None):
                 'groupid': l.group.groupid,
                 'groupname': l.group.groupname,
                 'sortkey': l.group.sortkey,
-                'lists': [l,],
+                'lists': [l, ],
                 'homelink': 'list/group/%s' % l.group.groupid,
             }
 
@@ -183,9 +188,11 @@ class NavContext(object):
         if listname:
             self.ctx.update({'searchform_listname': listname})
 
+
 def render_nav(navcontext, template, ctx):
     ctx.update(navcontext.ctx)
     return render(navcontext.request, template, ctx)
+
 
 @cache(hours=4)
 def index(request):
@@ -200,13 +207,14 @@ def index(request):
 @cache(hours=8)
 def groupindex(request, groupid):
     (groups, listgroupid) = get_all_groups_and_lists(request)
-    mygroups = [{'groupname': g['groupname'], 'lists': g['lists']} for g in groups if g['groupid']==int(groupid)]
+    mygroups = [{'groupname': g['groupname'], 'lists': g['lists']} for g in groups if g['groupid'] == int(groupid)]
     if len(mygroups) == 0:
         raise Http404('List group does not exist')
 
     return render_nav(NavContext(request, all_groups=groups, expand_groupid=groupid), 'index.html', {
         'groups': mygroups,
     })
+
 
 @cache(hours=8)
 def monthlist(request, listname):
@@ -215,12 +223,13 @@ def monthlist(request, listname):
 
     curs = connection.cursor()
     curs.execute("SELECT year, month FROM list_months WHERE listid=%(listid)s ORDER BY year DESC, month DESC", {'listid': l.listid})
-    months=[{'year':r[0],'month':r[1], 'date':datetime(r[0],r[1],1)} for r in curs.fetchall()]
+    months = [{'year': r[0], 'month': r[1], 'date': datetime(r[0], r[1], 1)} for r in curs.fetchall()]
 
     return render_nav(NavContext(request, l.listid, l.listname), 'monthlist.html', {
         'list': l,
         'months': months,
     })
+
 
 def get_monthday_info(mlist, l, d):
     allmonths = set([m.date.month for m in mlist])
@@ -271,8 +280,9 @@ def _render_datelist(request, l, d, datefilter, title, queryproc):
         'daysinmonth': daysinmonth,
         'yearmonth': yearmonth,
     })
-    r['X-pglm'] = ':%s:' % (':'.join(['%s/%s/%s' % (l.listid, year, month) for year,month in allyearmonths]))
+    r['X-pglm'] = ':%s:' % (':'.join(['%s/%s/%s' % (l.listid, year, month) for year, month in allyearmonths]))
     return r
+
 
 def render_datelist_from(request, l, d, title, to=None):
     # NOTE! Basic permissions checks must be done before calling this function!
@@ -282,6 +292,7 @@ def render_datelist_from(request, l, d, title, to=None):
 
     return _render_datelist(request, l, d, datefilter, title,
                             lambda x: list(x.order_by('date')[:200]))
+
 
 def render_datelist_to(request, l, d, title):
     # NOTE! Basic permissions checks must be done before calling this function!
@@ -293,6 +304,7 @@ def render_datelist_to(request, l, d, title):
     return _render_datelist(request, l, d, Q(date__lte=d), title,
                             lambda x: sorted(x.order_by('-date')[:200], key=lambda m: m.date))
 
+
 @cache(hours=2)
 def datelistsince(request, listname, msgid):
     l = get_object_or_404(List, listname=listname)
@@ -300,6 +312,7 @@ def datelistsince(request, listname, msgid):
 
     msg = get_object_or_404(Message, messageid=msgid)
     return render_datelist_from(request, l, msg.date, "%s since %s" % (l.listname, msg.date.strftime("%Y-%m-%d %H:%M:%S")))
+
 
 # Longer cache since this will be used for the fixed date links
 @cache(hours=4)
@@ -313,6 +326,7 @@ def datelistsincetime(request, listname, year, month, day, hour, minute):
         raise Http404("Invalid date format, not found")
     return render_datelist_from(request, l, d, "%s since %s" % (l.listname, d.strftime("%Y-%m-%d %H:%M")))
 
+
 @cache(hours=2)
 def datelistbefore(request, listname, msgid):
     l = get_object_or_404(List, listname=listname)
@@ -320,6 +334,7 @@ def datelistbefore(request, listname, msgid):
 
     msg = get_object_or_404(Message, messageid=msgid)
     return render_datelist_to(request, l, msg.date, "%s before %s" % (l.listname, msg.date.strftime("%Y-%m-%d %H:%M:%S")))
+
 
 @cache(hours=2)
 def datelistbeforetime(request, listname, year, month, day, hour, minute):
@@ -332,6 +347,7 @@ def datelistbeforetime(request, listname, year, month, day, hour, minute):
         raise Http404("Invalid date format, not found")
     return render_datelist_to(request, l, d, "%s before %s" % (l.listname, d.strftime("%Y-%m-%d %H:%M")))
 
+
 @cache(hours=4)
 def datelist(request, listname, year, month):
     l = get_object_or_404(List, listname=listname)
@@ -342,9 +358,10 @@ def datelist(request, listname, year, month):
     except ValueError:
         raise Http404("Malformatted date, month not found")
 
-    enddate = d+timedelta(days=31)
+    enddate = d + timedelta(days=31)
     enddate = datetime(enddate.year, enddate.month, 1)
     return render_datelist_from(request, l, d, "%s - %s %s" % (l.listname, d.strftime("%B"), d.year), enddate)
+
 
 @cache(hours=4)
 def attachment(request, attid):
@@ -362,6 +379,7 @@ def attachment(request, attid):
 
     return HttpResponse(r[0][3], content_type=r[0][1])
 
+
 def _build_thread_structure(threadid):
     # Yeah, this is *way* too complicated for the django ORM
     curs = connection.cursor()
@@ -373,8 +391,18 @@ def _build_thread_structure(threadid):
 SELECT id,_from,subject,date,messageid,has_attachment,parentid,datepath FROM t ORDER BY datepath||date
 """, {'threadid': threadid})
 
-    for id,_from,subject,date,messageid,has_attachment,parentid,parentpath in curs.fetchall():
-        yield {'id':id, 'mailfrom':_from, 'subject': subject, 'date': date, 'printdate': date.strftime("%Y-%m-%d %H:%M:%S"), 'messageid': messageid, 'hasattachment': has_attachment, 'parentid': parentid, 'indent': "&nbsp;" * len(parentpath)}
+    for id, _from, subject, date, messageid, has_attachment, parentid, parentpath in curs.fetchall():
+        yield {
+            'id': id,
+            'mailfrom': _from,
+            'subject': subject,
+            'date': date,
+            'printdate': date.strftime("%Y-%m-%d %H:%M:%S"),
+            'messageid': messageid,
+            'hasattachment': has_attachment,
+            'parentid': parentid,
+            'indent': "&nbsp;" * len(parentpath),
+        }
 
 
 def _get_nextprevious(listmap, dt):
@@ -419,6 +447,7 @@ SELECT l.listid,0,
                 }
     return retval
 
+
 @cache(hours=4)
 def message(request, msgid):
     ensure_message_permissions(request, msgid)
@@ -437,7 +466,7 @@ def message(request, msgid):
         if ims >= newest:
             return HttpResponseNotModified()
 
-    responses = [t for t in threadstruct if t['parentid']==m.id]
+    responses = [t for t in threadstruct if t['parentid'] == m.id]
 
     if m.parentid:
         for t in threadstruct:
@@ -459,6 +488,7 @@ def message(request, msgid):
     r['X-pgthread'] = ":%s:" % m.threadid
     r['Last-Modified'] = http_date(newest)
     return r
+
 
 @cache(hours=4)
 def message_flat(request, msgid):
@@ -488,6 +518,7 @@ def message_flat(request, msgid):
     r['X-pgthread'] = ":%s:" % msg.threadid
     r['Last-Modified'] = http_date(newest)
     return r
+
 
 @nocache
 @antispam_auth
@@ -532,7 +563,6 @@ def _build_mbox(query, params, msgid=None):
         msg = parser.parse(s)
         return msg.as_string(unixfrom=True)
 
-
     def _message_stream(first):
         yield _one_message(first[1])
 
@@ -547,6 +577,7 @@ def _build_mbox(query, params, msgid=None):
     r['Content-type'] = 'application/mbox'
     return r
 
+
 @nocache
 @antispam_auth
 def message_mbox(request, msgid):
@@ -560,6 +591,7 @@ def message_mbox(request, msgid):
             'thread': msg.threadid,
         },
         msgid)
+
 
 @nocache
 @antispam_auth
@@ -587,6 +619,7 @@ def mbox(request, listname, listname2, mboxyear, mboxmonth):
         # Just return the whole thing
         query = query.replace('%%%', '')
     return _build_mbox(query, params)
+
 
 def search(request):
     if not settings.PUBLIC_ARCHIVES:
@@ -689,10 +722,11 @@ def search(request):
             's': subject,
             'f': mailfrom,
             'r': rank,
-            'a': abstract.replace("[[[[[[", "<b>").replace("]]]]]]","</b>"),
+            'a': abstract.replace("[[[[[[", "<b>").replace("]]]]]]", "</b>"),
         } for messageid, date, subject, mailfrom, rank, abstract in curs.fetchall()],
         resp)
     return resp
+
 
 @cache(seconds=10)
 def web_sync_timestamp(request):
@@ -700,6 +734,7 @@ def web_sync_timestamp(request):
     r = HttpResponse(s, content_type='text/plain')
     r['Content-Length'] = len(s)
     return r
+
 
 @cache(hours=8)
 def legacy(request, listname, year, month, msgnum):
@@ -715,17 +750,19 @@ def legacy(request, listname, year, month, msgnum):
         raise Http404('Message does not exist')
     return HttpResponsePermanentRedirect('/message-id/%s' % r[0][0])
 
+
 # dynamic CSS serving, meaning we merge a number of different CSS into a
 # single one, making sure it turns into a single http response. We do this
 # dynamically, since the output will be cached.
 _dynamic_cssmap = {
     'base': ['media/css/main.css',
-             'media/css/normalize.css',],
+             'media/css/normalize.css', ],
     'docs': ['media/css/global.css',
              'media/css/table.css',
              'media/css/text.css',
              'media/css/docs.css'],
 }
+
 
 @cache(hours=8)
 def dynamic_css(request, css):
@@ -765,6 +802,7 @@ def dynamic_css(request, css):
 
     return resp
 
+
 # Redirect to the requested url, with a slash first. This is used to remove
 # trailing slashes on messageid links by doing a permanent redirect. This is
 # better than just eating them, since this way we only end up with one copy
@@ -772,6 +810,7 @@ def dynamic_css(request, css):
 @cache(hours=8)
 def slash_redirect(request, url):
     return HttpResponsePermanentRedirect("/%s" % url)
+
 
 # Redirect the requested URL to whatever happens to be in the regexp capture.
 # This is used for user agents that generate broken URLs that are easily

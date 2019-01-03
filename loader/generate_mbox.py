@@ -64,12 +64,11 @@ if __name__ == "__main__":
             parser.print_help()
             sys.exit(1)
 
-
     # Arguments OK, now connect
     cfg = ConfigParser()
     cfg.read(os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])), 'archives.ini'))
     try:
-        connstr = cfg.get('db','connstr')
+        connstr = cfg.get('db', 'connstr')
     except:
         connstr = 'need_connstr'
 
@@ -85,7 +84,7 @@ if __name__ == "__main__":
             # Same month, so do it
             monthrange = ((today.year, today.month),)
         else:
-            monthrange = ((today.year, today.month),(yesterday.year, yesterday.month))
+            monthrange = ((today.year, today.month), (yesterday.year, yesterday.month))
         for lid, lname in all_lists:
             for year, month in monthrange:
                 fullpath = os.path.join(args.destination, lname, 'files/public/archive')
