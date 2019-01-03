@@ -124,7 +124,14 @@ class ArchivesParser(object):
 		return charset
 
 	def get_payload_as_unicode(self, msg):
-		b = msg.get_payload(decode=True)
+		try:
+			b = msg.get_payload(decode=True)
+		except AssertionError:
+			# Badly encoded data can throw an exception here, where the python
+			# libraries fail to handle it and enters a cannot-happen path.
+			# In which case we just ignore it and hope for a better MIME part later.
+			b = None
+
 		if b:
 			# Find out if there is a charset
 			charset = None
@@ -303,8 +310,15 @@ class ArchivesParser(object):
 				return
 			# For now, accept anything not text/plain
 			if container.get_content_type() != 'text/plain':
-				self.attachments.append((self._extract_filename(container), container.get_content_type(), container.get_payload(decode=True)))
+				try:
+					self.attachments.append((self._extract_filename(container), container.get_content_type(), container.get_payload(decode=True)))
+				except AssertionError:
+					# Badly encoded data can throw an exception here, where the python
+					# libraries fail to handle it and enters a cannot-happen path.
+					# In which case we just ignore this attachment.
+					return
 				return
+
 			# It's a text/plain, it might be worthwhile.
 			# If it has a name, we consider it an attachments
 			if not container.get_params():
@@ -312,19 +326,42 @@ class ArchivesParser(object):
 			for k,v in container.get_params():
 				if k=='name' and v != '':
 					# Yes, it has a name
-					self.attachments.append((self._extract_filename(container), container.get_content_type(), container.get_payload(decode=True)))
+					try:
+						self.attachments.append((self._extract_filename(container), container.get_content_type(), container.get_payload(decode=True)))
+					except AssertionError:
+						# Badly encoded data can throw an exception here, where the python
+						# libraries fail to handle it and enters a cannot-happen path.
+						# In which case we just ignore this attachment.
+						return
+
 					return
+
 			# If it's content-disposition=attachment, we also want to save it
 			if 'Content-Disposition' in container and container['Content-Disposition'].startswith('attachment'):
-				self.attachments.append((self._extract_filename(container), container.get_content_type(), container.get_payload(decode=True)))
+				try:
+					self.attachments.append((self._extract_filename(container), container.get_content_type(), container.get_payload(decode=True)))
+				except AssertionError:
+					# Badly encoded data can throw an exception here, where the python
+					# libraries fail to handle it and enters a cannot-happen path.
+					# In which case we just ignore this attachment.
+					return
+
 				return
+
 			# If we have already found one text/plain part, make all
 			# further text/plain parts attachments
 			if self.attachments_found_first_plaintext:
 				# However, this will also *always* catch the MIME part added
 				# by majordomo with the footer. So if that one is present,
 				# we need to explicitly exclude it again.
-				b = container.get_payload(decode=True)
+				try:
+					b = container.get_payload(decode=True)
+				except AssertionError:
+					# Badly encoded data can throw an exception here, where the python
+					# libraries fail to handle it and enters a cannot-happen path.
+					# In which case we just ignore this attachment.
+					return
+
 				if isinstance(b, str) and not self._re_footer.match(b):
 					# We know there is no name for this one
 					self.attachments.append((None, container.get_content_type(), b))
