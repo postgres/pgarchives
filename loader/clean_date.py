@@ -28,7 +28,8 @@ def scan_message(messageid, olddate, curs):
     # Can be either one of them, but we really don't care...
     ds = None
     for k, r in list(msg.items()):
-        if k != 'Received': continue
+        if k != 'Received':
+            continue
 
         print("Trying on %s" % r)
         m = re.search(';\s*(.*)$', r)

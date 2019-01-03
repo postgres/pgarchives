@@ -187,7 +187,8 @@ class ArchivesParser(object):
         # First see if this is a single-part message that we can just
         # decode and go.
         b = self.get_payload_as_unicode(self.msg)
-        if b: return b
+        if b:
+            return b
         if b == '':
             # We found something, but it was empty. We'll keep looking as
             # there might be something better available, but make a note
@@ -203,7 +204,8 @@ class ArchivesParser(object):
         #      text/html
         #   application/octet-stream (attachment)
         b = self.recursive_first_plaintext(self.msg)
-        if b: return b
+        if b:
+            return b
         if b == '':
             hasempty = True
 
@@ -212,7 +214,8 @@ class ArchivesParser(object):
         b = self.recursive_first_plaintext(self.msg, True)
         if b:
             b = self.html_clean(b)
-            if b: return b
+            if b:
+                return b
         if b == '' or b is None:
             hasempty = True
 
@@ -243,7 +246,8 @@ class ArchivesParser(object):
                 return self.get_payload_as_unicode(p)
             if p.is_multipart():
                 b = self.recursive_first_plaintext(p, html_instead)
-                if b or b == '': return b
+                if b or b == '':
+                    return b
 
         # Yikes, nothing here! Hopefully we'll find something when
         # we continue looping at a higher level.
@@ -272,7 +276,8 @@ class ArchivesParser(object):
         # Try to get the filename for an attachment in the container.
         # If the standard library can figure one out, use that one.
         f = container.get_filename()
-        if f: return self._clean_filename_encoding(f)
+        if f:
+            return self._clean_filename_encoding(f)
 
         # Failing that, some mailers set Content-Description to the
         # filename
