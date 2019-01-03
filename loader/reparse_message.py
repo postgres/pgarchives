@@ -102,8 +102,9 @@ if __name__ == "__main__":
 			ap.analyze(date_override=opt.force_date)
 		except IgnorableException as e:
 			if opt.update:
-				raise e
-			f.write("Exception loading %s: %s" % (id, e))
+				print("Exception loading {0}: {1}".format(id, e))
+			else:
+				f.write("Exception loading %s: %s" % (id, e))
 			continue
 
 		if opt.update:
