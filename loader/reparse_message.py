@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # reparse_message.py - using the rawtxt stored in the database,
 # redo the parsing of it and overwrite it with itself. Used when
@@ -10,8 +10,8 @@ import sys
 import codecs
 
 from optparse import OptionParser
-from ConfigParser import ConfigParser
-from StringIO import StringIO
+from configparser import ConfigParser
+from io import BytesIO
 from datetime import datetime, timedelta
 
 import psycopg2
@@ -45,16 +45,16 @@ if __name__ == "__main__":
 	(opt, args) = optparser.parse_args()
 
 	if (len(args)):
-		print "No bare arguments accepted"
+		print("No bare arguments accepted")
 		optparser.print_usage()
 		sys.exit(1)
 
 	if sum([1 for x in [opt.all, opt.sample, opt.msgid] if x]) != 1:
-		print "Must specify exactly one of --msgid, --all and --sample"
+		print("Must specify exactly one of --msgid, --all and --sample")
 		sys.exit(1)
 
 	if not opt.update and os.path.exists('reparse.diffs'):
-		print "File reparse.diffs already exists. Remove or rename and try again."
+		print("File reparse.diffs already exists. Remove or rename and try again.")
 		sys.exit(1)
 
 	log.set(opt.verbose)
@@ -97,10 +97,10 @@ if __name__ == "__main__":
 	for id, rawtxt in ResultIter(curs):
 		num += 1
 		ap = ArchivesParserStorage()
-		ap.parse(StringIO(rawtxt))
+		ap.parse(BytesIO(rawtxt))
 		try:
 			ap.analyze(date_override=opt.force_date)
-		except IgnorableException, e:
+		except IgnorableException as e:
 			if opt.update:
 				raise e
 			f.write("Exception loading %s: %s" % (id, e))
@@ -119,14 +119,14 @@ if __name__ == "__main__":
 			sys.stdout.flush()
 			laststatus = datetime.now()
 
-	print ""
+	print("")
 
 	if opt.update:
 		opstatus.print_status()
 		if not opt.commit:
 			while True:
 				print("OK to commit transaction? ")
-				a = raw_input().lower().strip()
+				a = input().lower().strip()
 				if a == 'y' or a == 'yes':
 					print("Ok, committing.")
 					break

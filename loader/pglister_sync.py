@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # Synchronize list info from pglister
@@ -6,7 +6,7 @@
 import os
 import sys
 import argparse
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 import psycopg2
 import requests
 
@@ -44,7 +44,7 @@ if __name__=="__main__":
 	# For groups, just add them if they don't exist
 	groups = {g['group']['id']:g['group']['groupname'] for g in obj}
 
-	for id,name in groups.items():
+	for id,name in list(groups.items()):
 		curs.execute("SELECT EXISTS (SELECT 1 FROM listgroups WHERE groupname=%(group)s)", {
 			'group': name,
 		})
@@ -52,7 +52,7 @@ if __name__=="__main__":
 			curs.execute("INSERT INTO listgroups (groupname, sortkey) VALUES (%(group)s, 100) RETURNING groupname", {
 				'group': name,
 			})
-			print "Added group %s" % name
+			print("Added group %s" % name)
 
 	# Add any missing lists, and synchronize their contents.
 	for l in obj:
@@ -66,7 +66,7 @@ if __name__=="__main__":
 				'groupname': l['group']['groupname'],
 			})
 			listid, name = curs.fetchone()
-			print "Added list %s" % name
+			print("Added list %s" % name)
 		else:
 			listid, name = curs.fetchone()
 			curs.execute("UPDATE lists SET shortdesc=%(name)s, description=%(desc)s, groupid=(SELECT groupid FROM listgroups WHERE groupname=%(groupname)s), active=true WHERE listid=%(id)s AND NOT (active AND shortdesc=%(name)s AND description=%(desc)s AND groupid=(SELECT groupid FROM listgroups WHERE groupname=%(groupname)s)) RETURNING listname", {
@@ -76,7 +76,7 @@ if __name__=="__main__":
 				'groupname': l['group']['groupname'],
 			})
 			for n, in curs.fetchall():
-				print "Updated list %s " % n
+				print("Updated list %s " % n)
 
 		if do_subscribers:
 			# If we synchronize subscribers, we do so on all lists for now.
@@ -86,9 +86,9 @@ if __name__=="__main__":
 			})
 			for what, who in curs.fetchall():
 				if what == 'ins':
-					print "Added subscriber %s to list %s" % (who, name)
+					print("Added subscriber %s to list %s" % (who, name))
 				else:
-					print "Removed subscriber %s from list %s" % (who, name)
+					print("Removed subscriber %s from list %s" % (who, name))
 
 
 	# We don't remove lists ever, because we probably want to keep archives around.
@@ -97,10 +97,10 @@ if __name__=="__main__":
 		'lists': [l['listname'] for l in obj],
 	})
 	for n, in curs.fetchall():
-		print "List %s exists in archives, but not in upstream! Should it be marked inactive?" % n
+		print("List %s exists in archives, but not in upstream! Should it be marked inactive?" % n)
 
 	if args.dryrun:
-		print "Dry-run, rolling back"
+		print("Dry-run, rolling back")
 		conn.rollback()
 	else:
 		conn.commit()

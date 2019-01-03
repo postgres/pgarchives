@@ -1,6 +1,6 @@
 import difflib
 
-from parser import ArchivesParser
+from .parser import ArchivesParser
 
 from lib.log import log, opstatus
 
@@ -144,9 +144,9 @@ class ArchivesParserStorage(ArchivesParser):
 			# holding other threads together.
 			if self.threadid:
 				# Already have a threadid, means that we have a glue message
-				print "Message %s resolved to existing thread %s, while being somebodys parent" % (self.msgid, self.threadid)
+				print("Message %s resolved to existing thread %s, while being somebodys parent" % (self.msgid, self.threadid))
 			else:
-				print "Message %s did not resolve to existing thread, but is somebodys parent" % self.msgid
+				print("Message %s did not resolve to existing thread, but is somebodys parent" % self.msgid)
 				# In this case, just pick the first thread from the list and merge into that
 				# one.
 				self.threadid = childrows[0][2]
@@ -254,31 +254,27 @@ class ArchivesParserStorage(ArchivesParser):
 			})
 		try:
 			id, _from, to, cc, subject, date, has_attachment, bodytxt = curs.fetchone()
-		except TypeError, e:
+		except TypeError as e:
 			f.write("---- %s ----\n" % self.msgid)
 			f.write("Could not re-find in archives (old id was %s): %s\n" % (oldid, e))
 			f.write("\n-------------------------------\n\n")
 			return
 
 
-		_from = _from.decode('utf8')
-		to = to.decode('utf8')
-		cc = cc.decode('utf8')
-		subject = subject.decode('utf8')
-		if (_from, to, cc, subject) != (self._from, self.to, self.cc, self.subject):
+		if (_from.rstrip(), to.rstrip(), cc.rstrip(), subject.rstrip()) != (self._from, self.to, self.cc, self.subject):
 			log.status("Message %s has header changes " % self.msgid)
 			f.write("==== %s ====\n" % self.msgid)
 			for fn in ['_from', 'to', 'cc', 'subject']:
 				if getattr(self, fn) != eval(fn):
-					s = u"- {0}: {1}\n".format(fn, eval(fn))
-					d = u"+ {0}: {1}\n".format(fn, getattr(self, fn))
+					s = "- {0}: {1}\n".format(fn, eval(fn))
+					d = "+ {0}: {1}\n".format(fn, getattr(self, fn))
 					f.write(s)
 					f.write(d)
 			f.write("\n\n")
 
-		if bodytxt.decode('utf8') != self.bodytxt:
+		if bodytxt != self.bodytxt:
 			log.status("Message %s has body changes " % self.msgid)
-			tempdiff = list(difflib.unified_diff(bodytxt.decode('utf8').splitlines(),
+			tempdiff = list(difflib.unified_diff(bodytxt.splitlines(),
 												 self.bodytxt.splitlines(),
 												 fromfile='old',
 												 tofile='new',
@@ -289,7 +285,9 @@ class ArchivesParserStorage(ArchivesParser):
 				# Then verify that each slice of 3 contains one @@ row (header), one -From and one +>From,
 				# which indicates the only change is in the From.
 				ok = True
-				for a,b,c in map(None, *([iter(tempdiff[2:])] * 3)):
+				tempdiff = tempdiff[2:]
+				while tempdiff:
+					a,b,c = (tempdiff.pop(0), tempdiff.pop(0), tempdiff.pop(0))
 					if not (a.startswith('@@ ') and b.startswith('-From ') and c.startswith('+>From ')):
 						ok=False
 						break
@@ -299,12 +297,12 @@ class ArchivesParserStorage(ArchivesParser):
 
 
 			# Generate a nicer diff
-			d = list(difflib.unified_diff(bodytxt.decode('utf8').splitlines(),
-												   self.bodytxt.splitlines(),
-												   fromfile='old',
-												   tofile='new',
-												   n=0,
-												   lineterm=''))
+			d = list(difflib.unified_diff(bodytxt.splitlines(),
+										  self.bodytxt.splitlines(),
+										  fromfile='old',
+										  tofile='new',
+										  n=0,
+										  lineterm=''))
 			if len(d) > 0:
 				f.write("---- %s ----\n" % self.msgid)
 				f.write("\n".join(d))

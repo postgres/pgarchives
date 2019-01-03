@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # generate_mbox.py - generate an mbox file from the rawtxt stored
 #                    in the datatabase.
@@ -11,27 +11,34 @@ import calendar
 import re
 
 import argparse
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 import email.parser
+import email.policy
 import email.generator
-from StringIO import StringIO
+from io import BytesIO
 
 import psycopg2
 
 
 def generate_single_mbox(conn, listid, year, month, destination):
 	curs = conn.cursor()
-	curs.execute("SELECT rawtxt FROM messages m INNER JOIN list_threads t ON t.threadid=m.threadid WHERE hiddenstatus IS NULL AND listid=%(listid)s AND date>=%(startdate)s AND date <= %(enddate)s ORDER BY date", {
+	curs.execute("SELECT id, rawtxt FROM messages m INNER JOIN list_threads t ON t.threadid=m.threadid WHERE hiddenstatus IS NULL AND listid=%(listid)s AND date>=%(startdate)s AND date <= %(enddate)s ORDER BY date", {
 		'listid': listid,
 		'startdate': date(year, month, 1),
 		'enddate': date(year, month, calendar.monthrange(year, month)[1]),
 	})
-	with open(destination, 'w') as f:
-		for raw, in curs:
-			s = StringIO(raw)
-			parser = email.parser.Parser()
+	with open(destination, 'w', encoding='utf8') as f:
+		for id, raw, in curs:
+			s = BytesIO(raw)
+			parser = email.parser.BytesParser(policy=email.policy.compat32)
 			msg = parser.parse(s)
-			f.write(msg.as_string(unixfrom=True))
+			try:
+				x = msg.as_string(unixfrom=True)
+				f.write(x)
+			except UnicodeEncodeError as e:
+				print("Not including {0}, unicode error".format(msg['message-id']))
+			except Exception as e:
+				print("Not including {0}, exception {1}".format(msg['message-id'], e))
 
 
 if __name__ == "__main__":
@@ -46,14 +53,14 @@ if __name__ == "__main__":
 
 	if args.auto:
 		if (args.list or args.month):
-			print "Must not specify list and month when auto-generating!"
+			print("Must not specify list and month when auto-generating!")
 			sys.exit(1)
 		if not os.path.isdir(args.destination):
-			print "Destination must be a directory, and exist, when auto-generating"
+			print("Destination must be a directory, and exist, when auto-generating")
 			sys.exit(1)
 	else:
 		if not (args.list and args.month and args.destination):
-			print "Must specify list, month and destination when generating a single mailbox"
+			print("Must specify list, month and destination when generating a single mailbox")
 			parser.print_help()
 			sys.exit(1)
 
@@ -85,14 +92,14 @@ if __name__ == "__main__":
 				if not os.path.isdir(fullpath):
 					os.makedirs(fullpath)
 				if not args.quiet:
-					print "Generating {0}-{1} for {2}".format(year, month, lname)
+					print("Generating {0}-{1} for {2}".format(year, month, lname))
 				generate_single_mbox(conn, lid, year, month,
 									 os.path.join(fullpath, "{0}.{0:04d}{1:02d}".format(year, month)))
 	else:
 		# Parse year and month
 		m = re.match('^(\d{4})-(\d{2})$', args.month)
 		if not m:
-			print "Month must be specified on format YYYY-MM, not {0}".format(args.month)
+			print("Month must be specified on format YYYY-MM, not {0}".format(args.month))
 			sys.exit(1)
 		year = int(m.group(1))
 		month = int(m.group(2))
@@ -101,9 +108,9 @@ if __name__ == "__main__":
 			'name': args.list,
 		})
 		if curs.rowcount != 1:
-			print "List {0} not found.".format(args.list)
+			print("List {0} not found.".format(args.list))
 			sys.exit(1)
 
 		if not args.quiet:
-			print "Generating {0}-{1} for {2}".format(year, month, args.list)
+			print("Generating {0}-{1} for {2}".format(year, month, args.list))
 		generate_single_mbox(conn, curs.fetchone()[0], year, month, args.destination)

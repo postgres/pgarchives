@@ -2,23 +2,24 @@ import re
 import datetime
 import dateutil.parser
 
-from email.parser import Parser
-from email.header import decode_header
+from email.parser import BytesParser
+from email.header import decode_header, Header
 from email.errors import HeaderParseError
-from HTMLParser import HTMLParser, HTMLParseError
+from email.policy import compat32
+from html.parser import HTMLParser
 import tidylib
-import StringIO
+import io
 
 from lib.exception import IgnorableException
 from lib.log import log
 
 class ArchivesParser(object):
 	def __init__(self):
-		self.parser = Parser()
+		self.parser = BytesParser(policy=compat32)
 
 	def parse(self, stream):
 		self.rawtxt = stream.read()
-		self.msg = self.parser.parse(StringIO.StringIO(self.rawtxt))
+		self.msg = self.parser.parse(io.BytesIO(self.rawtxt))
 
 	def is_msgid(self, msgid):
 		# Look for a specific messageid. This means we might parse it twice,
@@ -26,7 +27,7 @@ class ArchivesParser(object):
 		try:
 			if self.clean_messageid(self.decode_mime_header(self.get_mandatory('Message-ID'))) == msgid:
 				return True
-		except Exception, e:
+		except Exception as e:
 			return False
 
 	def analyze(self, date_override=None):
@@ -49,13 +50,13 @@ class ArchivesParser(object):
 		self.parents = []
 		# The first one is in-reply-to, if it exists
 		if self.get_optional('in-reply-to'):
-			m = self.clean_messageid(self.get_optional('in-reply-to'), True)
+			m = self.clean_messageid(self.decode_mime_header(self.get_optional('in-reply-to')), True)
 			if m:
 				self.parents.append(m)
 
 		# Then we add all References values, in backwards order
 		if self.get_optional('references'):
-			cleaned_msgids = [self.clean_messageid(x, True) for x in reversed(self.get_optional('references').split())]
+			cleaned_msgids = [self.clean_messageid(x, True) for x in reversed(self.decode_mime_header(self.get_optional('references')).split())]
 			# Can't do this with a simple self.parents.extend() due to broken
 			# mailers that add the same reference more than once. And we can't
 			# use a set() to make it unique, because order is very important
@@ -130,19 +131,19 @@ class ArchivesParser(object):
 			params = msg.get_params()
 			if not params:
 				# No content-type, so we assume us-ascii
-				return unicode(b, 'us-ascii', errors='ignore')
+				return str(b, 'us-ascii', errors='ignore')
 			for k,v in params:
 				if k.lower() == 'charset':
 					charset = v
 					break
 			if charset:
 				try:
-					return unicode(b, self.clean_charset(charset), errors='ignore')
-				except LookupError, e:
+					return str(b, self.clean_charset(charset), errors='ignore')
+				except LookupError as e:
 					raise IgnorableException("Failed to get unicode payload: %s" % e)
 			else:
 				# XXX: reasonable default?
-				return unicode(b, errors='ignore')
+				return str(b, errors='ignore')
 		# Return None or empty string, depending on what we got back
 		return b
 
@@ -154,8 +155,8 @@ class ArchivesParser(object):
 		if b:
 			# Python bug 9133, allows unicode surrogate pairs - which PostgreSQL will
 			# later reject..
-			if b.find(u'\udbff\n\udef8'):
-				b = b.replace(u'\udbff\n\udef8', '')
+			if b.find('\udbff\n\udef8'):
+				b = b.replace('\udbff\n\udef8', '')
 
 		# Remove postgres specific mail footer - if it's there
 		m = self._re_footer.match(b)
@@ -249,15 +250,15 @@ class ArchivesParser(object):
 		# If this is a header-encoded filename, start by decoding that
 		if filename.startswith('=?'):
 			decoded, encoding = decode_header(filename)[0]
-			return unicode(decoded, encoding, errors='ignore')
+			return str(decoded, encoding, errors='ignore')
 
 		# If it's already unicode, just return it
-		if isinstance(filename, unicode):
+		if isinstance(filename, str):
 			return filename
 
 		# Anything that's not UTF8, we just get rid of. We can live with
 		# filenames slightly mangled in this case.
-		return unicode(filename, 'utf-8', errors='ignore')
+		return str(filename, 'utf-8', errors='ignore')
 
 	def _extract_filename(self, container):
 		# Try to get the filename for an attachment in the container.
@@ -324,7 +325,7 @@ class ArchivesParser(object):
 				# by majordomo with the footer. So if that one is present,
 				# we need to explicitly exclude it again.
 				b = container.get_payload(decode=True)
-				if not self._re_footer.match(b):
+				if isinstance(b, str) and not self._re_footer.match(b):
 					# We know there is no name for this one
 					self.attachments.append((None, container.get_content_type(), b))
 				return
@@ -423,8 +424,13 @@ class ArchivesParser(object):
 				# enough...
 				dp = datetime.datetime(*dp.utctimetuple()[:6])
 			return dp
-		except Exception, e:
+		except Exception as e:
 			raise IgnorableException("Failed to parse date '%s': %s" % (d, e))
+
+	def _maybe_decode(self, s, charset):
+		if isinstance(s, str):
+			return s.strip(' ')
+		return str(s, charset and self.clean_charset(charset) or 'us-ascii', errors='ignore').strip(' ')
 
 	# Workaround for broken quoting in some MUAs (see below)
 	_re_mailworkaround = re.compile('"(=\?[^\?]+\?[QB]\?[^\?]+\?=)"', re.IGNORECASE)
@@ -449,28 +455,32 @@ class ArchivesParser(object):
 			hdr = self._re_mailworkaround.sub(r'\1', hdr)
 
 		try:
-			return " ".join([unicode(s, charset and self.clean_charset(charset) or 'us-ascii', errors='ignore') for s,charset in decode_header(hdr)])
-		except HeaderParseError, e:
+			return " ".join([self._maybe_decode(s, charset) for s, charset in decode_header(hdr)])
+		except HeaderParseError as e:
 			# Parser error is typically someone specifying an encoding,
 			# but then not actually using that encoding. We'll do the best
 			# we can, which is cut it down to ascii and ignore errors
-			return unicode(hdr, 'us-ascii', errors='ignore')
+			return str(hdr, 'us-ascii', errors='ignore').strip(' ')
 
 	def decode_mime_header(self, hdr, email_workaround=False):
 		try:
+			if isinstance(hdr, Header):
+				hdr = hdr.encode()
+
 			h = self._decode_mime_header(hdr, email_workaround)
 			if h:
 				return h.replace("\0", "")
 			return ''
-		except LookupError, e:
+		except LookupError as e:
 			raise IgnorableException("Failed to decode header value '%s': %s" % (hdr, e))
-		except ValueError, ve:
+		except ValueError as ve:
 			raise IgnorableException("Failed to decode header value '%s': %s" % (hdr, ve))
 
 	def get_mandatory(self, fieldname):
 		try:
 			x = self.msg[fieldname]
-			if x==None: raise Exception()
+			if x==None:
+				raise Exception()
 			return x
 		except:
 			raise IgnorableException("Mandatory field '%s' is missing" % fieldname)
@@ -496,17 +506,15 @@ class ArchivesParser(object):
 												   'show-info': 0,
 												   })
 		if errors:
-			print("HTML tidy failed for %s!" % self.msgid)
+			print(("HTML tidy failed for %s!" % self.msgid))
 			print(errors)
 			return None
-		if type(html) == str:
-			html = unicode(html, 'utf8')
 
 		try:
 			cleaner = HTMLCleaner()
 			cleaner.feed(html)
 			return cleaner.get_text()
-		except HTMLParseError, e:
+		except Exception as e:
 			# Failed to parse the html, thus failed to clean it. so we must
 			# give up...
 			return None
@@ -515,7 +523,7 @@ class ArchivesParser(object):
 class HTMLCleaner(HTMLParser):
 	def __init__(self):
 		HTMLParser.__init__(self)
-		self.io = StringIO.StringIO()
+		self.io = io.StringIO()
 
 	def get_text(self):
 		return self.io.getvalue()

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # hide_message.py - hide a message (spam etc) in the archives, including
 # frontend expiry.
@@ -8,7 +8,7 @@ import os
 import sys
 
 from optparse import OptionParser
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 
 import psycopg2
 
@@ -29,12 +29,12 @@ if __name__ == "__main__":
 	(opt, args) = optparser.parse_args()
 
 	if (len(args)):
-		print "No bare arguments accepted"
+		print("No bare arguments accepted")
 		optparser.print_help()
 		sys.exit(1)
 
 	if not opt.msgid:
-		print "Message-id must be specified"
+		print("Message-id must be specified")
 		optparser.print_help()
 		sys.exit(1)
 
@@ -52,34 +52,34 @@ if __name__ == "__main__":
 		'msgid': opt.msgid,
 	})
 	if curs.rowcount <= 0:
-		print "Message not found."
+		print("Message not found.")
 		sys.exit(1)
 
 	id, threadid, previous = curs.fetchone()
 
 	# Message found, ask for reason
 	reason = 0
-	print "Current status: %s" % reasons[previous or 0]
-	print "\n".join("%s - %s " % (n, reasons[n]) for n in range(len(reasons)))
+	print("Current status: %s" % reasons[previous or 0])
+	print("\n".join("%s - %s " % (n, reasons[n]) for n in range(len(reasons))))
 	while True:
-		reason = raw_input('Reason for hiding message? ')
+		reason = input('Reason for hiding message? ')
 		try:
 			reason = int(reason)
 		except ValueError:
 			continue
 
 		if reason == 0:
-			print "Un-hiding message"
+			print("Un-hiding message")
 			reason = None
 			break
 		else:
 			try:
-				print "Hiding message for reason: %s" % reasons[reason]
+				print("Hiding message for reason: %s" % reasons[reason])
 			except:
 				continue
 			break
 	if previous == reason:
-		print "No change in status, not updating"
+		print("No change in status, not updating")
 		conn.close()
 		sys.exit(0)
 
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 		'id': id,
 	})
 	if curs.rowcount != 1:
-		print "Failed to update! Not hiding!"
+		print("Failed to update! Not hiding!")
 		conn.rollback()
 		sys.exit(0)
 	conn.commit()
@@ -96,4 +96,4 @@ if __name__ == "__main__":
 	VarnishPurger(cfg).purge([int(threadid), ])
 	conn.close()
 
-	print "Message hidden and varnish purge triggered."
+	print("Message hidden and varnish purge triggered.")

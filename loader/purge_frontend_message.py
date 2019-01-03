@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # purge_frontend_message.py - issue varnish purge for the message
 # in question, to for example force an expire of a hidden message.
@@ -8,7 +8,7 @@ import os
 import sys
 
 from optparse import OptionParser
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 
 import psycopg2
 
@@ -21,12 +21,12 @@ if __name__ == "__main__":
 	(opt, args) = optparser.parse_args()
 
 	if (len(args)):
-		print "No bare arguments accepted"
+		print("No bare arguments accepted")
 		optparser.print_help()
 		sys.exit(1)
 
 	if not opt.msgid:
-		print "Message-id must be specified"
+		print("Message-id must be specified")
 		optparser.print_help()
 		sys.exit(1)
 

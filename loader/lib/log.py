@@ -7,13 +7,13 @@ class Log(object):
 
 	def status(self, msg):
 		if self.verbose:
-			print msg
+			print(msg)
 
 	def log(self, msg):
-		print msg
+		print(msg)
 
 	def error(self, msg):
-		print msg
+		print(msg)
 
 	def print_status(self):
 		opstatus.print_status()
@@ -27,7 +27,7 @@ class OpStatus(object):
 		self.overwritten = 0
 
 	def print_status(self):
-		print "%s stored, %s new-list tagged, %s dupes, %s failed, %s overwritten" % (self.stored, self.tagged, self.dupes, self.failed, self.overwritten)
+		print("%s stored, %s new-list tagged, %s dupes, %s failed, %s overwritten" % (self.stored, self.tagged, self.dupes, self.failed, self.overwritten))
 
 
 log = Log()

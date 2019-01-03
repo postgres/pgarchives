@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # load_message.py - takes a single email or mbox formatted
 # file on stdin or in a file and reads it into the database.
@@ -8,9 +8,9 @@ import os
 import sys
 
 from optparse import OptionParser
-from ConfigParser import ConfigParser
-import urllib
-import urllib2
+from configparser import ConfigParser
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 
 import psycopg2
 
@@ -25,7 +25,7 @@ def log_failed_message(listid, srctype, src, msg, err):
 		msgid = msg.msgid
 	except:
 		msgid = "<unknown>"
-	log.error("Failed to load message (msgid %s) from %s, spec %s: %s" % (msgid.encode('us-ascii', 'replace'), srctype, src, unicode(str(err), 'us-ascii', 'replace')))
+	log.error("Failed to load message (msgid %s) from %s, spec %s: %s" % (msgid.encode('us-ascii', 'replace'), srctype, src, str(str(err), 'us-ascii', 'replace')))
 
 	# We also put the data in the db. This happens in the main transaction
 	# so if the whole script dies, it goes away...
@@ -34,7 +34,7 @@ def log_failed_message(listid, srctype, src, msg, err):
 			'msgid': msgid,
 			'srctype': srctype,
 			'src': src,
-			'err': unicode(str(err), 'us-ascii', 'replace'),
+			'err': str(str(err), 'us-ascii', 'replace'),
 			})
 
 
@@ -51,27 +51,27 @@ if __name__ == "__main__":
 	(opt, args) = optparser.parse_args()
 
 	if (len(args)):
-		print "No bare arguments accepted"
+		print("No bare arguments accepted")
 		optparser.print_usage()
 		sys.exit(1)
 
 	if not opt.list:
-		print "List must be specified"
+		print("List must be specified")
 		optparser.print_usage()
 		sys.exit(1)
 
 	if opt.directory and opt.mbox:
-		print "Can't specify both directory and mbox!"
+		print("Can't specify both directory and mbox!")
 		optparser.print_usage()
 		sys.exit(1)
 
 	if opt.force_date and (opt.directory or opt.mbox) and not opt.filter_msgid:
-		print "Can't use force_date with directory or mbox - only individual messages"
+		print("Can't use force_date with directory or mbox - only individual messages")
 		optparser.print_usage()
 		sys.exit(1)
 
 	if opt.filter_msgid and not (opt.directory or opt.mbox):
-		print "filter_msgid makes no sense without directory or mbox!"
+		print("filter_msgid makes no sense without directory or mbox!")
 		optparser.print_usage()
 		sys.exit(1)
 
@@ -93,8 +93,8 @@ if __name__ == "__main__":
 	try:
 		curs.execute("SET statement_timeout='30s'")
 		curs.execute("SELECT pg_advisory_xact_lock(8059944559669076)")
-	except Exception, e:
-		print("Failed to wait on advisory lock: %s" % e)
+	except Exception as e:
+		print(("Failed to wait on advisory lock: %s" % e))
 		sys.exit(1)
 
 	# Get the listid we're working on
@@ -121,36 +121,37 @@ if __name__ == "__main__":
 					continue
 				try:
 					ap.analyze(date_override=opt.force_date)
-				except IgnorableException, e:
+				except IgnorableException as e:
 					log_failed_message(listid, "directory", os.path.join(opt.directory, x), ap, e)
 					opstatus.failed += 1
 					continue
 				ap.store(conn, listid)
 				purges.update(ap.purges)
 			if opt.interactive:
-				print "Interactive mode, committing transaction"
+				print("Interactive mode, committing transaction")
 				conn.commit()
-				print "Proceed to next message with Enter, or input a period (.) to stop processing"
-				x = raw_input()
+				print("Proceed to next message with Enter, or input a period (.) to stop processing")
+				x = input()
 				if x == '.':
-					print "Ok, aborting!"
+					print("Ok, aborting!")
 					break
-				print "---------------------------------"
+				print("---------------------------------")
 	elif opt.mbox:
 		if not os.path.isfile(opt.mbox):
-			print "File %s does not exist" % opt.mbox
+			print("File %s does not exist" % opt.mbox)
 			sys.exit(1)
 		mboxparser = MailboxBreakupParser(opt.mbox)
 		while not mboxparser.EOF:
 			ap = ArchivesParserStorage()
-			msg = mboxparser.next()
-			if not msg: break
+			msg = next(mboxparser)
+			if not msg:
+				break
 			ap.parse(msg)
 			if opt.filter_msgid and not ap.is_msgid(opt.filter_msgid):
 				continue
 			try:
 				ap.analyze(date_override=opt.force_date)
-			except IgnorableException, e:
+			except IgnorableException as e:
 				log_failed_message(listid, "mbox", opt.mbox, ap, e)
 				opstatus.failed += 1
 				continue
@@ -163,10 +164,10 @@ if __name__ == "__main__":
 	else:
 		# Parse single message on stdin
 		ap = ArchivesParserStorage()
-		ap.parse(sys.stdin)
+		ap.parse(sys.stdin.buffer)
 		try:
 			ap.analyze(date_override=opt.force_date)
-		except IgnorableException, e:
+		except IgnorableException as e:
 			log_failed_message(listid, "stdin","", ap, e)
 			conn.close()
 			sys.exit(1)

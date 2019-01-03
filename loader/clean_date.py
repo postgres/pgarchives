@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Clean up old, broken, dates
 #
@@ -7,17 +7,17 @@ import os
 import sys
 import re
 
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 
 from email.parser import Parser
-from urllib import urlopen
+from urllib.request import urlopen
 import dateutil.parser
 
 import psycopg2
 
 def scan_message(messageid, olddate, curs):
 	u = "http://archives.postgresql.org/msgtxt.php?id=%s" % messageid
-	print "Scanning message at %s (date reported as %s)..." % (u, olddate)
+	print("Scanning message at %s (date reported as %s)..." % (u, olddate))
 
 	f = urlopen(u)
 	p = Parser()
@@ -26,10 +26,10 @@ def scan_message(messageid, olddate, curs):
 
 	# Can be either one of them, but we really don't care...
 	ds = None
-	for k,r in msg.items():
+	for k,r in list(msg.items()):
 		if k != 'Received': continue
 
-		print "Trying on %s" % r
+		print("Trying on %s" % r)
 		m = re.search(';\s*(.*)$', r)
 		if m:
 			ds = m.group(1)
@@ -40,23 +40,23 @@ def scan_message(messageid, olddate, curs):
 			break
 
 	if not ds:
-		print "Could not find date. Sorry."
+		print("Could not find date. Sorry.")
 		return False
 	d = None
 	try:
 		d = dateutil.parser.parse(ds)
 	except:
-		print "Could not parse date '%s', sorry." % ds
+		print("Could not parse date '%s', sorry." % ds)
 		return
 
 	while True:
-		x = raw_input("Parsed this as date %s. Update? " % d)
+		x = input("Parsed this as date %s. Update? " % d)
 		if x.upper() == 'Y':
 			curs.execute("UPDATE messages SET date=%(d)s WHERE messageid=%(m)s", {
 					'd': d,
 					'm': messageid,
 					})
-			print "Updated."
+			print("Updated.")
 			break
 		elif x.upper() == 'N':
 			break
@@ -74,4 +74,4 @@ if __name__ == "__main__":
 		scan_message(messageid, date, curs)
 
 	conn.commit()
-	print "Done."
+	print("Done.")
