@@ -10,20 +10,20 @@ from django.db.models import Q
 from django.conf import settings
 
 import copy
-import urllib
 import re
 import os
 import base64
 from datetime import datetime, timedelta, date
 import calendar
 import email.parser
-from StringIO import StringIO
+import email.policy
+from io import BytesIO
 
 import json
 
-from redirecthandler import ERedirect
+from .redirecthandler import ERedirect
 
-from models import *
+from .models import *
 
 # Ensure the user is logged in (if it's not public lists)
 def ensure_logged_in(request):
@@ -117,7 +117,7 @@ def antispam_auth(fn):
 			if len(auth) != 2:
 				return HttpResponseForbidden("Invalid authentication")
 			if auth[0].lower() == "basic":
-				user, pwd = base64.b64decode(auth[1]).split(':')
+				user, pwd = base64.b64decode(auth[1]).decode('utf8', errors='ignore').split(':')
 				if user == 'archives' and pwd == 'antispam':
 					# Actually run the function if auth is correct
 					resp = fn(request, *_args, **_kwargs)
@@ -156,7 +156,7 @@ def get_all_groups_and_lists(request, listid=None):
 				'homelink': 'list/group/%s' % l.group.groupid,
 				}
 
-	return (sorted(groups.values(), key=lambda g: g['sortkey']), listgroupid)
+	return (sorted(list(groups.values()), key=lambda g: g['sortkey']), listgroupid)
 
 
 class NavContext(object):
@@ -395,7 +395,7 @@ SELECT l.listid,0,
 	 WHERE m.date<%(time)s AND lt.listid=l.listid
 	 ORDER BY m.date DESC LIMIT 1
  ) FROM l""", {
-			'lists': listmap.keys(),
+			'lists': list(listmap.keys()),
 			'time': dt,
 			})
 	retval = {}
@@ -525,8 +525,8 @@ def _build_mbox(query, params, msgid=None):
 
 	def _one_message(raw):
 		# Parse as a message to generate headers
-		s = StringIO(raw)
-		parser = email.parser.Parser()
+		s = BytesIO(raw)
+		parser = email.parser.BytesParser(policy=email.policy.compat32)
 		msg = parser.parse(s)
 		return msg.as_string(unixfrom=True)
 
@@ -603,7 +603,7 @@ def search(request):
 	# q = query to search for
 	# ln = comma separate list of listnames to search in
 	# d = number of days back to search for, or -1 (or not specified)
-	#     to search the full archives
+	#	  to search the full archives
 	# s = sort results by ['r'=rank, 'd'=date, 'i'=inverse date]
 	if not request.method == 'POST':
 		raise Http404('I only respond to POST')

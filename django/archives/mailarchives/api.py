@@ -2,8 +2,8 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 
-from views import cache
-from models import Message, List, ApiClient, ThreadSubscription
+from .views import cache
+from .models import Message, List, ApiClient, ThreadSubscription
 
 import json
 
