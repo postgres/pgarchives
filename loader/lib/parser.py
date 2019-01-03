@@ -124,7 +124,14 @@ class ArchivesParser(object):
 		return charset
 
 	def get_payload_as_unicode(self, msg):
-		b = msg.get_payload(decode=True)
+		try:
+			b = msg.get_payload(decode=True)
+		except AssertionError:
+			# Badly encoded data can throw an exception here, where the python
+			# libraries fail to handle it and enters a cannot-happen path.
+			# In which case we just ignore it and hope for a better MIME part later.
+			b = None
+
 		if b:
 			# Find out if there is a charset
 			charset = None
