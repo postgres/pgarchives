@@ -30,12 +30,12 @@ def log_failed_message(listid, srctype, src, msg, err):
     # We also put the data in the db. This happens in the main transaction
     # so if the whole script dies, it goes away...
     conn.cursor().execute("INSERT INTO loaderrors (listid, msgid, srctype, src, err) VALUES (%(listid)s, %(msgid)s, %(srctype)s, %(src)s, %(err)s)", {
-            'listid': listid,
-            'msgid': msgid,
-            'srctype': srctype,
-            'src': src,
-            'err': str(str(err), 'us-ascii', 'replace'),
-            })
+        'listid': listid,
+        'msgid': msgid,
+        'srctype': srctype,
+        'src': src,
+        'err': str(str(err), 'us-ascii', 'replace'),
+    })
 
 
 if __name__ == "__main__":
@@ -99,8 +99,8 @@ if __name__ == "__main__":
 
     # Get the listid we're working on
     curs.execute("SELECT listid FROM lists WHERE listname=%(list)s", {
-            'list': opt.list
-            })
+        'list': opt.list
+    })
     r = curs.fetchall()
     if len(r) != 1:
         log.error("List %s not found" % opt.list)

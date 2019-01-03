@@ -154,7 +154,7 @@ def get_all_groups_and_lists(request, listid=None):
                 'sortkey': l.group.sortkey,
                 'lists': [l,],
                 'homelink': 'list/group/%s' % l.group.groupid,
-                }
+            }
 
     return (sorted(list(groups.values()), key=lambda g: g['sortkey']), listgroupid)
 
@@ -193,8 +193,8 @@ def index(request):
 
     (groups, listgroupid) = get_all_groups_and_lists(request)
     return render_nav(NavContext(request, all_groups=groups), 'index.html', {
-            'groups': [{'groupname': g['groupname'], 'lists': g['lists']} for g in groups],
-            })
+        'groups': [{'groupname': g['groupname'], 'lists': g['lists']} for g in groups],
+    })
 
 
 @cache(hours=8)
@@ -205,8 +205,8 @@ def groupindex(request, groupid):
         raise Http404('List group does not exist')
 
     return render_nav(NavContext(request, all_groups=groups, expand_groupid=groupid), 'index.html', {
-            'groups': mygroups,
-            })
+        'groups': mygroups,
+    })
 
 @cache(hours=8)
 def monthlist(request, listname):
@@ -218,9 +218,9 @@ def monthlist(request, listname):
     months=[{'year':r[0],'month':r[1], 'date':datetime(r[0],r[1],1)} for r in curs.fetchall()]
 
     return render_nav(NavContext(request, l.listid, l.listname), 'monthlist.html', {
-            'list': l,
-            'months': months,
-            })
+        'list': l,
+        'months': months,
+    })
 
 def get_monthday_info(mlist, l, d):
     allmonths = set([m.date.month for m in mlist])
@@ -236,10 +236,10 @@ def get_monthday_info(mlist, l, d):
     if monthdate:
         curs = connection.cursor()
         curs.execute("SELECT DISTINCT extract(day FROM date) FROM messages WHERE date >= %(startdate)s AND date < %(enddate)s AND threadid IN (SELECT threadid FROM list_threads WHERE listid=%(listid)s) ORDER BY 1", {
-                'startdate': datetime(year=monthdate.year, month=monthdate.month, day=1),
-                'enddate': monthdate + timedelta(days=calendar.monthrange(monthdate.year, monthdate.month)[1]),
-                'listid': l.listid,
-                })
+            'startdate': datetime(year=monthdate.year, month=monthdate.month, day=1),
+            'enddate': monthdate + timedelta(days=calendar.monthrange(monthdate.year, monthdate.month)[1]),
+            'listid': l.listid,
+        })
         daysinmonth = [int(r[0]) for r in curs.fetchall()]
 
     yearmonth = None
@@ -265,12 +265,12 @@ def _render_datelist(request, l, d, datefilter, title, queryproc):
     (yearmonth, daysinmonth) = get_monthday_info(mlist, l, d)
 
     r = render_nav(NavContext(request, l.listid, l.listname), 'datelist.html', {
-            'list': l,
-            'messages': mlist,
-            'title': title,
-            'daysinmonth': daysinmonth,
-            'yearmonth': yearmonth,
-            })
+        'list': l,
+        'messages': mlist,
+        'title': title,
+        'daysinmonth': daysinmonth,
+        'yearmonth': yearmonth,
+    })
     r['X-pglm'] = ':%s:' % (':'.join(['%s/%s/%s' % (l.listid, year, month) for year,month in allyearmonths]))
     return r
 
@@ -379,7 +379,8 @@ SELECT id,_from,subject,date,messageid,has_attachment,parentid,datepath FROM t O
 
 def _get_nextprevious(listmap, dt):
     curs = connection.cursor()
-    curs.execute("""WITH l(listid) AS (
+    curs.execute("""
+WITH l(listid) AS (
    SELECT unnest(%(lists)s)
 )
 SELECT l.listid,1,
@@ -394,10 +395,11 @@ SELECT l.listid,0,
      INNER JOIN list_threads lt ON lt.threadid=m.threadid
      WHERE m.date<%(time)s AND lt.listid=l.listid
      ORDER BY m.date DESC LIMIT 1
- ) FROM l""", {
-            'lists': list(listmap.keys()),
-            'time': dt,
-            })
+ ) FROM l""",
+                 {
+                     'lists': list(listmap.keys()),
+                     'time': dt,
+                 })
     retval = {}
     for listid, isnext, data in curs.fetchall():
         if data:
@@ -408,13 +410,13 @@ SELECT l.listid,0,
                 'date': data[1],
                 'subject': data[2],
                 'from': data[3],
-                }
+            }
             if listname in retval:
                 retval[listname][isnext and 'next' or 'prev'] = d
             else:
                 retval[listname] = {
                     isnext and 'next' or 'prev': d
-                    }
+                }
     return retval
 
 @cache(hours=4)
@@ -447,13 +449,13 @@ def message(request, msgid):
     nextprev = _get_nextprevious(listmap, m.date)
 
     r = render_nav(NavContext(request, lists[0].listid, lists[0].listname), 'message.html', {
-            'msg': m,
-            'threadstruct': threadstruct,
-            'responses': responses,
-            'parent': parent,
-            'lists': lists,
-            'nextprev': nextprev,
-            })
+        'msg': m,
+        'threadstruct': threadstruct,
+        'responses': responses,
+        'parent': parent,
+        'lists': lists,
+        'nextprev': nextprev,
+    })
     r['X-pgthread'] = ":%s:" % m.threadid
     r['Last-Modified'] = http_date(newest)
     return r
@@ -478,11 +480,11 @@ def message_flat(request, msgid):
             return HttpResponseNotModified()
 
     r = render_nav(NavContext(request), 'message_flat.html', {
-            'msg': msg,
-            'allmsg': allmsg,
-            'lists': lists,
-            'isfirst': isfirst,
-            })
+        'msg': msg,
+        'allmsg': allmsg,
+        'lists': lists,
+        'isfirst': isfirst,
+    })
     r['X-pgthread'] = ":%s:" % msg.threadid
     r['Last-Modified'] = http_date(newest)
     return r
@@ -572,9 +574,9 @@ def mbox(request, listname, listname2, mboxyear, mboxmonth):
 
     query = "SELECT messageid, rawtxt FROM messages m INNER JOIN list_threads t ON t.threadid=m.threadid WHERE listid=%(listid)s AND hiddenstatus IS NULL AND date >= %(startdate)s AND date <= %(enddate)s %%% ORDER BY date"
     params = {
-                'listid': l.listid,
-                'startdate': date(mboxyear, mboxmonth, 1),
-                'enddate': datetime(mboxyear, mboxmonth, calendar.monthrange(mboxyear, mboxmonth)[1], 23, 59, 59),
+        'listid': l.listid,
+        'startdate': date(mboxyear, mboxmonth, 1),
+        'enddate': datetime(mboxyear, mboxmonth, calendar.monthrange(mboxyear, mboxmonth)[1], 23, 59, 59),
     }
 
     if not settings.PUBLIC_ARCHIVES and not request.user.is_superuser:
@@ -647,8 +649,8 @@ def search(request):
         # We don't do a more specific check if it's a messageid because doing
         # a key lookup is cheap...
         curs.execute("SELECT messageid FROM messages WHERE messageid=%(q)s", {
-                'q': query,
-                })
+            'q': query,
+        })
         a = curs.fetchall()
         if len(a) == 1:
             # Yup, this was a messageid
@@ -680,16 +682,16 @@ def search(request):
 
     resp = HttpResponse(content_type='application/json')
 
-    json.dump([{
-                'm': messageid,
-                'd': date.isoformat(),
-                's': subject,
-                'f': mailfrom,
-                'r': rank,
-                'a': abstract.replace("[[[[[[", "<b>").replace("]]]]]]","</b>"),
-
-                } for messageid, date, subject, mailfrom, rank, abstract in curs.fetchall()],
-              resp)
+    json.dump([
+        {
+            'm': messageid,
+            'd': date.isoformat(),
+            's': subject,
+            'f': mailfrom,
+            'r': rank,
+            'a': abstract.replace("[[[[[[", "<b>").replace("]]]]]]","</b>"),
+        } for messageid, date, subject, mailfrom, rank, abstract in curs.fetchall()],
+        resp)
     return resp
 
 @cache(seconds=10)
@@ -703,11 +705,11 @@ def web_sync_timestamp(request):
 def legacy(request, listname, year, month, msgnum):
     curs = connection.cursor()
     curs.execute("SELECT msgid FROM legacymap WHERE listid=(SELECT listid FROM lists WHERE listname=%(list)s) AND year=%(year)s AND month=%(month)s AND msgnum=%(msgnum)s", {
-            'list': listname,
-            'year': year,
-            'month': month,
-            'msgnum': msgnum,
-            })
+        'list': listname,
+        'year': year,
+        'month': month,
+        'msgnum': msgnum,
+    })
     r = curs.fetchall()
     if len(r) != 1:
         raise Http404('Message does not exist')
@@ -723,7 +725,7 @@ _dynamic_cssmap = {
              'media/css/table.css',
              'media/css/text.css',
              'media/css/docs.css'],
-    }
+}
 
 @cache(hours=8)
 def dynamic_css(request, css):

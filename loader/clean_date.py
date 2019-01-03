@@ -53,14 +53,14 @@ def scan_message(messageid, olddate, curs):
         x = input("Parsed this as date %s. Update? " % d)
         if x.upper() == 'Y':
             curs.execute("UPDATE messages SET date=%(d)s WHERE messageid=%(m)s", {
-                    'd': d,
-                    'm': messageid,
-                    })
+                'd': d,
+                'm': messageid,
+            })
             print("Updated.")
             break
         elif x.upper() == 'N':
             break
-    
+
 if __name__ == "__main__":
     cfg = ConfigParser()
     cfg.read('%s/archives.ini' % os.path.realpath(os.path.dirname(sys.argv[0])))
