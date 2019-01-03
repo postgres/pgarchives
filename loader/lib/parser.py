@@ -541,7 +541,7 @@ class ArchivesParser(object):
                                                    'char-encoding': 'utf8',
                                                    'show-warnings': 0,
                                                    'show-info': 0,
-                                                   })
+                                               })
         if errors:
             print(("HTML tidy failed for %s!" % self.msgid))
             print(errors)

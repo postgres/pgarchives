@@ -23,7 +23,7 @@ def listinfo(request):
         'description': l.description,
         'active': l.active,
         'group': l.group.groupname,
-        } for l in List.objects.select_related('group').all()], resp)
+    } for l in List.objects.select_related('group').all()], resp)
 
     return resp
 
@@ -101,12 +101,13 @@ def thread(request, msgid):
 
     resp = HttpResponse(content_type='application/json')
     json.dump([
-        {'msgid': m.messageid,
-         'date': m.date.isoformat(),
-         'from': m.mailfrom,
-         'subj': m.subject,
-         'atts': [{'id': a.id, 'name': a.filename} for a in m.attachment_set.all()],
-     }
+        {
+            'msgid': m.messageid,
+            'date': m.date.isoformat(),
+            'from': m.mailfrom,
+            'subj': m.subject,
+            'atts': [{'id': a.id, 'name': a.filename} for a in m.attachment_set.all()],
+        }
         for m in mlist], resp)
     resp['X-pgthread'] = m.threadid
     return resp

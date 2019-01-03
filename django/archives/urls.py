@@ -54,7 +54,7 @@ urlpatterns = [
     url(r'^list/([\w-]+|\*)/latest.json$', archives.mailarchives.api.latest),
     url(r'^message-id.json/(.+)$', archives.mailarchives.api.thread),
     url(r'^listinfo/$', archives.mailarchives.api.listinfo),
-#    url(r'^thread/(.+)/subscribe/$', archives.mailarchives.api.thread_subscribe),
+    #    url(r'^thread/(.+)/subscribe/$', archives.mailarchives.api.thread_subscribe),
 
     # Legacy forwarding from old archives site
     url(r'^message-id/legacy/([\w-]+)/(\d+)-(\d+)/msg(\d+).php$', archives.mailarchives.views.legacy),

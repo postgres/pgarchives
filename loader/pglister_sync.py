@@ -36,9 +36,9 @@ if __name__=="__main__":
         cfg.get('pglister', 'root'),
         cfg.get('pglister', 'myname'),
         do_subscribers and 1 or 0,
-        ), headers={
-            'X-Api-Key': cfg.get('pglister', 'apikey'),
-        })
+    ), headers={
+        'X-Api-Key': cfg.get('pglister', 'apikey'),
+    })
     obj = r.json()
 
     # For groups, just add them if they don't exist

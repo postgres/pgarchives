@@ -65,10 +65,10 @@ def login(request):
         cipher = encryptor.encrypt(s + ' ' * (16-(len(s) % 16))) # pad to 16 bytes
 
         return HttpResponseRedirect("%s?d=%s$%s" % (
-                settings.PGAUTH_REDIRECT,
-                base64.b64encode(iv, b"-_").decode('utf8'),
-                base64.b64encode(cipher, b"-_").decode('utf8'),
-                ))
+            settings.PGAUTH_REDIRECT,
+            base64.b64encode(iv, b"-_").decode('utf8'),
+            base64.b64encode(cipher, b"-_").decode('utf8'),
+        ))
     else:
         return HttpResponseRedirect(settings.PGAUTH_REDIRECT)
 
@@ -208,7 +208,7 @@ def user_search(searchterm=None, userid=None):
     u = urllib.request.urlopen('%ssearch/?%s' % (
         settings.PGAUTH_REDIRECT,
         urlencode(q),
-        ))
+    ))
     (ivs, datas) = u.read().split('&')
     u.close()
 
