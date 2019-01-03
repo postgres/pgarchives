@@ -159,7 +159,7 @@ API_CLIENTS = ('127.0.0.1',)
 PUBLIC_ARCHIVES = False
 
 try:
-	from settings_local import *
+	from .settings_local import *
 except ImportError:
 	pass
 

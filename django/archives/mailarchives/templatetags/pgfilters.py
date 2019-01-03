@@ -48,4 +48,4 @@ def nameonly(value):
 @register.filter(name='md5')
 @stringfilter
 def md5(value):
-	return hashlib.md5(value).hexdigest()
+	return hashlib.md5(value.encode('utf8')).hexdigest()
