@@ -1,2 +1,2 @@
 class IgnorableException(Exception):
-	pass
+    pass

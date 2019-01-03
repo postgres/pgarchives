@@ -15,35 +15,35 @@ import psycopg2
 from lib.varnish import VarnishPurger
 
 if __name__ == "__main__":
-	optparser = OptionParser()
-	optparser.add_option('-m', '--msgid', dest='msgid', help='Messageid to load')
+    optparser = OptionParser()
+    optparser.add_option('-m', '--msgid', dest='msgid', help='Messageid to load')
 
-	(opt, args) = optparser.parse_args()
+    (opt, args) = optparser.parse_args()
 
-	if (len(args)):
-		print("No bare arguments accepted")
-		optparser.print_help()
-		sys.exit(1)
+    if (len(args)):
+        print("No bare arguments accepted")
+        optparser.print_help()
+        sys.exit(1)
 
-	if not opt.msgid:
-		print("Message-id must be specified")
-		optparser.print_help()
-		sys.exit(1)
+    if not opt.msgid:
+        print("Message-id must be specified")
+        optparser.print_help()
+        sys.exit(1)
 
-	cfg = ConfigParser()
-	cfg.read('%s/archives.ini' % os.path.realpath(os.path.dirname(sys.argv[0])))
-	try:
-		connstr = cfg.get('db','connstr')
-	except:
-		connstr = 'need_connstr'
+    cfg = ConfigParser()
+    cfg.read('%s/archives.ini' % os.path.realpath(os.path.dirname(sys.argv[0])))
+    try:
+        connstr = cfg.get('db','connstr')
+    except:
+        connstr = 'need_connstr'
 
-	conn = psycopg2.connect(connstr)
-	curs = conn.cursor()
+    conn = psycopg2.connect(connstr)
+    curs = conn.cursor()
 
-	curs.execute("SELECT id, threadid FROM messages WHERE messageid=%(msgid)s", {
-		'msgid': opt.msgid,
-	})
-	id, threadid = curs.fetchone()
+    curs.execute("SELECT id, threadid FROM messages WHERE messageid=%(msgid)s", {
+        'msgid': opt.msgid,
+    })
+    id, threadid = curs.fetchone()
 
-	VarnishPurger(cfg).purge([int(threadid), ])
-	conn.close()
+    VarnishPurger(cfg).purge([int(threadid), ])
+    conn.close()

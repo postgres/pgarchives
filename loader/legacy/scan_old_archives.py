@@ -101,23 +101,23 @@ listmap = {
 hp = HTMLParser()
 
 def get_messageid(fn):
-	with open(fn) as f:
-		for l in f:
-			if l.startswith('<!--X-Message-Id: '):
-				# Found it!
-				return hp.unescape(l[18:-5])
-	raise Exception("No messageid in %s" % fn)
+    with open(fn) as f:
+        for l in f:
+            if l.startswith('<!--X-Message-Id: '):
+                # Found it!
+                return hp.unescape(l[18:-5])
+    raise Exception("No messageid in %s" % fn)
 
 dirre = re.compile("^(\d+)-(\d+)$")
 fnre = re.compile("^msg(\d+)\.php$")
 for (dirpath, dirnames, filenames) in os.walk(root):
-	# Dirpath is the full pathname
-	base = os.path.basename(dirpath)
-	m = dirre.match(base)
-	if m:
-		# Directory with actual files in it
-		listname = os.path.basename(os.path.dirname(dirpath))
-		for fn in filenames:
-			m2 = fnre.match(fn)
-			if m2:
-				print "%s;%s;%s;%s;\"%s\"" % (listmap[listname], m.group(1), m.group(2), m2.group(1), get_messageid("%s/%s" % (dirpath, fn)))
+    # Dirpath is the full pathname
+    base = os.path.basename(dirpath)
+    m = dirre.match(base)
+    if m:
+        # Directory with actual files in it
+        listname = os.path.basename(os.path.dirname(dirpath))
+        for fn in filenames:
+            m2 = fnre.match(fn)
+            if m2:
+                print "%s;%s;%s;%s;\"%s\"" % (listmap[listname], m.group(1), m.group(2), m2.group(1), get_messageid("%s/%s" % (dirpath, fn)))
