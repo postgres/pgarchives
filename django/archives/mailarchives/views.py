@@ -123,7 +123,7 @@ def antispam_auth(fn):
             if len(auth) != 2:
                 return HttpResponseForbidden("Invalid authentication")
             if auth[0].lower() == "basic":
-                user, pwd = base64.b64decode(auth[1]).decode('utf8', errors='ignore').split(':')
+                user, pwd = base64.b64decode(auth[1]).decode('utf8', errors='ignore').split(':', 1)
                 if user == 'archives' and pwd == 'antispam':
                     # Actually run the function if auth is correct
                     resp = fn(request, *_args, **_kwargs)
