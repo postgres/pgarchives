@@ -112,7 +112,7 @@ def thread(request, msgid):
             'atts': [{'id': a.id, 'name': a.filename} for a in m.attachment_set.all()],
         }
         for m in mlist], resp)
-    resp['X-pgthread'] = m.threadid
+    resp['X-pgthread'] = msg.threadid
     return resp
 
 
