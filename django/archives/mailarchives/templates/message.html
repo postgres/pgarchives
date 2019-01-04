@@ -1,24 +1,6 @@
 {%extends "page.html"%}
 {%block title%}{%if not msg.hiddenstatus%}{{msg.subject}}{%endif%}{%endblock%}
 
-{%block extrahead%}
-<script type="text/javascript">
-function onThreadSelect() {
-   document.location.href = '/message-id/' + document.getElementById('thread_select').value;
-}
-
-$(function(){
-   $('select#thread_select').selectmenu({
-      style:'dropdown',
-      escapeHtml:true,
-      icons:[
-         {find:'.hasatt', icon: 'ui-icon-document'},
-      ]
-   });
-});
-</script>
-{%endblock%}
-
 {%block contents%}
 {%if not msg.hiddenstatus%}
 <h1 class="subject">{{msg.subject}}</h1>

@@ -4,20 +4,10 @@
 {%load pgfilters%}
 {%block extrahead%}
 <meta name="robots" content="noindex" />
-{%if not isfirst%}
-<script type="text/javascript">
-function load() {
-   if (document.location.href.indexOf('#') < 0) {
-      document.location.href = document.location.href + '#' + '{{msg.messageid|md5}}';
-   }
-}
-window.onload = load;
-</script>
-{%endif%}
 {%endblock%}
 {%block contents%}
 {%if not msg.hiddenstatus%}
-<h1 class="subject">{{msg.subject}}</h1>
+<h1 id="flatMsgSubject" class="subject" data-isfirst="{{isfirst}}" data-msgid="{{msg.messageid|md5}}">{{msg.subject}}</h1>
 <table class="table-sm table-responsive message-header" style="border-bottom: 0.05em solid #E7EAE8; margin-bottom: 1em;">
  <tr>
   <th scope="row" style="width: 10%">Lists:</th>
