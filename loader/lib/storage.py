@@ -262,10 +262,10 @@ class ArchivesParserStorage(ArchivesParser):
             f.write("\n-------------------------------\n\n")
             return
 
-        if (_from.rstrip(), to.rstrip(), cc.rstrip(), subject.rstrip()) != (self._from, self.to, self.cc, self.subject):
+        if (_from.rstrip(), to.rstrip(), cc.rstrip(), subject.rstrip(), date) != (self._from, self.to, self.cc, self.subject, self.date):
             log.status("Message %s has header changes " % self.msgid)
             f.write("==== %s ====\n" % self.msgid)
-            for fn in ['_from', 'to', 'cc', 'subject']:
+            for fn in ['_from', 'to', 'cc', 'subject', 'date']:
                 if getattr(self, fn) != eval(fn):
                     s = "- {0}: {1}\n".format(fn, eval(fn))
                     d = "+ {0}: {1}\n".format(fn, getattr(self, fn))
