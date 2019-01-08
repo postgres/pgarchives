@@ -13,6 +13,8 @@ import io
 from lib.exception import IgnorableException
 from lib.log import log
 
+_re_received = re.compile('^from .*;([^(]+)(\s*\(envelope-from.*)?', re.I | re.DOTALL)
+
 
 class ArchivesParser(object):
     def __init__(self):
@@ -41,6 +43,24 @@ class ArchivesParser(object):
             self.date = self.forgiving_date_decode(date_override)
         else:
             self.date = self.forgiving_date_decode(self.decode_mime_header(self.get_mandatory('Date')))
+
+            # Accept times up to 4 hours in the future, for badly synced clocks
+            maxdate = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=4)
+            if self.date > maxdate:
+                # Date is in the future, we don't trust that. Instead, let's see if we can find
+                # it in the raw text of the message.
+                def _extract_date(d):
+                    m = _re_received.match(d)
+                    if m:
+                        try:
+                            return self.forgiving_date_decode(m.group(1).strip())
+                        except IgnorableException:
+                            pass
+
+                lowdate = min((x for x in map(_extract_date, self.msg.get_all('Received')) if x and x < maxdate))
+                if lowdate:
+                    self.date = lowdate
+                # Else we're going to go with what we found
         self.bodytxt = self.get_body()
         self.attachments = []
         self.get_attachments()
@@ -467,6 +487,8 @@ class ArchivesParser(object):
                 # us the right time, but the wrong timezone. Should be
                 # enough...
                 dp = datetime.datetime(*dp.utctimetuple()[:6])
+            if not dp.tzinfo:
+                dp = dp.replace(tzinfo=datetime.timezone.utc)
             return dp
         except Exception as e:
             raise IgnorableException("Failed to parse date '%s': %s" % (d, e))
