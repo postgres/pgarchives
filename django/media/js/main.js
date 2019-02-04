@@ -1,10 +1,3 @@
-$(document).ready(function() {
-  $(window).on("scroll", function() {
-    $(".navbar").toggleClass("compressed", $(window).scrollTop() >= 20);
-  });
-});
-
-
 $(function(){
     /* Callback from main message view when a message is picked in dropdown */
     $('#thread_select').change(function(e) {
