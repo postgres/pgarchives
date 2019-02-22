@@ -27,18 +27,18 @@ urlpatterns = [
     # some user agents generate broken URLs that include <>
     url(r'^(?P<prefix>message-id/(|flat/|raw/))<(?P<msgid>.*)>$', archives.mailarchives.views.re_redirect),
 
+    # message-id ending in a slash needs to be redirected to one without it
+    url(r'^(message-id/.*)/$', archives.mailarchives.views.slash_redirect),
+
     # Match regular messages
-    url(r'^message-id/([^/]+)$', archives.mailarchives.views.message),
-    url(r'^message-id/flat/([^/]+)$', archives.mailarchives.views.message_flat),
-    url(r'^message-id/raw/([^/]+)$', archives.mailarchives.views.message_raw),
-    url(r'^message-id/mbox/([^/]+)$', archives.mailarchives.views.message_mbox),
+    url(r'^message-id/flat/(.+)$', archives.mailarchives.views.message_flat),
+    url(r'^message-id/raw/(.+)$', archives.mailarchives.views.message_raw),
+    url(r'^message-id/mbox/(.+)$', archives.mailarchives.views.message_mbox),
+    url(r'^message-id/(.+)$', archives.mailarchives.views.message),
     url(r'^list/([\w-]+)/mbox/([\w-]+)\.(\d{4})(\d{2})', archives.mailarchives.views.mbox),
 
     # Search
     url(r'^archives-search/', archives.mailarchives.views.search),
-
-    # message-id with a slash needs to be redirected to one without it
-    url(r'^(message-id/.*)/$', archives.mailarchives.views.slash_redirect),
 
     # Date etc indexes
     url(r'^list/([\w-]+)/$', archives.mailarchives.views.monthlist),
