@@ -34,7 +34,10 @@ urlpatterns = [
     url(r'^message-id/flat/(.+)$', archives.mailarchives.views.message_flat),
     url(r'^message-id/raw/(.+)$', archives.mailarchives.views.message_raw),
     url(r'^message-id/mbox/(.+)$', archives.mailarchives.views.message_mbox),
+    url(r'^message-id/attachment/(\d+)/.*$', archives.mailarchives.views.attachment),
+    url(r'^message-id/legacy/([\w-]+)/(\d+)-(\d+)/msg(\d+).php$', archives.mailarchives.views.legacy),
     url(r'^message-id/(.+)$', archives.mailarchives.views.message),
+
     url(r'^list/([\w-]+)/mbox/([\w-]+)\.(\d{4})(\d{2})', archives.mailarchives.views.mbox),
 
     # Search
@@ -48,16 +51,11 @@ urlpatterns = [
     url(r'^list/([\w-]+)/before/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})', archives.mailarchives.views.datelistbeforetime),
     url(r'^list/([\w-]+)/before/([^/]+)$', archives.mailarchives.views.datelistbefore),
 
-    url(r'^message-id/attachment/(\d+)/.*$', archives.mailarchives.views.attachment),
-
     # API calls
     url(r'^list/([\w-]+|\*)/latest.json$', archives.mailarchives.api.latest),
     url(r'^message-id.json/(.+)$', archives.mailarchives.api.thread),
     url(r'^listinfo/$', archives.mailarchives.api.listinfo),
     #    url(r'^thread/(.+)/subscribe/$', archives.mailarchives.api.thread_subscribe),
-
-    # Legacy forwarding from old archives site
-    url(r'^message-id/legacy/([\w-]+)/(\d+)-(\d+)/msg(\d+).php$', archives.mailarchives.views.legacy),
 
     # Normally served off www.postgresql.org, but manually handled here for
     # development installs.
