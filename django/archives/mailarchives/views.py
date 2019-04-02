@@ -69,8 +69,10 @@ def ensure_message_permissions(request, msgid):
  WHERE messages.messageid=%(msgid)s
  AND NOT EXISTS (
   SELECT 1 FROM listsubscribers
+  INNER JOIN lists ON lists.listid=listsubscribers.list_id
   WHERE listsubscribers.list_id=list_threads.listid
   AND listsubscribers.username=%(username)s
+  AND subscriber_access
  )
 )""", {
             'msgid': msgid,
