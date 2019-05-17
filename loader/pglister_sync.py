@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
         if do_subscribers:
             # If we synchronize subscribers, we do so on all lists for now.
-            curs.execute("WITH t(u) AS (SELECT UNNEST(%(usernames)s)), ins(un) AS (INSERT INTO listsubscribers (username, list_id) SELECT u, %(listid)s FROM t WHERE NOT EXISTS (SELECT 1 FROM listsubscribers WHERE username=u AND list_id=%(listid)s) RETURNING username), del(un) AS (DELETE FROM listsubscribers WHERE list_id=%(listid)s AND NOT EXISTS (SELECT 1 FROM t WHERE u=username) RETURNING username) SELECT 'ins',un FROM ins UNION ALL SELECT 'del',un FROM del ORDER BY 1,2", {
+            curs.execute("WITH t(u) AS (SELECT UNNEST(%(usernames)s::text[])), ins(un) AS (INSERT INTO listsubscribers (username, list_id) SELECT u, %(listid)s FROM t WHERE NOT EXISTS (SELECT 1 FROM listsubscribers WHERE username=u AND list_id=%(listid)s) RETURNING username), del(un) AS (DELETE FROM listsubscribers WHERE list_id=%(listid)s AND NOT EXISTS (SELECT 1 FROM t WHERE u=username) RETURNING username) SELECT 'ins',un FROM ins UNION ALL SELECT 'del',un FROM del ORDER BY 1,2", {
                 'usernames': l['subscribers'],
                 'listid': listid,
             })
