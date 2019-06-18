@@ -3,7 +3,7 @@ Description=pgarchives: remail resender
 After=postgresql.service
 
 [Service]
-ExecStart=/some/where/resender/archives_resendewr.py
+ExecStart=/some/where/resender/archives_resender.py
 WorkingDirectory=/some/where/resender
 Restart=always
 RestartSec=30
