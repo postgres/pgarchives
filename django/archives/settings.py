@@ -155,5 +155,6 @@ if ALLOW_RESEND or not PUBLIC_ARCHIVES:
         'django.contrib.sessions',
     ] + INSTALLED_APPS
 
-    from archives.util import validate_new_user
-    PGAUTH_CREATEUSER_CALLBACK = validate_new_user
+    if not PUBLIC_ARCHIVES:
+        from archives.util import validate_new_user
+        PGAUTH_CREATEUSER_CALLBACK = validate_new_user
