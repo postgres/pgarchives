@@ -86,6 +86,7 @@ def latest(request, listname):
     # XXX: need to deal with the global view, but for now API callers come in directly
     if list:
         resp['X-pglm'] = ':%s:' % (':'.join(['%s/%s/%s' % (list.listid, year, month) for year, month in allyearmonths]))
+        resp['xkey'] = ' '.join(['pgam_{0}/{1}/{2}'.format(l.listid, year, month) for year, month in allyearmonths])
     return resp
 
 
@@ -113,6 +114,7 @@ def thread(request, msgid):
         }
         for m in mlist], resp)
     resp['X-pgthread'] = msg.threadid
+    resp['xkey'] = 'pgat_{0}'.format(msg.threadid)
     return resp
 
 
