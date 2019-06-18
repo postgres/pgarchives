@@ -1,12 +1,5 @@
 [db]
 connstr=dbname=archives
 
-[mail]
-server=arkaria.postgresql.org
-
-[majordomo]
-server=mail.postgresql.org
-password=topsecret
-
 [varnish]
 purgeurl=https://wrigleys.postgresql.org/api/varnish/purge/
