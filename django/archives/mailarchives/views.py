@@ -646,7 +646,7 @@ def resend(request, messageid):
 
     if request.method == 'POST':
         if request.POST.get('resend', None) == '1':
-            ResendMessage(message=m, sendto=request.user).save()
+            ResendMessage.objects.get_or_create(message=m, sendto=request.user)
             connection.cursor().execute("NOTIFY archives_resend")
             return HttpResponseRedirect('/message-id/resend/{0}/complete'.format(m.messageid))
 
