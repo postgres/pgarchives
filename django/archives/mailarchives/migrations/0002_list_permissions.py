@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='list',
             name='subscriber_access',
-            field=models.BooleanField(default=False, help_text=b'Subscribers can access contents (default is admins only)'),
+            field=models.BooleanField(default=False, help_text='Subscribers can access contents (default is admins only)'),
         ),
         migrations.AddField(
             model_name='listsubscriber',

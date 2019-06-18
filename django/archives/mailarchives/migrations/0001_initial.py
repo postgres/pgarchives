@@ -51,8 +51,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('threadid', models.IntegerField()),
-                ('mailfrom', models.TextField(db_column=b'_from')),
-                ('to', models.TextField(db_column=b'_to')),
+                ('mailfrom', models.TextField(db_column='_from')),
+                ('to', models.TextField(db_column='_to')),
                 ('cc', models.TextField()),
                 ('subject', models.TextField()),
                 ('date', models.DateTimeField()),
@@ -69,11 +69,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='list',
             name='group',
-            field=models.ForeignKey(to='mailarchives.ListGroup', db_column=b'groupid'),
+            field=models.ForeignKey(to='mailarchives.ListGroup', db_column='groupid'),
         ),
         migrations.AddField(
             model_name='attachment',
             name='message',
-            field=models.ForeignKey(to='mailarchives.Message', db_column=b'message'),
+            field=models.ForeignKey(to='mailarchives.Message', db_column='message'),
         ),
     ]
