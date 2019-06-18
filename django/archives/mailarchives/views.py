@@ -646,7 +646,11 @@ def resend(request, messageid):
 
     if request.method == 'POST':
         if request.POST.get('resend', None) == '1':
-            ResendMessage.objects.get_or_create(message=m, sendto=request.user)
+            # Figure out if this user has sent an email recently, and if so refuse it
+            if ResendMessage.objects.filter(sendto=request.user, registeredat__gt=datetime.now()).exists():
+                return HttpResponse("You have already requested an email to be sent in the past {0} seconds. Please try again later.".format(settings.RESEND_RATE_LIMIT_SECONDS))
+
+            ResendMessage.objects.get_or_create(message=m, sendto=request.user, registeredat=datetime.now() + timedelta(seconds=settings.RESEND_RATE_LIMIT_SECONDS))
             connection.cursor().execute("NOTIFY archives_resend")
             return HttpResponseRedirect('/message-id/resend/{0}/complete'.format(m.messageid))
 

@@ -134,6 +134,9 @@ CSRF_COOKIE_SECURE = True
 # Required for lighttpd
 FORCE_SCRIPT_NAME = ""
 
+# Minimum this many seconds between emails sent out to a single user
+RESEND_RATE_LIMIT_SECONDS = 30
+
 # Always override!
 SEARCH_CLIENTS = ('127.0.0.1',)
 API_CLIENTS = ('127.0.0.1',)

@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             name='ResendMessage',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('registeredat', models.DateTimeField(auto_now_add=True)),
+                ('registeredat', models.DateTimeField()),
                 ('message', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='mailarchives.Message')),
                 ('sendto', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],

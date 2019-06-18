@@ -124,7 +124,7 @@ class ListSubscriber(models.Model):
 class ResendMessage(models.Model):
     message = models.ForeignKey(Message, null=False, blank=False)
     sendto = models.ForeignKey(User, null=False, blank=False)
-    registeredat = models.DateTimeField(null=False, blank=False, auto_now_add=True)
+    registeredat = models.DateTimeField(null=False, blank=False)
 
 
 class ApiClient(models.Model):
