@@ -34,6 +34,8 @@ urlpatterns = [
     url(r'^message-id/flat/(.+)$', archives.mailarchives.views.message_flat),
     url(r'^message-id/raw/(.+)$', archives.mailarchives.views.message_raw),
     url(r'^message-id/mbox/(.+)$', archives.mailarchives.views.message_mbox),
+    url(r'^message-id/resend/(.+)/complete$', archives.mailarchives.views.resend_complete),
+    url(r'^message-id/resend/(.+)$', archives.mailarchives.views.resend),
     url(r'^message-id/attachment/(\d+)/.*$', archives.mailarchives.views.attachment),
     url(r'^message-id/legacy/([\w-]+)/(\d+)-(\d+)/msg(\d+).php$', archives.mailarchives.views.legacy),
     url(r'^message-id/(.+)$', archives.mailarchives.views.message),
@@ -62,7 +64,7 @@ urlpatterns = [
     url(r'^dyncss/(?P<css>base|docs).css$', archives.mailarchives.views.dynamic_css),
 ]
 
-if not settings.PUBLIC_ARCHIVES:
+if settings.ALLOW_RESEND or not settings.PUBLIC_ARCHIVES:
     import archives.auth
 
     urlpatterns += [

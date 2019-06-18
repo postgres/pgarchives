@@ -33,6 +33,7 @@
      <a href="/message-id/raw/{{msg.messageid|urlencode}}">Raw Message</a> |
      <a href="/message-id/flat/{{msg.messageid|urlencode}}">Whole Thread</a> |
      <a href="/message-id/mbox/{{msg.messageid|urlencode}}">Download mbox</a>
+{%if allow_resend %}| <a href="/message-id/resend/{{msg.messageid|urlencode}}">Resend email</a>{%endif%}
    </td>
  </tr>
  {% if not show_all %}

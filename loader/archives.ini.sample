@@ -3,3 +3,9 @@ connstr=dbname=archives
 
 [varnish]
 purgeurl=https://wrigleys.postgresql.org/api/varnish/purge/
+
+[smtp]
+server=localhost:9911
+heloname=localhost
+resender=noreply@example.com
+

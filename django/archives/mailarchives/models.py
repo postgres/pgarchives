@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Reason a message was hidden.
 # We're intentionally putting the prefix text in the array here, since
@@ -118,6 +119,12 @@ class ListSubscriber(models.Model):
     class Meta:
         unique_together = (('list', 'username'), )
         db_table = 'listsubscribers'
+
+
+class ResendMessage(models.Model):
+    message = models.ForeignKey(Message, null=False, blank=False)
+    sendto = models.ForeignKey(User, null=False, blank=False)
+    registeredat = models.DateTimeField(null=False, blank=False, auto_now_add=True)
 
 
 class ApiClient(models.Model):

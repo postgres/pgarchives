@@ -1,0 +1,17 @@
+{%extends "page.html"%}
+{%block title%}Resend - {{msg.subject}}{%endblock%}
+
+{%block contents%}
+<h1 class="subject">Resend - {{msg.subject}}</h1>
+<p>
+  The message <em>{{msg.subject}}</em> with messageid <em>{{msg.messageid}}</em>
+  has been scheduled for resending to <em>{{request.user.email}}</em>.
+</p>
+<p>
+  It will be delivered within a few minutes.
+</p>
+
+<p>
+  <a class="btn btn-primary" href="/message-id/{{msg.messageid|urlencode}}">Return to message</a>
+</p>
+{%endblock%}

@@ -100,6 +100,8 @@ TEMPLATES = [{
 
 
 INSTALLED_APPS = [
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
     'archives.mailarchives',
 ]
 
@@ -133,6 +135,7 @@ FORCE_SCRIPT_NAME = ""
 SEARCH_CLIENTS = ('127.0.0.1',)
 API_CLIENTS = ('127.0.0.1',)
 PUBLIC_ARCHIVES = False
+ALLOW_RESEND = False
 
 try:
     from .settings_local import *
@@ -140,16 +143,15 @@ except ImportError:
     pass
 
 # If this is a non-public site, enable middleware for handling logins etc
-if not PUBLIC_ARCHIVES:
+if ALLOW_RESEND or not PUBLIC_ARCHIVES:
     MIDDLEWARE_CLASSES = [
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
     ] + MIDDLEWARE_CLASSES
     MIDDLEWARE_CLASSES.append('archives.mailarchives.redirecthandler.RedirectMiddleware')
 
     INSTALLED_APPS = [
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
         'django.contrib.sessions',
     ] + INSTALLED_APPS
 

@@ -1,0 +1,14 @@
+[Unit]
+Description=pgarchives: remail resender
+After=postgresql.service
+
+[Service]
+ExecStart=/some/where/resender/archives_resendewr.py
+WorkingDirectory=/some/where/resender
+Restart=always
+RestartSec=30
+User=www-data
+Group=www-data
+
+[Install]
+WantedBy=multi-user.target

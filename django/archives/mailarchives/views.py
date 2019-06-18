@@ -1,10 +1,11 @@
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseForbidden, Http404
-from django.http import StreamingHttpResponse
+from django.http import StreamingHttpResponse, HttpResponseRedirect
 from django.http import HttpResponsePermanentRedirect, HttpResponseNotModified
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, get_object_or_404
 from django.utils.http import http_date, parse_http_date_safe
+from django.views.decorators.csrf import csrf_exempt
 from django.db import connection, transaction
 from django.db.models import Q
 from django.conf import settings
@@ -169,7 +170,9 @@ def get_all_groups_and_lists(request, listid=None):
 class NavContext(object):
     def __init__(self, request, listid=None, listname=None, all_groups=None, expand_groupid=None):
         self.request = request
-        self.ctx = {}
+        self.ctx = {
+            'allow_resend': settings.ALLOW_RESEND,
+        }
 
         if all_groups:
             groups = copy.deepcopy(all_groups)
@@ -623,6 +626,51 @@ def mbox(request, listname, listname2, mboxyear, mboxmonth):
     return _build_mbox(query, params)
 
 
+@transaction.atomic
+def resend(request, messageid):
+    if not settings.ALLOW_RESEND:
+        raise PermissionDenied("Access denied.")
+
+    if not (hasattr(request, 'user') and request.user.is_authenticated()):
+        raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
+
+    ensure_message_permissions(request, messageid)
+
+    m = get_object_or_404(Message, messageid=messageid)
+    if m.hiddenstatus:
+        raise PermissionDenied("Access denied.")
+
+    if request.method == 'POST':
+        if request.POST.get('resend', None) == '1':
+            ResendMessage(message=m, sendto=request.user).save()
+            connection.cursor().execute("NOTIFY archives_resend")
+            return HttpResponseRedirect('/message-id/resend/{0}/complete'.format(m.messageid))
+
+    lists = List.objects.extra(where=["listid IN (SELECT listid FROM list_threads WHERE threadid=%s)" % m.threadid]).order_by('listname')
+
+    return render_nav(NavContext(request, lists[0].listid, lists[0].listname), 'message_resend.html', {
+        'msg': m,
+        'lists': lists,
+    })
+
+
+def resend_complete(request, messageid):
+    if not settings.ALLOW_RESEND:
+        raise PermissionDenied("Access denied.")
+
+    m = get_object_or_404(Message, messageid=messageid)
+    if m.hiddenstatus:
+        raise PermissionDenied("Access denied.")
+
+    lists = List.objects.extra(where=["listid IN (SELECT listid FROM list_threads WHERE threadid=%s)" % m.threadid]).order_by('listname')
+
+    return render_nav(NavContext(request, lists[0].listid, lists[0].listname), 'resend_complete.html', {
+        'msg': m,
+        'lists': lists,
+    })
+
+
+@csrf_exempt
 def search(request):
     if not settings.PUBLIC_ARCHIVES:
         # We don't support searching of non-public archives at all at this point.

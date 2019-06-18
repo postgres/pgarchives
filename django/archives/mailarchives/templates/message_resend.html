@@ -1,0 +1,20 @@
+{%extends "page.html"%}
+{%block title%}Resend - {{msg.subject}}{%endblock%}
+
+{%block contents%}
+<h1 class="subject">Resend - {{msg.subject}}</h1>
+<p>
+  The below message will be resent to <em>{{request.user.email}}</em>,
+  which is the email address of the account you are currently logged in with.
+</p>
+
+<p>
+  <form method="post" action="/message-id/resend/{{msg.messageid|urlencode}}">{% csrf_token %}
+    <input type="hidden" name="resend" value="1">
+    <input type="submit" value="Resend this message" class="btn btn-primary">
+  </form>
+</p>
+
+<h4>Message to resend</h4>
+{% include '_message.html' with msg=msg lists=lists show_all=True %}
+{%endblock%}
