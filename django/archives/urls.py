@@ -69,7 +69,7 @@ if settings.ALLOW_RESEND or not settings.PUBLIC_ARCHIVES:
 
     urlpatterns += [
         # For non-public archives, support login
-        url(r'^accounts/login/?$', archives.auth.login),
-        url(r'^accounts/logout/?$', archives.auth.logout),
-        url(r'^auth_receive/$', archives.auth.auth_receive),
+        url(r'^(?:list/_auth/)?accounts/login/?$', archives.auth.login),
+        url(r'^(?:list/_auth/)?accounts/logout/?$', archives.auth.logout),
+        url(r'^(?:list/_auth/)?auth_receive/$', archives.auth.auth_receive),
     ]
