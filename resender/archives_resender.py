@@ -24,6 +24,16 @@ def process_queue(conn, sender, smtpserver, heloname):
 
         recipient = ll[0][1]
         contents = ll[0][2]
+        if contents[0:5].tobytes() == b'From ':
+            # If the first line is the From header, strip it out before sending anything
+            # Try ot find the end of it. We'll look for a 1k long line, and if that fails,
+            # we just give up.
+            first = contents[:1024].tobytes()
+            ofs = first.find(b'\n')
+            if ofs < 0:
+                raise Exception("Found start of From line but could not find end of it. Failing to send email to {0}!".format(recipient))
+
+            contents = contents[ofs + 1:]
 
         try:
             # Actually resend! New SMTP connection for each message because we're not sending
