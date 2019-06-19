@@ -22,7 +22,7 @@ class VarnishPurger(object):
                 exprlist.append('pgam_%s/%s/%s' % p)
             else:
                 # Purging individual thread
-                exprlist.append('pgat_%:' % p)
+                exprlist.append('pgat_%s:' % p)
         purgedict = dict(list(zip(['x%s' % n for n in range(0, len(exprlist))], exprlist)))
         purgedict['n'] = len(exprlist)
         r = requests.post(purgeurl, data=purgedict, headers={
