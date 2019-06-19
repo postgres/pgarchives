@@ -126,6 +126,14 @@ class ResendMessage(models.Model):
     sendto = models.ForeignKey(User, null=False, blank=False)
     registeredat = models.DateTimeField(null=False, blank=False)
 
+    class Meta:
+        unique_together = (('message', 'sendto'), )
+
+
+class LastResentMessage(models.Model):
+    sentto = models.ForeignKey(User, null=False, blank=False, primary_key=True)
+    sentat = models.DateTimeField(null=False, blank=False)
+
 
 class ApiClient(models.Model):
     apikey = models.CharField(max_length=100, null=False, blank=False)
