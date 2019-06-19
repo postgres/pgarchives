@@ -19,11 +19,11 @@ class VarnishPurger(object):
         for p in purges:
             if isinstance(p, tuple):
                 # Purging a list
-                exprlist.append('obj.http.x-pglm ~ :%s/%s/%s:' % p)
+                exprlist.append('pgam_%s/%s/%s' % p)
             else:
                 # Purging individual thread
-                exprlist.append('obj.http.x-pgthread ~ :%s:' % p)
-        purgedict = dict(list(zip(['p%s' % n for n in range(0, len(exprlist))], exprlist)))
+                exprlist.append('pgat_%:' % p)
+        purgedict = dict(list(zip(['x%s' % n for n in range(0, len(exprlist))], exprlist)))
         purgedict['n'] = len(exprlist)
         r = requests.post(purgeurl, data=purgedict, headers={
             'Content-type': 'application/x-www-form-urlencoded',
