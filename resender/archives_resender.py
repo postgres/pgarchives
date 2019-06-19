@@ -16,7 +16,7 @@ import psycopg2
 
 def process_queue(conn, sender, smtpserver, heloname):
     with conn.cursor() as curs:
-        curs.execute("SELECT r.id, u.email, m.rawtxt FROM mailarchives_resendmessage r INNER JOIN auth_user u ON u.id=r.sendto_id INNER JOIN messages m ON m.id=r.message_id WHERE registeredat > CURRENT_TIMESTAMP ORDER BY r.id FOR UPDATE OF r LIMIT 1")
+        curs.execute("SELECT r.id, u.email, m.rawtxt FROM mailarchives_resendmessage r INNER JOIN auth_user u ON u.id=r.sendto_id INNER JOIN messages m ON m.id=r.message_id WHERE registeredat < CURRENT_TIMESTAMP ORDER BY r.id FOR UPDATE OF r LIMIT 1")
         ll = curs.fetchall()
         if len(ll) == 0:
             conn.rollback()
