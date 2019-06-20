@@ -285,7 +285,6 @@ def _render_datelist(request, l, d, datefilter, title, queryproc):
         'daysinmonth': daysinmonth,
         'yearmonth': yearmonth,
     })
-    r['X-pglm'] = ':%s:' % (':'.join(['%s/%s/%s' % (l.listid, year, month) for year, month in allyearmonths]))
     r['xkey'] = ' '.join(['pgam_{0}/{1}/{2}'.format(l.listid, year, month) for year, month in allyearmonths])
     return r
 
@@ -491,7 +490,6 @@ def message(request, msgid):
         'lists': lists,
         'nextprev': nextprev,
     })
-    r['X-pgthread'] = ":%s:" % m.threadid
     r['xkey'] = 'pgat_{0}'.format(m.threadid)
     r['Last-Modified'] = http_date(newest)
     return r
@@ -522,7 +520,6 @@ def message_flat(request, msgid):
         'lists': lists,
         'isfirst': isfirst,
     })
-    r['X-pgthread'] = ":%s:" % msg.threadid
     r['xkey'] = 'pgat_{0}'.format(msg.threadid)
     r['Last-Modified'] = http_date(newest)
     return r
@@ -545,7 +542,6 @@ def message_raw(request, msgid):
         r = HttpResponse('This message has been hidden.', content_type='text/plain')
     else:
         r = HttpResponse(row[0][2], content_type='text/plain')
-        r['X-pgthread'] = ":%s:" % row[0][0]
         r['xkey'] = 'pgat_{0}'.format(row[0][0])
     return r
 
