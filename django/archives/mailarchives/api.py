@@ -85,7 +85,7 @@ def latest(request, listname):
     # up in this month.
     # XXX: need to deal with the global view, but for now API callers come in directly
     if list and settings.PUBLIC_ARCHIVES:
-        resp['xkey'] = ' '.join(['pgam_{0}/{1}/{2}'.format(l.listid, year, month) for year, month in allyearmonths])
+        resp['xkey'] = ' '.join(['pgam_{0}/{1}/{2}'.format(list.listid, year, month) for year, month in allyearmonths])
     return resp
 
 
