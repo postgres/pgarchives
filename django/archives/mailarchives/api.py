@@ -84,7 +84,7 @@ def latest(request, listname):
     # Make sure this expires from the varnish cache when new entries show
     # up in this month.
     # XXX: need to deal with the global view, but for now API callers come in directly
-    if list:
+    if list and settings.PUBLIC_ARCHIVES:
         resp['xkey'] = ' '.join(['pgam_{0}/{1}/{2}'.format(l.listid, year, month) for year, month in allyearmonths])
     return resp
 
@@ -112,7 +112,8 @@ def thread(request, msgid):
             'atts': [{'id': a.id, 'name': a.filename} for a in m.attachment_set.all()],
         }
         for m in mlist], resp)
-    resp['xkey'] = 'pgat_{0}'.format(msg.threadid)
+    if settings.PUBLIC_ARCHIVES:
+        resp['xkey'] = 'pgat_{0}'.format(msg.threadid)
     return resp
 
 
