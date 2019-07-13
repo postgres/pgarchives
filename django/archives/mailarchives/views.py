@@ -675,6 +675,10 @@ def resend_complete(request, messageid):
     if m.hiddenstatus:
         raise PermissionDenied("Access denied.")
 
+    ensure_message_permissions(request, m.messageid)
+    if m.hiddenstatus:
+        raise PermissionDenied("Access denied.")
+
     lists = List.objects.extra(where=["listid IN (SELECT listid FROM list_threads WHERE threadid=%s)" % m.threadid]).order_by('listname')
 
     return render_nav(NavContext(request, lists[0].listid, lists[0].listname), 'resend_complete.html', {
