@@ -22,7 +22,7 @@ from lib.varnish import VarnishPurger
 def log_failed_message(listid, srctype, src, msg, err):
     try:
         msgid = msg.msgid
-    except:
+    except Exception:
         msgid = "<unknown>"
     log.error("Failed to load message (msgid %s) from %s, spec %s: %s" % (msgid.encode('us-ascii', 'replace'), srctype, src, str(str(err), 'us-ascii', 'replace')))
 
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     cfg.read('%s/archives.ini' % os.path.realpath(os.path.dirname(sys.argv[0])))
     try:
         connstr = cfg.get('db', 'connstr')
-    except:
+    except Exception:
         connstr = 'need_connstr'
 
     conn = psycopg2.connect(connstr)
