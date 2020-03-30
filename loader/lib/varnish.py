@@ -28,6 +28,6 @@ class VarnishPurger(object):
         r = requests.post(purgeurl, data=purgedict, headers={
             'Content-type': 'application/x-www-form-urlencoded',
             'Host': 'www.postgresql.org',
-        })
+        }, timeout=30)
         if r.status_code != 200:
             log.error("Failed to send purge request!")
