@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='listsubscriber',
             name='list',
-            field=models.ForeignKey(to='mailarchives.List'),
+            field=models.ForeignKey(to='mailarchives.List', on_delete=models.CASCADE),
         ),
         migrations.AlterUniqueTogether(
             name='listsubscriber',

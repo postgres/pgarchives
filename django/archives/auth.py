@@ -29,10 +29,10 @@ import base64
 import json
 import socket
 from urllib.parse import urlparse, urlencode, parse_qs
-import urllib.request
-from Crypto.Cipher import AES
-from Crypto.Hash import SHA
-from Crypto import Random
+import requests
+from Cryptodome.Cipher import AES
+from Cryptodome.Hash import SHA
+from Cryptodome import Random
 import time
 
 
@@ -49,11 +49,6 @@ class AuthBackend(ModelBackend):
 
 # Handle login requests by sending them off to the main site
 def login(request):
-    if not hasattr(settings, 'PGAUTH_REDIRECT'):
-        # No pgauth installed, so allow local installs.
-        from django.contrib.auth.views import login
-        return login(request, template_name='admin.html')
-
     if 'next' in request.GET:
         # Put together an url-encoded dict of parameters we're getting back,
         # including a small nonce at the beginning to make sure it doesn't
@@ -63,7 +58,7 @@ def login(request):
         r = Random.new()
         iv = r.read(16)
         encryptor = AES.new(SHA.new(settings.SECRET_KEY.encode('ascii')).digest()[:16], AES.MODE_CBC, iv)
-        cipher = encryptor.encrypt(s + ' ' * (16 - (len(s) % 16)))  # pad to 16 bytes
+        cipher = encryptor.encrypt(s.encode('ascii') + b' ' * (16 - (len(s) % 16)))  # pad to 16 bytes
 
         return HttpResponseRedirect("%s?d=%s$%s" % (
             settings.PGAUTH_REDIRECT,
@@ -138,14 +133,14 @@ def auth_receive(request):
 a different username than %s.
 
 This is almost certainly caused by some legacy data in our database.
-Please send an email to webmaster@postgresql.eu, indicating the username
+Please send an email to webmaster@postgresql.org, indicating the username
 and email address from above, and we'll manually merge the two accounts
 for you.
 
 We apologize for the inconvenience.
 """ % (data['e'][0], data['u'][0]), content_type='text/plain')
 
-        if hasattr(settings, 'PGAUTH_CREATEUSER_CALLBACK'):
+        if getattr(settings, 'PGAUTH_CREATEUSER_CALLBACK', None):
             res = getattr(settings, 'PGAUTH_CREATEUSER_CALLBACK')(
                 data['u'][0],
                 data['e'][0],
@@ -208,18 +203,20 @@ def user_search(searchterm=None, userid=None):
     else:
         q = {'s': searchterm}
 
-    u = urllib.request.urlopen('%ssearch/?%s' % (
-        settings.PGAUTH_REDIRECT,
-        urlencode(q),
-    ))
-    (ivs, datas) = u.read().split('&')
-    u.close()
+    r = requests.get(
+        '{0}search/'.format(settings.PGAUTH_REDIRECT),
+        params=q,
+    )
+    if r.status_code != 200:
+        return []
+
+    (ivs, datas) = r.text.encode('utf8').split(b'&')
 
     # Decryption time
     decryptor = AES.new(base64.b64decode(settings.PGAUTH_KEY),
                         AES.MODE_CBC,
                         base64.b64decode(ivs, "-_"))
-    s = decryptor.decrypt(base64.b64decode(datas, "-_")).rstrip(' ')
+    s = decryptor.decrypt(base64.b64decode(datas, "-_")).rstrip(b' ').decode('utf8')
     j = json.loads(s)
 
     return j

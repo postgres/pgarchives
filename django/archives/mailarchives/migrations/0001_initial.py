@@ -69,11 +69,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='list',
             name='group',
-            field=models.ForeignKey(to='mailarchives.ListGroup', db_column='groupid'),
+            field=models.ForeignKey(to='mailarchives.ListGroup', db_column='groupid', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='attachment',
             name='message',
-            field=models.ForeignKey(to='mailarchives.Message', db_column='message'),
+            field=models.ForeignKey(to='mailarchives.Message', db_column='message', on_delete=models.CASCADE),
         ),
     ]

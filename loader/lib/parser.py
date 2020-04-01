@@ -258,12 +258,16 @@ class ArchivesParser(object):
                 # Don't include it if it looks like an attachment
                 if 'Content-Disposition' in p and p['Content-Disposition'].startswith('attachment'):
                     continue
-                return self.get_payload_as_unicode(p)
+                t = self.get_payload_as_unicode(p)
+                if t:
+                    return t
             if html_instead and p.get_params()[0][0].lower() == 'text/html':
                 # Don't include it if it looks like an attachment
                 if 'Content-Disposition' in p and p['Content-Disposition'].startswith('attachment'):
                     continue
-                return self.get_payload_as_unicode(p)
+                t = self.get_payload_as_unicode(p)
+                if t:
+                    return t
             if p.is_multipart():
                 b = self.recursive_first_plaintext(p, html_instead)
                 if b or b == '':

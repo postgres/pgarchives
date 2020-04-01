@@ -76,7 +76,7 @@ class List(models.Model):
     shortdesc = models.TextField(null=False, blank=False)
     description = models.TextField(null=False, blank=False)
     active = models.BooleanField(null=False, blank=False)
-    group = models.ForeignKey(ListGroup, db_column='groupid')
+    group = models.ForeignKey(ListGroup, db_column='groupid', on_delete=models.CASCADE)
     subscriber_access = models.BooleanField(null=False, blank=False, default=False, help_text="Subscribers can access contents (default is admins only)")
 
     @property
@@ -90,7 +90,7 @@ class List(models.Model):
 
 
 class Attachment(models.Model):
-    message = models.ForeignKey(Message, null=False, blank=False, db_column='message')
+    message = models.ForeignKey(Message, null=False, blank=False, db_column='message', on_delete=models.CASCADE)
     filename = models.CharField(max_length=1000, null=False, blank=False)
     contenttype = models.CharField(max_length=1000, null=False, blank=False)
     # attachment = bytea, not supported by django at this point
@@ -113,7 +113,7 @@ class ListSubscriber(models.Model):
     # Only used when public access is not allowed.
     # We set the username of the community account instead of a
     # foreign key, because the user might not exist.
-    list = models.ForeignKey(List, null=False, blank=False)
+    list = models.ForeignKey(List, null=False, blank=False, on_delete=models.CASCADE)
     username = models.CharField(max_length=30, null=False, blank=False)
 
     class Meta:
@@ -122,8 +122,8 @@ class ListSubscriber(models.Model):
 
 
 class ResendMessage(models.Model):
-    message = models.ForeignKey(Message, null=False, blank=False)
-    sendto = models.ForeignKey(User, null=False, blank=False)
+    message = models.ForeignKey(Message, null=False, blank=False, on_delete=models.CASCADE)
+    sendto = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
     registeredat = models.DateTimeField(null=False, blank=False)
 
     class Meta:
@@ -131,7 +131,7 @@ class ResendMessage(models.Model):
 
 
 class LastResentMessage(models.Model):
-    sentto = models.ForeignKey(User, null=False, blank=False, primary_key=True)
+    sentto = models.ForeignKey(User, null=False, blank=False, primary_key=True, on_delete=models.CASCADE)
     sentat = models.DateTimeField(null=False, blank=False)
 
 
@@ -144,7 +144,7 @@ class ApiClient(models.Model):
 
 
 class ThreadSubscription(models.Model):
-    apiclient = models.ForeignKey(ApiClient, null=False, blank=False)
+    apiclient = models.ForeignKey(ApiClient, null=False, blank=False, on_delete=models.CASCADE)
     threadid = models.IntegerField(null=False, blank=False)
 
     class Meta:
