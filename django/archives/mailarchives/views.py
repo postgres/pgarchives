@@ -31,7 +31,7 @@ from .models import *
 def ensure_logged_in(request):
     if settings.PUBLIC_ARCHIVES:
         return
-    if hasattr(request, 'user') and request.user.is_authenticated():
+    if hasattr(request, 'user') and request.user.is_authenticated:
         return
     raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
 
@@ -41,7 +41,7 @@ def ensure_logged_in(request):
 def ensure_list_permissions(request, l):
     if settings.PUBLIC_ARCHIVES:
         return
-    if hasattr(request, 'user') and request.user.is_authenticated():
+    if hasattr(request, 'user') and request.user.is_authenticated:
         if request.user.is_superuser:
             return
         if l.subscriber_access and ListSubscriber.objects.filter(list=l, username=request.user.username).exists():
@@ -59,7 +59,7 @@ def ensure_list_permissions(request, l):
 def ensure_message_permissions(request, msgid):
     if settings.PUBLIC_ARCHIVES:
         return
-    if hasattr(request, 'user') and request.user.is_authenticated():
+    if hasattr(request, 'user') and request.user.is_authenticated:
         if request.user.is_superuser:
             return
 
@@ -635,7 +635,7 @@ def resend(request, messageid):
     if not settings.ALLOW_RESEND:
         raise PermissionDenied("Access denied.")
 
-    if not (hasattr(request, 'user') and request.user.is_authenticated()):
+    if not (hasattr(request, 'user') and request.user.is_authenticated):
         raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
 
     ensure_message_permissions(request, messageid)
