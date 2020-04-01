@@ -131,7 +131,7 @@ class ResendMessage(models.Model):
 
 
 class LastResentMessage(models.Model):
-    sentto = models.ForeignKey(User, null=False, blank=False, primary_key=True, on_delete=models.CASCADE)
+    sentto = models.OneToOneField(User, null=False, blank=False, primary_key=True, on_delete=models.CASCADE)
     sentat = models.DateTimeField(null=False, blank=False)
 
 
