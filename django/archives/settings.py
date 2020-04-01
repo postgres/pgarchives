@@ -77,7 +77,7 @@ STATICFILES_DIRS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '7j9q&&!g26rkh!=g%1zb@20b^k^gmzy4=!mhzu2wesxb9b%16m'
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
 ]
 
@@ -150,12 +150,12 @@ except ImportError:
 
 # If this is a non-public site, enable middleware for handling logins etc
 if ALLOW_RESEND or not PUBLIC_ARCHIVES:
-    MIDDLEWARE_CLASSES = [
+    MIDDLEWARE = [
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
-    ] + MIDDLEWARE_CLASSES
-    MIDDLEWARE_CLASSES.append('archives.mailarchives.redirecthandler.RedirectMiddleware')
+    ] + MIDDLEWARE
+    MIDDLEWARE.append('archives.mailarchives.redirecthandler.RedirectMiddleware')
 
     INSTALLED_APPS = [
         'django.contrib.sessions',
