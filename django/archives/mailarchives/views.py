@@ -383,7 +383,7 @@ def attachment(request, attid):
 
     ensure_message_permissions(request, r[0][2])
 
-    return HttpResponse(r[0][3], content_type=r[0][1])
+    return HttpResponse(bytes(r[0][3]), content_type=r[0][1])
 
 
 def _build_thread_structure(threadid):
@@ -544,7 +544,7 @@ def message_raw(request, msgid):
     if row[0][1]:
         r = HttpResponse('This message has been hidden.', content_type='text/plain')
     else:
-        r = HttpResponse(row[0][2], content_type='text/plain')
+        r = HttpResponse(bytes(row[0][2]), content_type='text/plain')
         if settings.PUBLIC_ARCHIVES:
             r['xkey'] = 'pgat_{0}'.format(row[0][0])
     return r
