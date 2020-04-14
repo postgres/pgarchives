@@ -28,7 +28,7 @@ from django.conf import settings
 import base64
 import json
 import socket
-from urllib.parse import urlparse, urlencode, parse_qs
+from urllib.parse import urlparse, urlencode, parse_qs, quote_plus
 import requests
 from Cryptodome.Cipher import AES
 from Cryptodome.Hash import SHA
@@ -53,7 +53,7 @@ def login(request):
         # Put together an url-encoded dict of parameters we're getting back,
         # including a small nonce at the beginning to make sure it doesn't
         # encrypt the same way every time.
-        s = "t=%s&%s" % (int(time.time()), urlencode({'r': request.GET['next']}))
+        s = "t=%s&%s" % (int(time.time()), urlencode({'r': quote_plus(request.GET['next'], safe='/')}))
         # Now encrypt it
         r = Random.new()
         iv = r.read(16)
