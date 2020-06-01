@@ -46,6 +46,7 @@ if __name__ == "__main__":
     optparser.add_option('-v', '--verbose', dest='verbose', action='store_true', help='Verbose output')
     optparser.add_option('--force-date', dest='force_date', help='Override date (used for dates that can\'t be parsed)')
     optparser.add_option('--filter-msgid', dest='filter_msgid', help='Only process message with given msgid')
+    optparser.add_option('--overwrite', dest='overwrite', action='store_true', help='Overwrite full contents of message')
 
     (opt, args) = optparser.parse_args()
 
@@ -124,7 +125,7 @@ if __name__ == "__main__":
                     log_failed_message(listid, "directory", os.path.join(opt.directory, x), ap, e)
                     opstatus.failed += 1
                     continue
-                ap.store(conn, listid)
+                ap.store(conn, listid, opt.overwrite, opt.overwrite)
                 purges.update(ap.purges)
             if opt.interactive:
                 print("Interactive mode, committing transaction")
@@ -154,7 +155,7 @@ if __name__ == "__main__":
                 log_failed_message(listid, "mbox", opt.mbox, ap, e)
                 opstatus.failed += 1
                 continue
-            ap.store(conn, listid)
+            ap.store(conn, listid, opt.overwrite, opt.overwrite)
             purges.update(ap.purges)
         if mboxparser.returncode():
             log.error("Failed to parse mbox:")
@@ -170,7 +171,7 @@ if __name__ == "__main__":
             log_failed_message(listid, "stdin", "", ap, e)
             conn.close()
             sys.exit(1)
-        ap.store(conn, listid)
+        ap.store(conn, listid, opt.overwrite, opt.overwrite)
         purges.update(ap.purges)
         if opstatus.stored:
             log.log("Stored message with message-id %s" % ap.msgid)

@@ -16,7 +16,7 @@ class ArchivesParserStorage(ArchivesParser):
     def purge_thread(self, threadid):
         self.purges.add(int(threadid))
 
-    def store(self, conn, listid, overwrite=False):
+    def store(self, conn, listid, overwrite=False, overwrite_raw=False):
         curs = conn.cursor()
 
         # Potentially add the information that there exists a mail for
@@ -51,6 +51,15 @@ class ArchivesParserStorage(ArchivesParser):
             if overwrite:
                 pk = r[0][2]
                 self.purge_thread(r[0][0])
+                if overwrite_raw:
+                    # For full overwrite, we also update the raw text of the message. This is an
+                    # uncommon enough operation that we'll just do it as a separate command.
+                    log.status("Full raw overwrite of %s" % self.msgid)
+                    curs.execute("UPDATE messages SET rawtxt=%(raw)s WHERE id=%(id)s", {
+                        'raw': bytearray(self.rawtxt),
+                        'id': pk,
+                    })
+
                 # Overwrite an existing message. We do not attempt to
                 # "re-thread" a message, we just update the contents. We
                 # do remove all attachments and rewrite them. Of course, we
