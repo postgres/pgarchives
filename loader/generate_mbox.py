@@ -96,7 +96,7 @@ if __name__ == "__main__":
                                      os.path.join(fullpath, "{0}.{0:04d}{1:02d}".format(year, month)))
     else:
         # Parse year and month
-        m = re.match('^(\d{4})-(\d{2})$', args.month)
+        m = re.match(r'^(\d{4})-(\d{2})$', args.month)
         if not m:
             print("Month must be specified on format YYYY-MM, not {0}".format(args.month))
             sys.exit(1)

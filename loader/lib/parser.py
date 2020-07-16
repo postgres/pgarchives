@@ -13,7 +13,7 @@ import io
 from lib.exception import IgnorableException
 from lib.log import log
 
-_re_received = re.compile('^from .*;([^(]+)(\s*\(envelope-from.*)?', re.I | re.DOTALL)
+_re_received = re.compile(r'^from .*;([^(]+)(\s*\(envelope-from.*)?', re.I | re.DOTALL)
 
 
 class ArchivesParser(object):
@@ -176,7 +176,7 @@ class ArchivesParser(object):
 
     # Regular expression matching the PostgreSQL custom mail footer that
     # is appended to all emails.
-    _re_footer = re.compile('(.*)--\s+\nSent via [^\s]+ mailing list \([^\)]+\)\nTo make changes to your subscription:\nhttp://www\.postgresql\.org/mailpref/[^\s]+\s*$', re.DOTALL)
+    _re_footer = re.compile(r'(.*)--\s+\nSent via [^\s]+ mailing list \([^\)]+\)\nTo make changes to your subscription:\nhttp://www\.postgresql\.org/mailpref/[^\s]+\s*$', re.DOTALL)
 
     def get_body(self):
         b = self._get_body()
@@ -403,7 +403,7 @@ class ArchivesParser(object):
             self.attachments_found_first_plaintext = True
             # No name, and text/plain, so ignore it
 
-    re_msgid = re.compile('^\s*<(.*)>\s*')
+    re_msgid = re.compile(r'^\s*<(.*)>\s*')
 
     def clean_messageid(self, messageid, ignorebroken=False):
         m = self.re_msgid.match(messageid)
@@ -416,10 +416,10 @@ class ArchivesParser(object):
 
 #    _date_multi_re = re.compile(' \((\w+\s\w+(\s+\w+)*|)\)$')
     # Now using [^\s] instead of \w, to work with japanese chars
-    _date_multi_re = re.compile(' \(([^\s]+\s[^\s]+(\s+[^\s]+)*|)\)$')
-    _date_multi_re2 = re.compile(' ([\+-]\d{4}) \([^)]+\)$')
-    _date_multiminus_re = re.compile(' -(-\d+)$')
-    _date_offsetnoplus_re = re.compile(' (\d{4})$')
+    _date_multi_re = re.compile(r' \(([^\s]+\s[^\s]+(\s+[^\s]+)*|)\)$')
+    _date_multi_re2 = re.compile(r' ([\+-]\d{4}) \([^)]+\)$')
+    _date_multiminus_re = re.compile(r' -(-\d+)$')
+    _date_offsetnoplus_re = re.compile(r' (\d{4})$')
 
     def forgiving_date_decode(self, d):
         if d.strip() == '':
@@ -503,7 +503,7 @@ class ArchivesParser(object):
         return str(s, charset and self.clean_charset(charset) or 'us-ascii', errors='ignore').strip(' ')
 
     # Workaround for broken quoting in some MUAs (see below)
-    _re_mailworkaround = re.compile('"(=\?[^\?]+\?[QB]\?[^\?]+\?=)"', re.IGNORECASE)
+    _re_mailworkaround = re.compile(r'"(=\?[^\?]+\?[QB]\?[^\?]+\?=)"', re.IGNORECASE)
 
     def _decode_mime_header(self, hdr, email_workaround):
         if hdr is None:

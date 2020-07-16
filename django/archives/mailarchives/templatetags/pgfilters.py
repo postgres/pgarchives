@@ -28,7 +28,7 @@ def hidemail(value):
 #
 # Those are not email addresses, so ignore them. The links won't work if they
 # are mangled.
-_re_mail = re.compile('(/m(essage-id)?/)?[^()<>@,;:\/\s"\'&|]+@[^()<>@,;:\/\s"\'&|]+')
+_re_mail = re.compile(r'(/m(essage-id)?/)?[^()<>@,;:\/\s"\'&|]+@[^()<>@,;:\/\s"\'&|]+')
 
 
 def _rewrite_email_match(match):
