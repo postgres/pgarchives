@@ -35,7 +35,7 @@ def generate_single_mbox(conn, listid, year, month, destination):
             try:
                 x = msg.as_string(unixfrom=True)
                 f.write(x)
-            except UnicodeEncodeError as e:
+            except UnicodeEncodeError:
                 print("Not including {0}, unicode error".format(msg['message-id']))
             except Exception as e:
                 print("Not including {0}, exception {1}".format(msg['message-id'], e))
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     cfg.read(os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])), 'archives.ini'))
     try:
         connstr = cfg.get('db', 'connstr')
-    except:
+    except Exception:
         connstr = 'need_connstr'
 
     conn = psycopg2.connect(connstr)

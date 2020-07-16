@@ -720,7 +720,7 @@ def search(request):
                 'names': request.POST['ln'].split(','),
             })
             lists = [x for x, in curs.fetchall()]
-        except:
+        except Exception:
             # If failing to parse list of lists, just search all
             lists = None
     else:

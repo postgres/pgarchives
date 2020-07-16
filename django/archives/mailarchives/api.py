@@ -41,7 +41,7 @@ def latest(request, listname):
     if 'n' in request.GET:
         try:
             limit = int(request.GET['n'])
-        except:
+        except Exception:
             limit = 0
     else:
         limit = 50

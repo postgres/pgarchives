@@ -30,7 +30,7 @@ class ArchivesParser(object):
         try:
             if self.clean_messageid(self.decode_mime_header(self.get_mandatory('Message-ID'))) == msgid:
                 return True
-        except Exception as e:
+        except Exception:
             return False
 
     def analyze(self, date_override=None):
@@ -527,7 +527,7 @@ class ArchivesParser(object):
 
         try:
             return " ".join([self._maybe_decode(s, charset) for s, charset in decode_header(hdr)])
-        except HeaderParseError as e:
+        except HeaderParseError:
             # Parser error is typically someone specifying an encoding,
             # but then not actually using that encoding. We'll do the best
             # we can, which is cut it down to ascii and ignore errors
@@ -553,13 +553,13 @@ class ArchivesParser(object):
             if x is None:
                 raise Exception()
             return x
-        except:
+        except Exception:
             raise IgnorableException("Mandatory field '%s' is missing" % fieldname)
 
     def get_optional(self, fieldname):
         try:
             return self.msg[fieldname]
-        except:
+        except Exception:
             return ''
 
     def html_clean(self, html):
@@ -585,7 +585,7 @@ class ArchivesParser(object):
             cleaner = HTMLCleaner()
             cleaner.feed(html)
             return cleaner.get_text()
-        except Exception as e:
+        except Exception:
             # Failed to parse the html, thus failed to clean it. so we must
             # give up...
             return None

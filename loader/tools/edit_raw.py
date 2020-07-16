@@ -32,7 +32,7 @@ if __name__ == "__main__":
     cfg.read('%s/../archives.ini' % os.path.realpath(os.path.dirname(sys.argv[0])))
     try:
         connstr = cfg.get('db', 'connstr')
-    except:
+    except Exception:
         connstr = 'need_connstr'
 
     conn = psycopg2.connect(connstr)
@@ -92,6 +92,6 @@ if __name__ == "__main__":
     finally:
         try:
             f.close()
-        except:
+        except Exception:
             pass
         os.unlink(f.name)

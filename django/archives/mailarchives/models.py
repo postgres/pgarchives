@@ -56,7 +56,7 @@ class Message(models.Model):
             return None
         try:
             return hide_reasons[self.hiddenstatus]
-        except:
+        except Exception:
             # Weird value
             return 'This message has been hidden.'
 
