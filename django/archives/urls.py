@@ -72,4 +72,5 @@ if settings.ALLOW_RESEND or not settings.PUBLIC_ARCHIVES:
         url(r'^(?:list/_auth/)?accounts/login/?$', archives.auth.login),
         url(r'^(?:list/_auth/)?accounts/logout/?$', archives.auth.logout),
         url(r'^(?:list/_auth/)?auth_receive/$', archives.auth.auth_receive),
+        url(r'^(?:list/_auth/)?auth_api/$', archives.auth.auth_api),
     ]
