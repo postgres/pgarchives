@@ -3,7 +3,15 @@
  <head>
   <title>PostgreSQL: {%block title%}{%endblock%}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta http-equiv="Content-Type" content="text/xhtml; charset=utf-8" />
+  <meta http-equiv="Content-Type" content="text/xhtml; charset=utf-8" />{%if og%}
+  <meta property="og:url" content="https://www.postgresql.org/{{og.url}}" />
+  <meta property="og:type" content="article" />
+  <meta property="og:article:author" content="{{og.author}}" />
+  <meta property="og:published_time" content="{{og.time|date:"c"}}" />
+  <meta property="og:image" content="https://www.postgresql.org/media-archives/img/about/press/elephant.png" />
+  <meta property="og:title" content="{{og.title}}" />
+  <meta property="og:description" content="{{og.description|truncatewords:"20"}}" />
+  <meta property="og:site_name" content="PostgreSQL Mailing List Archives" />{%endif%}
   {%block meta%}{%endblock%} {# used for custom meta tags such as description which we don't want for every page #}
   <meta name="theme-color" content="#336791"/>
   <meta name="copyright" content="The PostgreSQL Global Development Group" />

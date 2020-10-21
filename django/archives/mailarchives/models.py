@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from email.utils import parseaddr
+
 # Reason a message was hidden.
 # We're intentionally putting the prefix text in the array here, since
 # we might need that flexibility in the future.
@@ -38,6 +40,12 @@ class Message(models.Model):
     @property
     def shortdate(self):
         return self.date.strftime("%Y%m%d%H%M")
+
+    def from_name_only(self):
+        try:
+            return parseaddr(self.mailfrom)[0]
+        except Exception:
+            return ''
 
     # We explicitly cache the attachments here, so we can use them
     # multiple times from templates without generating multiple queries

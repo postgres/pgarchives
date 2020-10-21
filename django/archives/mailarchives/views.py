@@ -19,6 +19,7 @@ import calendar
 import email.parser
 import email.policy
 from io import BytesIO
+from urllib.parse import quote
 
 import json
 
@@ -490,6 +491,13 @@ def message(request, msgid):
         'parent': parent,
         'lists': lists,
         'nextprev': nextprev,
+        'og': {
+            'url': 'message-id/{}'.format(quote(m.messageid)),
+            'author': m.from_name_only(),
+            'time': m.date,
+            'title': m.subject,
+            'description': m.bodytxt,
+        },
     })
     if settings.PUBLIC_ARCHIVES:
         r['xkey'] = 'pgat_{0}'.format(m.threadid)
@@ -521,6 +529,12 @@ def message_flat(request, msgid):
         'allmsg': allmsg,
         'lists': lists,
         'isfirst': isfirst,
+        'og': {
+            'url': 'message-id/flat/{}'.format(quote(msg.messageid)),
+            'author': msg.from_name_only(),
+            'time': msg.date,
+            'title': msg.subject,
+        },
     })
     if settings.PUBLIC_ARCHIVES:
         r['xkey'] = 'pgat_{0}'.format(msg.threadid)
