@@ -34,7 +34,7 @@ def ensure_logged_in(request):
         return
     if hasattr(request, 'user') and request.user.is_authenticated:
         return
-    raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
+    raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, quote(request.path)))
 
 
 # Ensure the user has permissions to access a list. If not, raise
@@ -51,7 +51,7 @@ def ensure_list_permissions(request, l):
         raise PermissionDenied("Access denied.")
 
     # Redirect to a login page
-    raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
+    raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, quote(request.path)))
 
 
 # Ensure the user has permissions to access a message. In order to view
@@ -88,7 +88,7 @@ def ensure_message_permissions(request, msgid):
         raise PermissionDenied("Access denied.")
 
     # Redirect to a login page
-    raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
+    raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, quote(request.path)))
 
 
 # Decorator to set cache age
