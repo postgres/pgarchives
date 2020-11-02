@@ -1,5 +1,5 @@
 [Unit]
-Description=pgarchives: remail resender
+Description=pgarchives: email resender
 After=postgresql.service
 
 [Service]
