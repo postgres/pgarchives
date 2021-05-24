@@ -650,7 +650,7 @@ def resend(request, messageid):
         raise PermissionDenied("Access denied.")
 
     if not (hasattr(request, 'user') and request.user.is_authenticated):
-        raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
+        raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, quote(request.path)))
 
     ensure_message_permissions(request, messageid)
 
