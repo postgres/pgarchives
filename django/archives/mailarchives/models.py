@@ -141,20 +141,3 @@ class ResendMessage(models.Model):
 class LastResentMessage(models.Model):
     sentto = models.OneToOneField(User, null=False, blank=False, primary_key=True, on_delete=models.CASCADE)
     sentat = models.DateTimeField(null=False, blank=False)
-
-
-class ApiClient(models.Model):
-    apikey = models.CharField(max_length=100, null=False, blank=False)
-    postback = models.URLField(max_length=500, null=False, blank=False)
-
-    class Meta:
-        db_table = 'apiclients'
-
-
-class ThreadSubscription(models.Model):
-    apiclient = models.ForeignKey(ApiClient, null=False, blank=False, on_delete=models.CASCADE)
-    threadid = models.IntegerField(null=False, blank=False)
-
-    class Meta:
-        db_table = 'threadsubscriptions'
-        unique_together = (('apiclient', 'threadid'),)
