@@ -9,3 +9,9 @@ server=localhost:9911
 heloname=localhost
 resender=noreply@example.com
 
+[pglister]
+# synchronize subscribers between pgarchives and pglister
+subscribers=0
+root=/path/to/pglister
+myname=pgarchives
+apikey=CHANGEME
