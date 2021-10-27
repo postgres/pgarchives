@@ -20,6 +20,7 @@ import email.parser
 import email.policy
 from io import BytesIO
 from urllib.parse import quote
+import ipaddress
 
 import json
 
@@ -709,7 +710,12 @@ def search(request):
         return HttpResponseForbidden('Not public archives')
 
     # Only certain hosts are allowed to call the search API
-    if not request.META['REMOTE_ADDR'] in settings.SEARCH_CLIENTS:
+    allowed = False
+    for ip_range in settings.SEARCH_CLIENTS:
+        if ipaddress.ip_address(request.META['REMOTE_ADDR']) in ipaddress.ip_network(ip_range):
+            allowed = True
+            break
+    if not allowed:
         return HttpResponseForbidden('Invalid host')
 
     curs = connection.cursor()
