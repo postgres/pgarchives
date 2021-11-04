@@ -33,7 +33,7 @@ def log_failed_message(listid, srctype, src, msg, err):
         'msgid': msgid,
         'srctype': srctype,
         'src': src,
-        'err': str(str(err), 'us-ascii', 'replace'),
+        'err': str(err),
     })
 
 
