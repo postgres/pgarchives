@@ -1,6 +1,7 @@
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.conf import settings
+import ipaddress
 
 from .views import cache
 from .models import Message, List
@@ -8,12 +9,19 @@ from .models import Message, List
 import json
 
 
+def is_host_allowed(request):
+    for ip_range in settings.API_CLIENTS:
+        if ipaddress.ip_address(request.META['REMOTE_ADDR']) in ipaddress.ip_network(ip_range):
+            return True
+    return False
+
+
 @cache(hours=4)
 def listinfo(request):
     if not settings.PUBLIC_ARCHIVES:
         return HttpResponseForbidden('No API access on private archives for now')
 
-    if not request.META['REMOTE_ADDR'] in settings.API_CLIENTS:
+    if not is_host_allowed(request):
         return HttpResponseForbidden('Invalid host')
 
     resp = HttpResponse(content_type='application/json')
@@ -33,7 +41,7 @@ def latest(request, listname):
     if not settings.PUBLIC_ARCHIVES:
         return HttpResponseForbidden('No API access on private archives for now')
 
-    if not request.META['REMOTE_ADDR'] in settings.API_CLIENTS:
+    if not is_host_allowed(request):
         return HttpResponseForbidden('Invalid host')
 
     # Return the latest <n> messages on this list.
@@ -94,7 +102,7 @@ def thread(request, msgid):
     if not settings.PUBLIC_ARCHIVES:
         return HttpResponseForbidden('No API access on private archives for now')
 
-    if not request.META['REMOTE_ADDR'] in settings.API_CLIENTS:
+    if not is_host_allowed(request):
         return HttpResponseForbidden('Invalid host')
 
     # Return metadata about a single thread. A list of all the emails
