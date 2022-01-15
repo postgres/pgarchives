@@ -145,6 +145,8 @@ API_CLIENTS = ('127.0.0.1',)
 PUBLIC_ARCHIVES = False
 ALLOW_RESEND = False
 
+PGWEB_ADDRESS = 'https://www.postgresql.org'
+
 try:
     from .settings_local import *
 except ImportError:

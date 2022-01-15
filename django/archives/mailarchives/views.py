@@ -174,6 +174,7 @@ class NavContext(object):
         self.request = request
         self.ctx = {
             'allow_resend': settings.ALLOW_RESEND,
+            'PGWEB_ADDRESS': settings.PGWEB_ADDRESS,
         }
 
         if all_groups:

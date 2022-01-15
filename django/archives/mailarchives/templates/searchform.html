@@ -1,6 +1,6 @@
 <h3>Search the Archives</h3>
 
-<form method="get" action="/search/">
+<form method="get" action="{{ PGWEB_ADDRESS }}/search/">
   <input type="hidden" name="m" value="1">
   {%if searchform_listname%} <input type="hidden" name="ln" value="{{searchform_listname}}"/>{%endif%}
   <div class="row">
@@ -17,7 +17,7 @@
         <small class="form-text text-muted">(enter a message-id to go directly to that message)</small>
       </div>
       <div class="input-group">
-        <a href="https://www.postgresql.org/search/?m=1{%if searchform_listname%}&amp;ln={{searchform_listname}}{%endif%}">Advanced Search</a>
+        <a href="{{ PGWEB_ADDRESS }}/search/?m=1{%if searchform_listname%}&amp;ln={{searchform_listname}}{%endif%}">Advanced Search</a>
       </div>
     </div><!-- /.col-lg-6 -->
   </div><!-- /.row -->
