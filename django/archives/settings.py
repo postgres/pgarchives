@@ -143,6 +143,9 @@ RESEND_RATE_LIMIT_SECONDS = 30
 SEARCH_CLIENTS = ('127.0.0.1',)
 API_CLIENTS = ('127.0.0.1',)
 PUBLIC_ARCHIVES = False
+# pgauth configuration if using private archives
+PGAUTH_REDIRECT = "http://localhost:8000/account/auth/12/"
+PGAUTH_KEY = "encryption_key"
 ALLOW_RESEND = False
 
 PGWEB_ADDRESS = 'https://www.postgresql.org'
@@ -164,6 +167,10 @@ if ALLOW_RESEND or not PUBLIC_ARCHIVES:
     INSTALLED_APPS = [
         'django.contrib.sessions',
     ] + INSTALLED_APPS
+
+    AUTHENTICATION_BACKENDS = (
+        'archives.auth.AuthBackend',
+    )
 
     if not PUBLIC_ARCHIVES:
         from archives.util import validate_new_user
