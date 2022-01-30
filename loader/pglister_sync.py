@@ -60,7 +60,7 @@ if __name__ == "__main__":
             'name': l['listname'],
         })
         if curs.rowcount == 0:
-            curs.execute("INSERT INTO lists (listname, shortdesc, description, active, groupid) SELECT %(name)s, %(name)s, %(desc)s, 't', groupid FROM listgroups WHERE groupname=%(groupname)s RETURNING listid, listname", {
+            curs.execute("INSERT INTO lists (listname, shortdesc, description, active, groupid, subscriber_access) SELECT %(name)s, %(name)s, %(desc)s, 't', groupid, 'f' FROM listgroups WHERE groupname=%(groupname)s RETURNING listid, listname", {
                 'name': l['listname'],
                 'desc': l['longdesc'],
                 'groupname': l['group']['groupname'],
