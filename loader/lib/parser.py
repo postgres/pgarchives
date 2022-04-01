@@ -384,15 +384,17 @@ class ArchivesParser(object):
                 # However, this will also *always* catch the MIME part added
                 # by majordomo with the footer. So if that one is present,
                 # we need to explicitly exclude it again.
+                # For this reason, we need it in both bytes and string format, so we can apply the regexp
                 try:
                     b = container.get_payload(decode=True)
+                    s = self.get_payload_as_unicode(container)
                 except AssertionError:
                     # Badly encoded data can throw an exception here, where the python
                     # libraries fail to handle it and enters a cannot-happen path.
                     # In which case we just ignore this attachment.
                     return
 
-                if isinstance(b, str) and not self._re_footer.match(b):
+                if isinstance(b, bytes) and isinstance(s, str) and not self._re_footer.match(s):
                     # We know there is no name for this one
                     self.attachments.append((None, container.get_content_type(), b))
                 return
