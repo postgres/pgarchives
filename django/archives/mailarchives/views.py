@@ -120,24 +120,25 @@ def nocache(fn):
 # Decorator to require http auth
 def antispam_auth(fn):
     def _antispam_auth(request, *_args, **_kwargs):
-        if not settings.PUBLIC_ARCHIVES:
-            return fn(request, *_args, **_kwargs)
-
+        # If the user has explicitly included a valid authentication header with the old style
+        # Basic auth, we accept that one as it's likely an automated script.
         if 'HTTP_AUTHORIZATION' in request.META:
             auth = request.META['HTTP_AUTHORIZATION'].split()
-            if len(auth) != 2:
-                return HttpResponseForbidden("Invalid authentication")
-            if auth[0].lower() == "basic":
+            if len(auth) == 2 and auth[0].lower() == "basic":
                 user, pwd = base64.b64decode(auth[1]).decode('utf8', errors='ignore').split(':', 1)
                 if user == 'archives' and pwd == 'antispam':
                     # Actually run the function if auth is correct
                     resp = fn(request, *_args, **_kwargs)
                     return resp
-        # Require authentication
-        response = HttpResponse()
-        response.status_code = 401
-        response['WWW-Authenticate'] = 'Basic realm="Please authenticate with user archives and password antispam"'
-        return response
+
+        # For all other requests, require authentication, but be happy with any
+        # authentication coming from our community auth system.
+        if not (hasattr(request, 'user') and request.user.is_authenticated):
+            raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, quote(request.path)))
+
+        # Actually run the function if auth is correct
+        resp = fn(request, *_args, **_kwargs)
+        return resp
 
     return _antispam_auth
 
