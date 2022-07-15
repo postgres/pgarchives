@@ -587,7 +587,7 @@ def _build_mbox(query, params, msgid=None):
         s = BytesIO(raw)
         parser = email.parser.BytesParser(policy=email.policy.compat32)
         msg = parser.parse(s)
-        return msg.as_string(unixfrom=True)
+        return msg.as_bytes(unixfrom=True)
 
     def _message_stream(first):
         yield _one_message(first[1])
