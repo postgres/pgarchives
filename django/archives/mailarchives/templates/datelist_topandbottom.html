@@ -1,11 +1,11 @@
 {%if messages%}
 <h3>Browse Archives</h3>
 {%with messages|first as firstmsg%}
-<a href="/list/{{list.listname}}/before/{{firstmsg.shortdate}}">Prev</a>
+<a href="/list/{{list.listname}}/before/{{firstmsg.shortdate}}" rel="nofollow">Prev</a>
 {%endwith%}
 |
 {%with messages|last as lastmsg%}
-<a href="/list/{{list.listname}}/since/{{lastmsg.shortdate}}">Next</a>
+<a href="/list/{{list.listname}}/since/{{lastmsg.shortdate}}" rel="nofollow">Next</a>
 {%endwith%}
 {%endif%}
 
