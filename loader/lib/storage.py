@@ -128,7 +128,7 @@ class ArchivesParserStorage(ArchivesParser):
                             best_parentid = all_parents[i][0]
                             best_threadid = all_parents[i][2]
             if best_threadid == -1:
-                raise Exception("Message %s, resolve failed in a way it shouldn't :P" % selg.msgid)
+                raise Exception("Message %s, resolve failed in a way it shouldn't :P" % self.msgid)
             self.parentid = best_parentid
             self.threadid = best_threadid
             # Slice away all matches that are worse than the one we wanted
