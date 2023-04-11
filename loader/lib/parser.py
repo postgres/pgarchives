@@ -137,6 +137,8 @@ class ArchivesParser(object):
             return 'big5'
         if lcharset == 'x-unicode-2-0-utf-7':
             return 'utf-7'
+        if lcharset == 'shift-jis' or lcharset == 'jis':
+            return 'shift_jisx0213'
         if lcharset == 'tscii':
             # No support for this charset :S Map it down to ascii
             # and throw away all the rest. sucks, but we have to
