@@ -387,7 +387,9 @@ def attachment(request, attid):
 
     ensure_message_permissions(request, r[0][2])
 
-    return HttpResponse(bytes(r[0][3]), content_type=r[0][1])
+    return HttpResponse(bytes(r[0][3]), content_type=r[0][1], headers={
+        'X-attached-to-message': r[0][2],
+    })
 
 
 def _build_thread_structure(threadid):
