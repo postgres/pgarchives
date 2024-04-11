@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import re_path
 from django.conf import settings
 
 # Uncomment the next two lines to enable the admin:
@@ -10,57 +10,57 @@ import archives.mailarchives.api
 
 urlpatterns = [
     # Examples:
-    # url(r'^$', 'archives.views.home', name='home),
-    # url(r'^archives/', include('archives.foo.urls')),
+    # re_path(r'^$', 'archives.views.home', name='home),
+    # re_path(r'^archives/', include('archives.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    # re_path(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
+    # re_path(r'^admin/', include(admin.site.urls)),
 
-    url(r'^web_sync_timestamp$', archives.mailarchives.views.web_sync_timestamp),
-    url(r'^$', archives.mailarchives.views.index),
-    url(r'^list/$', archives.mailarchives.views.index),
-    url(r'^list/group/(\d+)/$', archives.mailarchives.views.groupindex),
+    re_path(r'^web_sync_timestamp$', archives.mailarchives.views.web_sync_timestamp),
+    re_path(r'^$', archives.mailarchives.views.index),
+    re_path(r'^list/$', archives.mailarchives.views.index),
+    re_path(r'^list/group/(\d+)/$', archives.mailarchives.views.groupindex),
 
     # some user agents generate broken URLs that include <>
-    url(r'^(?P<prefix>message-id/(|flat/|raw/))<(?P<msgid>.*)>$', archives.mailarchives.views.re_redirect),
+    re_path(r'^(?P<prefix>message-id/(|flat/|raw/))<(?P<msgid>.*)>$', archives.mailarchives.views.re_redirect),
 
     # message-id ending in a slash needs to be redirected to one without it
-    url(r'^(message-id/.*)/$', archives.mailarchives.views.slash_redirect),
+    re_path(r'^(message-id/.*)/$', archives.mailarchives.views.slash_redirect),
 
     # Match regular messages
-    url(r'^message-id/flat/(.+)$', archives.mailarchives.views.message_flat),
-    url(r'^message-id/raw/(.+)$', archives.mailarchives.views.message_raw),
-    url(r'^message-id/mbox/(.+)$', archives.mailarchives.views.message_mbox),
-    url(r'^message-id/resend/(.+)/complete$', archives.mailarchives.views.resend_complete),
-    url(r'^message-id/resend/(.+)$', archives.mailarchives.views.resend),
-    url(r'^message-id/attachment/(\d+)/.*$', archives.mailarchives.views.attachment),
-    url(r'^message-id/legacy/([\w-]+)/(\d+)-(\d+)/msg(\d+).php$', archives.mailarchives.views.legacy),
-    url(r'^message-id/(.+)$', archives.mailarchives.views.message),
+    re_path(r'^message-id/flat/(.+)$', archives.mailarchives.views.message_flat),
+    re_path(r'^message-id/raw/(.+)$', archives.mailarchives.views.message_raw),
+    re_path(r'^message-id/mbox/(.+)$', archives.mailarchives.views.message_mbox),
+    re_path(r'^message-id/resend/(.+)/complete$', archives.mailarchives.views.resend_complete),
+    re_path(r'^message-id/resend/(.+)$', archives.mailarchives.views.resend),
+    re_path(r'^message-id/attachment/(\d+)/.*$', archives.mailarchives.views.attachment),
+    re_path(r'^message-id/legacy/([\w-]+)/(\d+)-(\d+)/msg(\d+).php$', archives.mailarchives.views.legacy),
+    re_path(r'^message-id/(.+)$', archives.mailarchives.views.message),
 
-    url(r'^list/([\w-]+)/mbox/([\w-]+)\.(\d{4})(\d{2})', archives.mailarchives.views.mbox),
+    re_path(r'^list/([\w-]+)/mbox/([\w-]+)\.(\d{4})(\d{2})', archives.mailarchives.views.mbox),
 
     # Search
-    url(r'^archives-search/', archives.mailarchives.views.search),
+    re_path(r'^archives-search/', archives.mailarchives.views.search),
 
     # Date etc indexes
-    url(r'^list/([\w-]+)/$', archives.mailarchives.views.monthlist),
-    url(r'^list/([\w-]+)/(\d+)-(\d+)/$', archives.mailarchives.views.datelist),
-    url(r'^list/([\w-]+)/since/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})', archives.mailarchives.views.datelistsincetime),
-    url(r'^list/([\w-]+)/since/([^/]+)/$', archives.mailarchives.views.datelistsince),
-    url(r'^list/([\w-]+)/before/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})', archives.mailarchives.views.datelistbeforetime),
-    url(r'^list/([\w-]+)/before/([^/]+)$', archives.mailarchives.views.datelistbefore),
+    re_path(r'^list/([\w-]+)/$', archives.mailarchives.views.monthlist),
+    re_path(r'^list/([\w-]+)/(\d+)-(\d+)/$', archives.mailarchives.views.datelist),
+    re_path(r'^list/([\w-]+)/since/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})', archives.mailarchives.views.datelistsincetime),
+    re_path(r'^list/([\w-]+)/since/([^/]+)/$', archives.mailarchives.views.datelistsince),
+    re_path(r'^list/([\w-]+)/before/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})', archives.mailarchives.views.datelistbeforetime),
+    re_path(r'^list/([\w-]+)/before/([^/]+)$', archives.mailarchives.views.datelistbefore),
 
     # API calls
-    url(r'^list/([\w-]+|\*)/latest.json$', archives.mailarchives.api.latest),
-    url(r'^message-id.json/(.+)$', archives.mailarchives.api.thread),
-    url(r'^listinfo/$', archives.mailarchives.api.listinfo),
+    re_path(r'^list/([\w-]+|\*)/latest.json$', archives.mailarchives.api.latest),
+    re_path(r'^message-id.json/(.+)$', archives.mailarchives.api.thread),
+    re_path(r'^listinfo/$', archives.mailarchives.api.listinfo),
 
     # Normally served off www.postgresql.org, but manually handled here for
     # development installs.
-    url(r'^dyncss/(?P<css>base|docs).css$', archives.mailarchives.views.dynamic_css),
+    re_path(r'^dyncss/(?P<css>base|docs).css$', archives.mailarchives.views.dynamic_css),
 ]
 
 if settings.ALLOW_RESEND or not settings.PUBLIC_ARCHIVES:
@@ -68,8 +68,8 @@ if settings.ALLOW_RESEND or not settings.PUBLIC_ARCHIVES:
 
     urlpatterns += [
         # For non-public archives, support login
-        url(r'^(?:list/_auth/)?accounts/login/?$', archives.auth.login),
-        url(r'^(?:list/_auth/)?accounts/logout/?$', archives.auth.logout),
-        url(r'^(?:list/_auth/)?auth_receive/$', archives.auth.auth_receive),
-        url(r'^(?:list/_auth/)?auth_api/$', archives.auth.auth_api),
+        re_path(r'^(?:list/_auth/)?accounts/login/?$', archives.auth.login),
+        re_path(r'^(?:list/_auth/)?accounts/logout/?$', archives.auth.logout),
+        re_path(r'^(?:list/_auth/)?auth_receive/$', archives.auth.auth_receive),
+        re_path(r'^(?:list/_auth/)?auth_api/$', archives.auth.auth_api),
     ]
