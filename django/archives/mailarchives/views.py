@@ -769,11 +769,12 @@ def search(request):
     # Ok, we have all we need to do the search
 
     if query.find('@') > 0:
+        cleaned_id = query.strip().removeprefix('<').removesuffix('>')
         # This could be a messageid. So try to get that one specifically first.
         # We don't do a more specific check if it's a messageid because doing
         # a key lookup is cheap...
         curs.execute("SELECT messageid FROM messages WHERE messageid=%(q)s", {
-            'q': query,
+            'q': cleaned_id,
         })
         a = curs.fetchall()
         if len(a) == 1:
