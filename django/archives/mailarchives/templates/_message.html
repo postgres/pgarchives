@@ -52,7 +52,7 @@
       <th scope="row">Lists:</th>
       <td>
         {%for l in lists %}
-          <span class="listname"><a href="/list/{{l.listname}}/since/{{msg.shortdate}}">{{l.listname}}</a></span>
+          <span class="listname"><a href="/list/{{l.listname}}/since/{{msg.dateonly}}0000">{{l.listname}}</a></span>
         {%endfor%}
       </td>
     </tr>

@@ -331,6 +331,9 @@ def datelistsincetime(request, listname, year, month, day, hour, minute):
     ensure_list_permissions(request, l)
 
     try:
+        if int(hour) != 0 or int(minute) != 0:
+            # "round off" timestamps to the whole day, to reduce the number of unique urls
+            return HttpResponseRedirect("{}{}{}0000".format(year, month, day))
         d = datetime(int(year), int(month), int(day), int(hour), int(minute))
     except ValueError:
         raise Http404("Invalid date format, not found")
@@ -352,6 +355,9 @@ def datelistbeforetime(request, listname, year, month, day, hour, minute):
     ensure_list_permissions(request, l)
 
     try:
+        if int(hour) != 0 or int(minute) != 0:
+            # "round off" timestamps to the whole day, to reduce the number of unique urls
+            return HttpResponseRedirect("{}{}{}0000".format(year, month, day))
         d = datetime(int(year), int(month), int(day), int(hour), int(minute))
     except ValueError:
         raise Http404("Invalid date format, not found")

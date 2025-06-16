@@ -41,6 +41,10 @@ class Message(models.Model):
     def shortdate(self):
         return self.date.strftime("%Y%m%d%H%M")
 
+    @property
+    def dateonly(self):
+        return self.date.strftime("%Y%m%d")
+
     def from_name_only(self):
         try:
             return parseaddr(self.mailfrom)[0]
