@@ -54,6 +54,7 @@ CREATE TABLE lists(
    shortdesc text NOT NULL,
    description text NOT NULL,
    active boolean NOT NULL,
+   subscriber_access boolean NOT NULL,
    groupid int NOT NULL REFERENCES listgroups(groupid)
 );
 
