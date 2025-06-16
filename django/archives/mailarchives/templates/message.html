@@ -6,4 +6,5 @@
 <h1 class="subject">{{msg.subject}}</h1>
 {%endif%}
 {% include '_message.html' with msg=msg lists=lists %}
+<form id="mail_other_options_form" method="post" action="/"></form>
 {%endblock%}

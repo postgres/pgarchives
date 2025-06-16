@@ -4,6 +4,14 @@ $(function(){
 	document.location.href = '/message-id/' + $(this).val();
     });
 
+    /* Callback for viewing protected versions */
+    $('a.post-link').click(function(e) {
+       if ($(this).data('ref')) {
+            $('#mail_other_options_form').attr('action', $(this).data('ref'));
+            $('#mail_other_options_form').submit();
+        }
+    });
+
 
     /*
      * For flat message view, redirect to the anchor of the messageid we're watching,

@@ -547,6 +547,7 @@ def message_flat(request, msgid):
     return r
 
 
+@csrf_exempt
 @nocache
 @antispam_auth
 def message_raw(request, msgid):
@@ -606,6 +607,7 @@ def _build_mbox(query, params, msgid=None):
     return r
 
 
+@csrf_exempt
 @nocache
 @antispam_auth
 def message_mbox(request, msgid):
@@ -650,6 +652,7 @@ def mbox(request, listname, listname2, mboxyear, mboxmonth):
 
 
 @transaction.atomic
+@csrf_exempt
 def resend(request, messageid):
     if not settings.ALLOW_RESEND:
         raise PermissionDenied("Access denied.")

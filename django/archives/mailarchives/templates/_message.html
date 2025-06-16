@@ -30,10 +30,10 @@
  <tr>
    <th class="align-middle" scope="row">Views:</th>
    <td>
-     <a href="/message-id/raw/{{msg.messageid|urlencode}}">Raw Message</a> |
      <a href="/message-id/flat/{{msg.messageid|urlencode}}">Whole Thread</a> |
-     <a href="/message-id/mbox/{{msg.messageid|urlencode}}">Download mbox</a>
-{%if allow_resend %}| <a href="/message-id/resend/{{msg.messageid|urlencode}}">Resend email</a>{%endif%}
+     <a href="#" data-ref="/message-id/raw/{{msg.messageid|urlencode}}" class="post-link">Raw Message</a> |
+     <a href="#" data-ref="/message-id/mbox/{{msg.messageid|urlencode}}" class="post-link">Download mbox</a>
+{%if allow_resend %} | <a href="#" data-ref="/message-id/resend/{{msg.messageid|urlencode}}" class="post-link">Resend email</a>{%endif%}
    </td>
  </tr>
  {% if not show_all %}
