@@ -16,11 +16,13 @@ class MailboxBreakupParser(object):
         self.EOF = False
 
         if fn.endswith(".gz"):
-            cat = "zcat"
+            file_stream = Popen(['zcat', fn], stdout=PIPE).stdout
         else:
-            cat = "cat"
-        cmd = "%s %s | formail -s /bin/sh -c 'cat && echo %s'" % (cat, fn, SEPARATOR)
-        self.pipe = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
+            file_stream = open(fn, 'rb')
+        formail_cmd = "formail -s /bin/sh -c 'cat && echo %s'" % (SEPARATOR,)
+        self.pipe = Popen(formail_cmd, shell=True, stdin=file_stream, stdout=PIPE, stderr=PIPE)
+        # Allow self.pipe to receive a SIGPIPE if zcat exits.
+        file_stream.close()
 
     def returncode(self):
         self.pipe.wait()
