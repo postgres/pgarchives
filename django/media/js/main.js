@@ -1,15 +1,20 @@
-$(function(){
-    /* Callback from main message view when a message is picked in dropdown */
-    $('#thread_select').change(function(e) {
-	document.location.href = '/message-id/' + $(this).val();
-    });
+document.addEventListener('DOMContentLoaded', (event) => {
+    const threadselect = document.getElementById('thread_select');
+    if (threadselect) {
+            threadselect.addEventListener('change', (event) => {
+	        document.location.href = '/message-id/' + event.target.value;
+                event.preventDefault();
+            });
+    }
 
     /* Callback for viewing protected versions */
-    $('a.post-link').click(function(e) {
-       if ($(this).data('ref')) {
-            $('#mail_other_options_form').attr('action', $(this).data('ref'));
-            $('#mail_other_options_form').submit();
-        }
+    const postlinkform = document.getElementById('mail_other_options_form');
+    document.querySelectorAll('a.post-link').forEach((link) => {
+        link.addEventListener('click', (event) => {
+            postlinkform.action = event.target.dataset.ref;
+            postlinkform.submit();
+            event.preventDefault();
+        });
     });
 
 
@@ -17,11 +22,10 @@ $(function(){
      * For flat message view, redirect to the anchor of the messageid we're watching,
      * unless we happen to be the first one.
      */
-    $('#flatMsgSubject[data-isfirst=False]').each(function(i, e) {
+    document.querySelectorAll('#flatMsgSubject[data-isfirst=False]').forEach((e) => {
 	if (document.location.href.indexOf('#') < 0) {
-	    document.location.href = document.location.href + '#' + $(e).data('msgid');
-	    return;
-	}
+            document.location.href = document.location.href + '#' + e.dataset.msgid;
+        }
     });
 });
 
