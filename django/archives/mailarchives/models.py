@@ -126,7 +126,7 @@ class ListSubscriber(models.Model):
     # We set the username of the community account instead of a
     # foreign key, because the user might not exist.
     list = models.ForeignKey(List, null=False, blank=False, on_delete=models.CASCADE)
-    username = models.CharField(max_length=30, null=False, blank=False)
+    username = models.CharField(max_length=150, null=False, blank=False)
 
     class Meta:
         unique_together = (('list', 'username'), )
