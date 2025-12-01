@@ -395,6 +395,7 @@ def attachment(request, attid):
 
     return HttpResponse(bytes(r[0][3]), content_type=r[0][1], headers={
         'X-attached-to-message': r[0][2],
+        'Content-Security-Policy': "default-src 'none'",
     })
 
 
