@@ -36,7 +36,7 @@ urlpatterns = [
     re_path(r'^message-id/mbox/(.+)$', archives.mailarchives.views.message_mbox),
     re_path(r'^message-id/resend/(.+)/complete$', archives.mailarchives.views.resend_complete),
     re_path(r'^message-id/resend/(.+)$', archives.mailarchives.views.resend),
-    re_path(r'^message-id/attachment/(\d+)/.*$', archives.mailarchives.views.attachment),
+    re_path(r'^message-id/attachment/(\d+)/?.*$', archives.mailarchives.views.attachment),
     re_path(r'^message-id/legacy/([\w-]+)/(\d+)-(\d+)/msg(\d+).php$', archives.mailarchives.views.legacy),
     re_path(r'^message-id/(.+)$', archives.mailarchives.views.message),
 
