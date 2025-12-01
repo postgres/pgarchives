@@ -164,16 +164,21 @@ def auth_receive(request):
         # somehow fix that live, give a proper error message and
         # have somebody look at it manually.
         if User.objects.filter(email=data['e'][0]).exists():
+            if hasattr(settings, 'ADMINS') and len(settings.ADMINS) > 0:
+                contact = settings.ADMINS[0][1]
+            else:
+                contact = "webmaster@postgresql.org"
+
             return HttpResponse("""A user with email %s already exists, but with
 a different username than %s.
 
 This is almost certainly caused by some legacy data in our database.
-Please send an email to webmaster@postgresql.org, indicating the username
+Please send an email to %s, indicating the username
 and email address from above, and we'll manually merge the two accounts
 for you.
 
 We apologize for the inconvenience.
-""" % (data['e'][0], data['u'][0]), content_type='text/plain')
+""" % (data['e'][0], data['u'][0], contact), content_type='text/plain')
 
         if getattr(settings, 'PGAUTH_CREATEUSER_CALLBACK', None):
             res = getattr(settings, 'PGAUTH_CREATEUSER_CALLBACK')(
@@ -211,7 +216,10 @@ We apologize for the inconvenience.
     # Finally, check of we have a data package that tells us where to
     # redirect the user.
     if 'd' in data:
-        (nonces, datas, tags) = data['d'][0].split('$')
+        splitdata = data['d'][0].split('$')
+        if len(splitdata) != 3:
+            return HttpResponse("Invalid login pass-through data received, likely because of an old link. Please try again.")
+        (nonces, datas, tags) = splitdata
         decryptor = AES.new(
             SHA256.new(settings.SECRET_KEY.encode('ascii')).digest()[:32],
             AES.MODE_SIV,
