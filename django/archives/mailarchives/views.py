@@ -327,14 +327,24 @@ def datelistsince(request, listname, msgid):
 # Longer cache since this will be used for the fixed date links
 @cache(hours=4)
 def datelistsincetime(request, listname, year, month, day, hour, minute):
+    iyear = int(year)
+    imonth = int(month)
+    iday = int(day)
+    ihour = int(hour)
+    iminute = int(minute)
+
+    if iyear > 2200 or imonth > 12 or iday > 31 or ihour > 23 or iminute > 60:
+        # This can never be valid, so exit early
+        raise Http404('Invalid date/time')
+
     l = get_object_or_404(List, listname=listname)
     ensure_list_permissions(request, l)
 
     try:
-        if int(hour) != 0 or int(minute) != 0:
+        if ihour != 0 or iminute != 0:
             # "round off" timestamps to the whole day, to reduce the number of unique urls
             return HttpResponseRedirect("{}{}{}0000".format(year, month, day))
-        d = datetime(int(year), int(month), int(day), int(hour), int(minute))
+        d = datetime(iyear, imonth, iday, ihour, iminute)
     except ValueError:
         raise Http404("Invalid date format, not found")
     return render_datelist_from(request, l, d, "%s since %s" % (l.listname, d.strftime("%Y-%m-%d %H:%M")))
@@ -351,14 +361,24 @@ def datelistbefore(request, listname, msgid):
 
 @cache(hours=2)
 def datelistbeforetime(request, listname, year, month, day, hour, minute):
+    iyear = int(year)
+    imonth = int(month)
+    iday = int(day)
+    ihour = int(hour)
+    iminute = int(minute)
+
+    if iyear > 2200 or imonth > 12 or iday > 31 or ihour > 23 or iminute > 60:
+        # This can never be valid, so exit early
+        raise Http404('Invalid date/time')
+
     l = get_object_or_404(List, listname=listname)
     ensure_list_permissions(request, l)
 
     try:
-        if int(hour) != 0 or int(minute) != 0:
+        if ihour != 0 or iminute != 0:
             # "round off" timestamps to the whole day, to reduce the number of unique urls
             return HttpResponseRedirect("{}{}{}0000".format(year, month, day))
-        d = datetime(int(year), int(month), int(day), int(hour), int(minute))
+        d = datetime(iyear, imonth, iday, ihour, iminute)
     except ValueError:
         raise Http404("Invalid date format, not found")
     return render_datelist_to(request, l, d, "%s before %s" % (l.listname, d.strftime("%Y-%m-%d %H:%M")))
