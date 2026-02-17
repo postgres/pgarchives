@@ -48,9 +48,9 @@ urlpatterns = [
     # Date etc indexes
     re_path(r'^list/([\w-]+)/$', archives.mailarchives.views.monthlist),
     re_path(r'^list/([\w-]+)/(\d+)-(\d+)/$', archives.mailarchives.views.datelist),
-    re_path(r'^list/([\w-]+)/since/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})', archives.mailarchives.views.datelistsincetime),
+    re_path(r'^list/([\w-]+)/since/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})/$', archives.mailarchives.views.datelistsincetime),
     re_path(r'^list/([\w-]+)/since/([^/]+)/$', archives.mailarchives.views.datelistsince),
-    re_path(r'^list/([\w-]+)/before/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})', archives.mailarchives.views.datelistbeforetime),
+    re_path(r'^list/([\w-]+)/before/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})/$', archives.mailarchives.views.datelistbeforetime),
     re_path(r'^list/([\w-]+)/before/([^/]+)$', archives.mailarchives.views.datelistbefore),
 
     # API calls
