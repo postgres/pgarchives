@@ -18,6 +18,7 @@ from datetime import datetime, timedelta, date
 import calendar
 import email.parser
 import email.policy
+import hashlib
 from io import BytesIO
 from urllib.parse import quote
 import ipaddress
@@ -90,6 +91,41 @@ def ensure_message_permissions(request, msgid):
 
     # Redirect to a login page
     raise ERedirect('%s?next=%s' % (settings.LOGIN_URL, quote(request.path)))
+
+
+# Retrieve our git revision so we know what to purge. We do this "globally" so it's only picked up once
+# per process, not on every request.
+_git_revision = b''
+if os.path.isdir('../.git'):
+    try:
+        with open('../.git/refs/heads/master') as f:
+            _git_revision = f.readline().strip().encode()
+            print("Loaded git revision: {}".format(_git_revision))
+    except IOError:
+        # If garbage collected, we will have to look for a packed ref.
+        try:
+            with open('../.git/packed-refs') as f:
+                for l in f.readlines():
+                    if l.endswith("refs/heads/master\n"):
+                        _git_revision = l.strip().encode()
+                        print("Loaded packed git revision: {}".format(_git_revision))
+                        break
+        except IOError as e:
+            print("Error loading git packed revision: {}".format(e))
+    except Exception as e:
+        print("Error loading git revision: {}".format(e))
+else:
+    print("Unable to load git revision: could not find git directory")
+
+_git_revision = settings.ETAG_REVISION_NUMBER + _git_revision
+
+
+# Calculate an etag based both on our git info and the given values
+def _calculate_etag(*args):
+    s = hashlib.sha1(_git_revision)
+    for a in args:
+        s.update(repr(a).encode())
+    return '"{}"'.format(s.hexdigest())
 
 
 # Decorator to set cache age
@@ -198,9 +234,12 @@ class NavContext(object):
             self.ctx.update({'searchform_listname': listname})
 
 
-def render_nav(navcontext, template, ctx):
+def render_nav(navcontext, template, ctx, headers={}):
     ctx.update(navcontext.ctx)
-    return render(navcontext.request, template, ctx)
+    r = render(navcontext.request, template, ctx)
+    for k, v in headers.items():
+        r[k] = v
+    return r
 
 
 @cache(hours=24)
@@ -213,21 +252,31 @@ def index(request):
     ensure_logged_in(request)
 
     (groups, listgroupid) = get_all_groups_and_lists(request)
+
+    # Calculate etag by hashing the groupids and listids.
+    etag = _calculate_etag([(g['groupid'], [l.listid for l in g['lists']]) for g in groups])
+    if request.headers.get('If-None-Match', None) == etag:
+        return HttpResponseNotModified()
+
     return render_nav(NavContext(request, all_groups=groups), 'index.html', {
         'groups': [{'groupname': g['groupname'], 'lists': g['lists']} for g in groups],
-    })
+    }, headers={'ETag': etag})
 
 
 @cache(hours=8)
 def groupindex(request, groupid):
     (groups, listgroupid) = get_all_groups_and_lists(request)
-    mygroups = [{'groupname': g['groupname'], 'lists': g['lists']} for g in groups if g['groupid'] == int(groupid)]
+    mygroups = [g for g in groups if g['groupid'] == int(groupid)]
     if len(mygroups) == 0:
         raise Http404('List group does not exist')
 
+    etag = _calculate_etag([(g['groupid'], [l.listid for l in g['lists']]) for g in mygroups])
+    if request.headers.get('If-None-Match', None) == etag:
+        return HttpResponseNotModified()
+
     return render_nav(NavContext(request, all_groups=groups, expand_groupid=groupid), 'index.html', {
         'groups': mygroups,
-    })
+    }, headers={'ETag': etag})
 
 
 @cache(hours=8)
@@ -239,10 +288,16 @@ def monthlist(request, listname):
     curs.execute("SELECT year, month FROM list_months WHERE listid=%(listid)s ORDER BY year DESC, month DESC", {'listid': l.listid})
     months = [{'year': r[0], 'month': r[1], 'date': datetime(r[0], r[1], 1)} for r in curs.fetchall()]
 
+    # Calculate etag for the list of months by hashing the months. It's hard to assign a xkey to it since purging would
+    # have to keep track of first-message-of-month, but returning 304 is a good way to keep the re-check cheap.
+    etag = _calculate_etag([(m['year'], m['month']) for m in months])
+    if request.headers.get('If-None-Match', None) == etag:
+        return HttpResponseNotModified()
+
     return render_nav(NavContext(request, l.listid, l.listname), 'monthlist.html', {
         'list': l,
         'months': months,
-    })
+    }, headers={'ETag': etag})
 
 
 def get_monthday_info(mlist, l, d):
@@ -287,6 +342,11 @@ def _render_datelist(request, l, d, datefilter, title, queryproc):
     allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
     (yearmonth, daysinmonth) = get_monthday_info(mlist, l, d)
 
+    # Calculate an ETag by hashing all the message id fields (int) and all the dates in the month that were active when rendered.
+    etag = _calculate_etag([m.id for m in mlist], daysinmonth)
+    if request.headers.get('If-None-Match', None) == etag:
+        return HttpResponseNotModified()
+
     r = render_nav(NavContext(request, l.listid, l.listname), 'datelist.html', {
         'list': l,
         'messages': mlist,
@@ -294,6 +354,7 @@ def _render_datelist(request, l, d, datefilter, title, queryproc):
         'daysinmonth': daysinmonth,
         'yearmonth': yearmonth,
     })
+    r['ETag'] = etag
     if settings.PUBLIC_ARCHIVES:
         r['xkey'] = ' '.join(['pgam_{0}/{1}/{2}'.format(l.listid, year, month) for year, month in allyearmonths])
     return r
@@ -410,6 +471,14 @@ def datelist(request, listname, year, month):
 
 @cache(hours=4)
 def attachment(request, attid):
+    # Just hash the id, an attachment will never change.
+    # We can do this before even querying if the object exists, because if you had the etag it would've at one point existed. In
+    # a private archive you could use this to probe if an attachment with a specific id exists at all (if you know the git info to generate
+    # the sha), but you can't see what message that attachment belongs to so there is no useful info leak.
+    etag = _calculate_etag(attid)
+    if request.headers.get('If-None-Match', None) == etag:
+        return HttpResponseNotModified()
+
     # Use a direct query instead of django, since it has bad support for
     # bytea
     # XXX: minor information leak, because we load the whole attachment before we check
@@ -425,6 +494,7 @@ def attachment(request, attid):
     return HttpResponse(bytes(r[0][3]), content_type=r[0][1], headers={
         'X-attached-to-message': r[0][2],
         'Content-Security-Policy': "default-src 'none'",
+        'ETag': etag,
     })
 
 

@@ -153,6 +153,10 @@ ALLOW_RESEND = False
 
 PGWEB_ADDRESS = 'https://www.postgresql.org'
 
+# Bumping this number in local_settings.py will invalidate *all* etags, as a way to force refreshes
+# (etags are also invalidated if the git revision changes). NOTE! Must be a byte string, not str!
+ETAG_REVISION_NUMBER = b"0"
+
 try:
     from .settings_local import *
 except ImportError:
