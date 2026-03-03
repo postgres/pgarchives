@@ -659,6 +659,7 @@ def message_mbox(request, msgid):
         msgid)
 
 
+@csrf_exempt
 @nocache
 @antispam_auth
 def mbox(request, listname, listname2, mboxyear, mboxmonth):
