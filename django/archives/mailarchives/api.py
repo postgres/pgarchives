@@ -1,9 +1,9 @@
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseNotModified
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 import ipaddress
 
-from .views import cache
+from .views import cache, _calculate_etag
 from .models import Message, List
 
 import json
@@ -24,14 +24,21 @@ def listinfo(request):
     if not is_host_allowed(request):
         return HttpResponseForbidden('Invalid host')
 
+    lists = list(List.objects.select_related('group').all())
+
+    etag = _calculate_etag([l.listid for l in lists])
+    if request.headers.get('If-None-Match', None) == etag:
+        return HttpResponseNotModified()
+
     resp = HttpResponse(content_type='application/json')
+    resp['ETag'] = etag
     json.dump([{
         'name': l.listname,
         'shortdesc': l.shortdesc,
         'description': l.description,
         'active': l.active,
         'group': l.group.groupname,
-    } for l in List.objects.select_related('group').all()], resp)
+    } for l in lists], resp)
 
     return resp
 
@@ -77,6 +84,11 @@ def latest(request, listname):
         extrawhere = ''
 
     mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().extra(where=extrawhere, params=extraparams).order_by('-date')[:limit]
+
+    etag = _calculate_etag([m.id for m in mlist])
+    if request.headers.get('If-None-Match', None) == etag:
+        return HttpResponseNotModified()
+
     allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
 
     resp = HttpResponse(content_type='application/json')
@@ -94,6 +106,7 @@ def latest(request, listname):
     # XXX: need to deal with the global view, but for now API callers come in directly
     if list and settings.PUBLIC_ARCHIVES:
         resp['xkey'] = ' '.join(['pgam_{0}/{1}/{2}'.format(list.listid, year, month) for year, month in allyearmonths])
+    resp['ETag'] = etag
     return resp
 
 
@@ -110,6 +123,10 @@ def thread(request, msgid):
     msg = get_object_or_404(Message, messageid=msgid)
     mlist = Message.objects.defer('bodytxt', 'cc', 'to').filter(threadid=msg.threadid)
 
+    etag = _calculate_etag([m.id for m in mlist])
+    if request.headers.get('If-None-Match', None) == etag:
+        return HttpResponseNotModified()
+
     resp = HttpResponse(content_type='application/json')
     json.dump([
         {
@@ -122,4 +139,5 @@ def thread(request, msgid):
         for m in mlist], resp)
     if settings.PUBLIC_ARCHIVES:
         resp['xkey'] = 'pgat_{0}'.format(msg.threadid)
+    resp['ETag'] = etag
     return resp
