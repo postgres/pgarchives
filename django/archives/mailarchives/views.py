@@ -203,6 +203,11 @@ def render_nav(navcontext, template, ctx):
     return render(navcontext.request, template, ctx)
 
 
+@cache(hours=24)
+def index_redir(request):
+    return HttpResponsePermanentRedirect("list/")
+
+
 @cache(hours=4)
 def index(request):
     ensure_logged_in(request)

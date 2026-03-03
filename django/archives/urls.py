@@ -20,7 +20,7 @@ urlpatterns = [
     # re_path(r'^admin/', include(admin.site.urls)),
 
     re_path(r'^web_sync_timestamp$', archives.mailarchives.views.web_sync_timestamp),
-    re_path(r'^$', archives.mailarchives.views.index),
+    re_path(r'^$', archives.mailarchives.views.index_redir),
     re_path(r'^list/$', archives.mailarchives.views.index),
     re_path(r'^list/group/(\d+)/$', archives.mailarchives.views.groupindex),
 
