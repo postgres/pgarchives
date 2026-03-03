@@ -381,7 +381,7 @@ def render_datelist_to(request, l, d, title):
                             lambda x: sorted(x.order_by('-date')[:200], key=lambda m: m.date))
 
 
-@cache(hours=2)
+@cache(hours=24)
 def datelistsince(request, listname, msgid):
     l = get_object_or_404(List, listname=listname)
     ensure_list_permissions(request, l)
@@ -393,7 +393,7 @@ def datelistsince(request, listname, msgid):
 
 
 # Longer cache since this will be used for the fixed date links
-@cache(hours=4)
+@cache(hours=24)
 def datelistsincetime(request, listname, year, month, day, hour, minute):
     iyear = int(year)
     imonth = int(month)
@@ -418,7 +418,7 @@ def datelistsincetime(request, listname, year, month, day, hour, minute):
     return render_datelist_from(request, l, d, "%s since %s" % (l.listname, d.strftime("%Y-%m-%d %H:%M")))
 
 
-@cache(hours=2)
+@cache(hours=24)
 def datelistbefore(request, listname, msgid):
     l = get_object_or_404(List, listname=listname)
     ensure_list_permissions(request, l)
@@ -429,7 +429,7 @@ def datelistbefore(request, listname, msgid):
     return HttpResponseRedirect("/list/{}/before/{}0000/".format(listname, msg.date.strftime("%Y%m%d")))
 
 
-@cache(hours=2)
+@cache(hours=24)
 def datelistbeforetime(request, listname, year, month, day, hour, minute):
     iyear = int(year)
     imonth = int(month)
@@ -454,7 +454,7 @@ def datelistbeforetime(request, listname, year, month, day, hour, minute):
     return render_datelist_to(request, l, d, "%s before %s" % (l.listname, d.strftime("%Y-%m-%d %H:%M")))
 
 
-@cache(hours=4)
+@cache(hours=24)
 def datelist(request, listname, year, month):
     l = get_object_or_404(List, listname=listname)
     ensure_list_permissions(request, l)
