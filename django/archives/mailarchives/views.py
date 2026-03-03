@@ -321,7 +321,9 @@ def datelistsince(request, listname, msgid):
     ensure_list_permissions(request, l)
 
     msg = get_object_or_404(Message, messageid=msgid)
-    return render_datelist_from(request, l, msg.date, "%s since %s" % (l.listname, msg.date.strftime("%Y-%m-%d %H:%M:%S")))
+
+    # Generate a redirect to the time based list for this date to reduce the number of unique pages
+    return HttpResponseRedirect("/list/{}/since/{}0000/".format(listname, msg.date.strftime("%Y%m%d")))
 
 
 # Longer cache since this will be used for the fixed date links
@@ -356,7 +358,9 @@ def datelistbefore(request, listname, msgid):
     ensure_list_permissions(request, l)
 
     msg = get_object_or_404(Message, messageid=msgid)
-    return render_datelist_to(request, l, msg.date, "%s before %s" % (l.listname, msg.date.strftime("%Y-%m-%d %H:%M:%S")))
+
+    # Generate a redirect to the time based list for this date to reduce the number of unique pages
+    return HttpResponseRedirect("/list/{}/before/{}0000/".format(listname, msg.date.strftime("%Y%m%d")))
 
 
 @cache(hours=2)
