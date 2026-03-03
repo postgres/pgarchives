@@ -339,7 +339,6 @@ def _render_datelist(request, l, d, datefilter, title, queryproc):
         mlist = Message.objects.defer('bodytxt', 'cc', 'to').select_related().filter(datefilter, hiddenstatus__isnull=True).extra(where=["threadid IN (SELECT threadid FROM list_threads WHERE listid=%s)" % l.listid])
     mlist = queryproc(mlist)
 
-    allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
     (yearmonth, daysinmonth) = get_monthday_info(mlist, l, d)
 
     # Calculate an ETag by hashing all the message id fields (int) and all the dates in the month that were active when rendered.
@@ -356,6 +355,7 @@ def _render_datelist(request, l, d, datefilter, title, queryproc):
     })
     r['ETag'] = etag
     if settings.PUBLIC_ARCHIVES:
+        allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
         r['xkey'] = ' '.join(['pgam_{0}/{1}/{2}'.format(l.listid, year, month) for year, month in allyearmonths])
     return r
 
