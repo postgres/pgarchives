@@ -581,7 +581,7 @@ def message(request, msgid):
     newest = calendar.timegm(max(threadstruct, key=lambda x: x['date'])['date'].utctimetuple())
     if 'HTTP_IF_MODIFIED_SINCE' in request.META and not settings.DEBUG:
         ims = parse_http_date_safe(request.META.get("HTTP_IF_MODIFIED_SINCE"))
-        if ims >= newest:
+        if ims is not None and ims >= newest:
             return HttpResponseNotModified()
 
     responses = [t for t in threadstruct if t['parentid'] == m.id]
