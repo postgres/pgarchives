@@ -676,7 +676,7 @@ def message_raw(request, msgid):
     return r
 
 
-def _build_mbox(query, params, msgid=None):
+def _build_mbox(query, params, msgid=None, filename=None):
     connection.ensure_connection()
 
     # Rawmsg is not in the django model, so we have to query it separately
@@ -710,6 +710,8 @@ def _build_mbox(query, params, msgid=None):
 
     r = StreamingHttpResponse(_message_stream(firstmsg))
     r['Content-type'] = 'application/mbox'
+    if filename:
+        r['Content-Disposition'] = 'attachment; filename="%s"' % filename
     return r
 
 
@@ -726,7 +728,7 @@ def message_mbox(request, msgid):
         {
             'thread': msg.threadid,
         },
-        msgid)
+        msgid, filename='%s.mbox' % quote(msgid, safe=''))
 
 
 @csrf_exempt
@@ -755,7 +757,11 @@ def mbox(request, listname, listname2, mboxyear, mboxmonth):
     else:
         # Just return the whole thing
         query = query.replace('%%%', '')
-    return _build_mbox(query, params)
+    # Set a per-list, per-month filename (matching the URL scheme,
+    # listname.YYYYMM) so downloads don't all collide on the same name.
+    return _build_mbox(
+        query, params,
+        filename='%s.%04d%02d.mbox' % (listname, mboxyear, mboxmonth))
 
 
 @transaction.atomic
