@@ -356,6 +356,11 @@ def _render_datelist(request, l, d, datefilter, title, queryproc):
     r['ETag'] = etag
     if settings.PUBLIC_ARCHIVES:
         allyearmonths = set([(m.date.year, m.date.month) for m in mlist])
+        # Always add the explicitly searched date.
+        # XXX: Maybe the really correct thing to do requires finding any "gaps" in the found emails
+        # when expiring, but that would could only be an issue if emails arrive far out of order,
+        # and if they do we can just accept a bit of a delay.
+        allyearmonths.add((d.year, d.month))
         r['xkey'] = ' '.join(['pgam_{0}/{1}/{2}'.format(l.listid, year, month) for year, month in allyearmonths])
     return r
 
