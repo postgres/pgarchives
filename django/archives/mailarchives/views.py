@@ -637,7 +637,7 @@ def message_flat(request, msgid):
     newest = calendar.timegm(max(allmsg, key=lambda x: x.date).date.utctimetuple())
     if 'HTTP_IF_MODIFIED_SINCE' in request.META and not settings.DEBUG:
         ims = parse_http_date_safe(request.META.get('HTTP_IF_MODIFIED_SINCE'))
-        if ims >= newest:
+        if ims is not None and ims >= newest:
             return HttpResponseNotModified()
 
     r = render_nav(NavContext(request), 'message_flat.html', {
